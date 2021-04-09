@@ -2532,11 +2532,25 @@ function starter( o0 )
 
     if( o.stack === null || o.stack === undefined )
     {
-      o.stack = _.Procedure.Stack( 1 );
+      if( o0.stack === null || o0.stack === undefined )
+      {
+        o.stack = _.Procedure.Stack( 1 );
+      }
+      else if( _.numberIs( o0 ) )
+      {
+        o.stack = _.Procedure.Stack( o0.stack + 1 ); /* add delta passed to starter */
+      }
     }
     else if( _.numberIs( o.stack ) )
     {
-      o.stack = _.Procedure.Stack( o.stack + 1 );
+      if( _.numberIs( o0.stack ) )
+      {
+        o.stack = _.Procedure.Stack( o0.stack + o.stack + 1 ); /* add delta passed to starter and delta passed to instance of starter */
+      }
+      else
+      {
+        o.stack = _.Procedure.Stack( o.stack + 1 );
+      }
     }
 
     return _.process.startMultiple( o );

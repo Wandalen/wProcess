@@ -9828,6 +9828,275 @@ function starterProcedureSourcePath( test )
 
 //
 
+function starterProcedureStack( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function run( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    /* */
+
+    // ready.then( function case1()
+    // {
+    //   test.case = `without subprocess, stack starter : 0, instance : 0, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+    //   const starter = _.process.starter
+    //   ({
+    //       outputCollecting : 1,
+    //       currentPath : a.abs( '.' )
+    //   })
+
+    //   let o =
+    //   {
+    //     execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+    //     mode,
+    //     sync,
+    //     deasync,
+    //   }
+
+    //   starter( o );
+
+    //   test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
+    //   test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+    //   o.ready.then( ( op ) =>
+    //   {
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
+    //     test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+    //     return null;
+    //   })
+
+    //   return o.ready;
+    // })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `in subprocess, stack starter : 0, stack instance : 0, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          stack : 0,
+          mode,
+          sync,
+          deasync,
+        },
+        stack : 0
+      };
+
+      let starterPath = a.program({ routine : starterApp, locals })
+
+      let o =
+      {
+        execPath : `node ${starterPath}`,
+        outputCollecting : 1
+      }
+
+      _.process.startMinimal( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at starterApp(.)+starterApp/g ) );
+
+        a.fileProvider.fileDelete( starterPath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `in subprocess, stack starter : 1, stack instance : 0, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          stack : 0,
+          mode,
+          sync,
+          deasync,
+        },
+        stack : 1
+      };
+
+      let starterPath = a.program({ routine : starterApp, locals })
+
+      let o =
+      {
+        execPath : `node ${starterPath}`,
+        outputCollecting : 1
+      }
+
+      _.process.startMinimal( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at Object.<anonymous>(.)+starterApp/g ) );
+
+        a.fileProvider.fileDelete( starterPath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `in subprocess, stack starter : 0, stack instance : 1, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          stack : 1,
+          mode,
+          sync,
+          deasync,
+        },
+        stack : 0
+      };
+
+      let starterPath = a.program({ routine : starterApp, locals })
+
+      let o =
+      {
+        execPath : `node ${starterPath}`,
+        outputCollecting : 1
+      }
+
+      _.process.startMinimal( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at Object.<anonymous>(.)+starterApp/g ) );
+
+        a.fileProvider.fileDelete( starterPath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `in subprocess, stack starter : 1, stack instance : 1, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          stack : 1,
+          mode,
+          sync,
+          deasync,
+        },
+        stack : 1
+      };
+
+      let starterPath = a.program({ routine : starterApp, locals })
+
+      let o =
+      {
+        execPath : `node ${starterPath}`,
+        outputCollecting : 1
+      }
+
+      _.process.startMinimal( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.false( _.strHas( op.output, /at Object.<anonymous>(.)+starterApp/g ) );
+        test.false( _.strHas( op.output, /at starterApp(.)+starterApp/g ) );
+
+        a.fileProvider.fileDelete( starterPath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function starterApp()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    const starter = _.process.starter
+    ({
+        outputCollecting : 1,
+        stack,
+    })
+
+    starter( o );
+
+    return o.ready.then( function multiple1( op )
+    {
+      console.log( op.procedure._sourcePath );
+      return null;
+    })
+  }
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+}
+
+starterProcedureStack.timeOut = 5e5; /* Locally : 55.096s */
+
+//
+
 function startMultipleProcedureStack( test )
 {
   let context = this;
@@ -40365,6 +40634,7 @@ const Proto =
     startAllProcedureSourcePathInSubprocess,
     startAllProcedureStack,
     starterProcedureSourcePath, /* with routine::starter */
+    starterProcedureStack, /* with routine::starter */
     startMultipleProcedureStack,
     startMinimalOnTerminateSeveralCallbacksChronology,
     startMinimalChronology,
