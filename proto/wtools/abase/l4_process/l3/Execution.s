@@ -271,7 +271,7 @@ function startMinimal_body( o )
 
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
-      if( _.numberIs( o.stack ) )
+      if( _.numberIs( o.stack ) ) /* xxx : qqq : for Yevhen : bad */
       o.stack = _.Procedure.Stack( null, 4 + o.stack );
       else
       o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
@@ -1804,7 +1804,7 @@ function startMultiple_body( o )
   {
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
-      if( _.numberIs( o.stack ) )
+      if( _.numberIs( o.stack ) ) /* xxx : qqq : for Yevhen : bad */
       o.stack = _.Procedure.Stack( null, 4 + o.stack );
       else
       o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
@@ -2536,7 +2536,7 @@ function starter( o0 )
       {
         o.stack = _.Procedure.Stack( 1 );
       }
-      else if( _.numberIs( o0 ) )
+      else if( _.numberIs( o0 ) ) /* xxx : qqq : for Yevhen : bad */
       {
         o.stack = _.Procedure.Stack( o0.stack + 1 ); /* add delta passed to starter */
       }
@@ -2545,6 +2545,7 @@ function starter( o0 )
     {
       if( _.numberIs( o0.stack ) )
       {
+        /* xxx : qqq : for Yevhen : bad */
         o.stack = _.Procedure.Stack( o0.stack + o.stack + 1 ); /* add delta passed to starter and delta passed to instance of starter */
       }
       else

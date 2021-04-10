@@ -40620,8 +40620,8 @@ const Proto =
     startMinimalOptionWhenDelay,
     startMinimalOptionWhenTime,
     startMinimalOptionTimeOut,
-    // startSingleAfterDeath, /* fails */
-    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */ /* fails */
+    // startSingleAfterDeath, /* xxx : qqq : for Yevhen : restore */
+    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */ /* xxx : qqq : for Yevhen : restore */
     startSingleAfterDeathOutput,
 
     // detaching
@@ -40779,7 +40779,7 @@ const Proto =
 
     spawnTimeOf,
 
-    // _startTree, /* fails */
+    // _startTree, /* xxx : qqq : for Yevhen : restore */
 
     // experiments
 
