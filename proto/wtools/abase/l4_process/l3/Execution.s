@@ -2519,7 +2519,7 @@ function starter( o0 )
       if o.stack to starter is number add it to the delta,
       if not, overwrite with o.stack passed to instance
     */
-
+    /* xxx : qqq : for Yevhen : bad | aaa : fixed. */
     if( _.numberIs( o0.stack ) )
     o.stack = _.Procedure.Stack( o.stack, 1 + o0.stack );
     else
