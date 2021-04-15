@@ -269,13 +269,8 @@ function startMinimal_body( o )
 
     /* procedure */
 
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    {
-      if( _.numberIs( o.stack ) ) /* xxx : qqq : for Yevhen : bad */
-      o.stack = _.Procedure.Stack( null, 4 + o.stack );
-      else
-      o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
-    }
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for Yevhen : bad  | aaa : fixed. */
+    o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
 
   }
 
@@ -1438,12 +1433,7 @@ function startSingle_body( o )
     /* procedure */
 
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    {
-      if( _.numberIs( o.stack ) )
-      o.stack = _.Procedure.Stack( null, 4 + o.stack );
-      else
-      o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
-    }
+    o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
 
   }
 
@@ -1802,13 +1792,8 @@ function startMultiple_body( o )
 
   function form0()
   {
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    {
-      if( _.numberIs( o.stack ) ) /* xxx : qqq : for Yevhen : bad */
-      o.stack = _.Procedure.Stack( null, 4 + o.stack );
-      else
-      o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
-    }
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for Yevhen : bad  | aaa : fixed. */
+    o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
   }
 
   /* */
@@ -2530,29 +2515,15 @@ function starter( o0 )
       _.mapExtend( o, o1 );
     }
 
-    if( o.stack === null || o.stack === undefined )
-    {
-      if( o0.stack === null || o0.stack === undefined )
-      {
-        o.stack = _.Procedure.Stack( 1 );
-      }
-      else if( _.numberIs( o0 ) ) /* xxx : qqq : for Yevhen : bad */
-      {
-        o.stack = _.Procedure.Stack( o0.stack + 1 ); /* add delta passed to starter */
-      }
-    }
-    else if( _.numberIs( o.stack ) )
-    {
-      if( _.numberIs( o0.stack ) )
-      {
-        /* xxx : qqq : for Yevhen : bad */
-        o.stack = _.Procedure.Stack( o0.stack + o.stack + 1 ); /* add delta passed to starter and delta passed to instance of starter */
-      }
-      else
-      {
-        o.stack = _.Procedure.Stack( o.stack + 1 );
-      }
-    }
+    /*
+      if o.stack to starter is number add it to the delta,
+      if not, overwrite with o.stack passed to instance
+    */
+
+    if( _.numberIs( o0.stack ) )
+    o.stack = _.Procedure.Stack( o.stack, 1 + o0.stack );
+    else
+    o.stack = _.Procedure.Stack( o.stack, 1 );
 
     return _.process.startMultiple( o );
   }
