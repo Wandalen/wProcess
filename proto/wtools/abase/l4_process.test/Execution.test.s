@@ -5474,7 +5474,7 @@ function startMinimalExecPathSeveralCommands( test )
       test.case = `mode : ${mode}, quoted`;
       let o =
       {
-        execPath : mode === 'fork' ? '"app.js arg1 && app.js arg2"' : '"node app.js arg1 && node app.js arg2"',
+        execPath : mode === 'fork' ? '"app arg1 && app arg2"' : '"node app arg1 && node app arg2"',
         mode,
         currentPath : a.routinePath,
         outputPiping : 1,
@@ -5492,7 +5492,7 @@ function startMinimalExecPathSeveralCommands( test )
       test.case = `mode : ${mode}, no quotes`;
       let o =
       {
-        execPath : mode === 'fork' ? 'app.js arg1 && app.js arg2' : 'node app.js arg1 && node app.js arg2',
+        execPath : mode === 'fork' ? 'app arg1 && app arg2' : 'node app arg1 && node app arg2',
         mode,
         currentPath : a.routinePath,
         outputPiping : 1,
@@ -5509,11 +5509,11 @@ function startMinimalExecPathSeveralCommands( test )
         }
         else if( mode === 'spawn' )
         {
-          test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'node', 'app.js', 'arg2' ]` ), 1 );
+          test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'node', 'app', 'arg2' ]` ), 1 );
         }
         else
         {
-          test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'app.js', 'arg2' ]` ), 1 );
+          test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'app', 'arg2' ]` ), 1 );
         }
         return null;
       })
@@ -8498,7 +8498,7 @@ function startProcedureTrivial( test )
         test.identical( procedure[ 0 ].isAlive(), false );
         test.identical( o.procedure, procedure[ 0 ] );
         test.identical( procedure[ 0 ].object(), o.pnd );
-        test.true( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
+        test.true( _.strHas( o.procedure._sourcePath, 'Execution.test.s' ) );
         return null;
       })
     })
@@ -8577,7 +8577,7 @@ function startProcedureExists( test )
         test.identical( o.procedure, procedure[ 0 ] );
         test.identical( procedure[ 0 ].object(), o.pnd );
         test.identical( o.procedure, procedure[ 0 ] );
-        test.true( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
+        test.true( _.strHas( o.procedure._sourcePath, 'Execution.test.s' ) );
         return null;
       })
     })
@@ -8855,6 +8855,1212 @@ startSingleProcedureStack.description =
   - stack may be defined relatively
   - stack may be switched off
 `
+
+//
+
+function startAllProcedureSourcePath( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function run( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `startSingle, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startSingle( o );
+
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `startMinimal, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMinimal( o );
+
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `startMultiple, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMultiple( o );
+
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+}
+
+startAllProcedureSourcePath.timeOut = 8e4; /* Locally : 7.923s */
+
+//
+
+function startAllProcedureSourcePathInSubprocess( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function run( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `startSingle, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          currentPath : a.abs( '.' ),
+          mode,
+          sync,
+          deasync
+        }
+      }
+
+      let startSinglePath = a.program({ routine : startSingleApp, locals });
+
+      let o =
+      {
+        execPath : `node ${startSinglePath}`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+      }
+
+      _.process.startMultiple( o );
+
+      o.ready.then( ( op ) =>
+      {
+        console.log( op.output )
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, 'startSingleApp' ) );
+
+        a.fileProvider.fileDelete( startSinglePath );
+        return null;
+      })
+
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `startMinimal, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          currentPath : a.abs( '.' ),
+          mode,
+          sync,
+          deasync
+        }
+      }
+
+      let startMinimalPath = a.program({ routine : startMinimalApp, locals });
+
+      let o =
+      {
+        execPath : `node ${startMinimalPath}`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+      }
+
+      _.process.startMultiple( o );
+
+      o.ready.then( ( op ) =>
+      {
+        console.log( op.output )
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, 'startMinimalApp' ) );
+
+        a.fileProvider.fileDelete( startMinimalPath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `startMultiple, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          currentPath : a.abs( '.' ),
+          mode,
+          sync,
+          deasync
+        }
+      }
+
+      let startMultiplePath = a.program({ routine : startMultipleApp, locals });
+
+      let o =
+      {
+        execPath : `node ${startMultiplePath}`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+      }
+
+      _.process.startMultiple( o );
+
+      o.ready.then( ( op ) =>
+      {
+        console.log( op.output )
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, 'startMultipleApp' ) );
+
+        a.fileProvider.fileDelete( startMultiplePath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function startSingleApp()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    _.process.startSingle( o );
+
+    return o.ready.then( function single1( op )
+    {
+      console.log( op.procedure._sourcePath );
+      return null;
+    })
+  }
+
+  /* */
+
+  function startMinimalApp()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    _.process.startMinimal( o );
+
+    return o.ready.then( function minimal1( op )
+    {
+      console.log( op.procedure._sourcePath );
+      return null;
+    })
+  }
+
+  /* */
+
+  function startMultipleApp()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    _.process.startMultiple( o );
+
+    return o.ready.then( function multiple1( op )
+    {
+      console.log( op.procedure._sourcePath );
+      return null;
+    })
+  }
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+}
+
+startAllProcedureSourcePathInSubprocess.timeOut = 5e5; /* Locally : 41.865s */
+
+//
+
+function startAllProcedureStack( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function run( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    /* stack = 0 */
+
+    ready.then( function case1()
+    {
+      test.case = `startSingle, stack : 0, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          currentPath : a.abs( '.' ),
+          stack : 0,
+          mode,
+          sync,
+          deasync
+        }
+      }
+
+      let startSinglePath = a.program({ routine : startSingleApp, locals });
+
+      let o =
+      {
+        execPath : `node ${startSinglePath}`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+      }
+
+      _.process.startMultiple( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at startSingleApp(.)+startSingleApp:/g ) );
+
+        a.fileProvider.fileDelete( startSinglePath );
+        return null;
+      })
+
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `startMinimal, stack : 0, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          currentPath : a.abs( '.' ),
+          stack : 0,
+          mode,
+          sync,
+          deasync
+        }
+      }
+
+      let startMinimalPath = a.program({ routine : startMinimalApp, locals });
+
+      let o =
+      {
+        execPath : `node ${startMinimalPath}`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+      }
+
+      _.process.startMultiple( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at startMinimalApp(.)+startMinimalApp:/g ) );
+
+        a.fileProvider.fileDelete( startMinimalPath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `startMultiple, stack : 0, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          currentPath : a.abs( '.' ),
+          stack : 0,
+          mode,
+          sync,
+          deasync
+        }
+      }
+
+      let startMultiplePath = a.program({ routine : startMultipleApp, locals });
+
+      let o =
+      {
+        execPath : `node ${startMultiplePath}`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+      }
+
+      _.process.startMultiple( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at startMultipleApp(.)+startMultipleApp:/g ) );
+
+        a.fileProvider.fileDelete( startMultiplePath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* stack = 1 */
+
+    ready.then( function case1Single()
+    {
+      test.case = `startSingle, stack : 1, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          currentPath : a.abs( '.' ),
+          stack : 1,
+          mode,
+          sync,
+          deasync
+        }
+      }
+
+      let startSinglePath = a.program({ routine : startSingleApp, locals });
+
+      let o =
+      {
+        execPath : `node ${startSinglePath}`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+      }
+
+      _.process.startMultiple( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at Object.<anonymous>(.)+startSingleApp:/g ) );
+
+        a.fileProvider.fileDelete( startSinglePath );
+        return null;
+      })
+
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1Minimal()
+    {
+      test.case = `startMinimal, stack : 1, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          currentPath : a.abs( '.' ),
+          stack : 1,
+          mode,
+          sync,
+          deasync
+        }
+      }
+
+      let startMinimalPath = a.program({ routine : startMinimalApp, locals });
+
+      let o =
+      {
+        execPath : `node ${startMinimalPath}`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+      }
+
+      _.process.startMultiple( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at Object.<anonymous>(.)+startMinimalApp:/g ) );
+
+        a.fileProvider.fileDelete( startMinimalPath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1Multiple()
+    {
+      test.case = `startMultiple, stack : 1, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          currentPath : a.abs( '.' ),
+          stack : 1,
+          mode,
+          sync,
+          deasync
+        }
+      }
+
+      let startMultiplePath = a.program({ routine : startMultipleApp, locals });
+
+      let o =
+      {
+        execPath : `node ${startMultiplePath}`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+      }
+
+      _.process.startMultiple( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at Object.<anonymous>(.)+startMultipleApp:/g ) );
+
+        a.fileProvider.fileDelete( startMultiplePath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* without subprocess */
+
+    /* stack : 0 */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 0, without subprocess, startSingle, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 0,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startSingle( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 0, without subprocess, startMinimal, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 0,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMinimal( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 0, without subprocess, startMultiple, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 0,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMultiple( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* stack : 1 */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 1, without subprocess, startSingle, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startSingle( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 1, without subprocess, startMinimal, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMinimal( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 1, without subprocess, startMultiple, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMultiple( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function startSingleApp()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    _.process.startSingle( o );
+
+    return o.ready.then( function single1( op )
+    {
+      console.log( op.procedure._sourcePath );
+      return null;
+    })
+  }
+
+  /* */
+
+  function startMinimalApp()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    _.process.startMinimal( o );
+
+    return o.ready.then( function minimal1( op )
+    {
+      console.log( op.procedure._sourcePath );
+      return null;
+    })
+  }
+
+  /* */
+
+  function startMultipleApp()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    _.process.startMultiple( o );
+
+    return o.ready.then( function multiple1( op )
+    {
+      console.log( op.procedure._sourcePath );
+      return null;
+    })
+  }
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+}
+
+startAllProcedureStack.timeOut = 8e5; /* Locally : 82.736s */
+
+//
+
+function starterProcedureSourcePath( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  const starter = _.process.starter
+  ({
+      outputCollecting : 1,
+      currentPath : a.abs( '.' )
+  })
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function run( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        mode,
+        sync,
+        deasync,
+      }
+
+      starter( o );
+
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+}
+
+//
+
+function starterProcedureStack( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function run( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `in subprocess, stack starter : 0, stack instance : 0, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          stack : 0,
+          mode,
+          sync,
+          deasync,
+        },
+        stack : 0
+      };
+
+      let starterPath = a.program({ routine : starterApp, locals })
+
+      let o =
+      {
+        execPath : `node ${starterPath}`,
+        outputCollecting : 1
+      }
+
+      _.process.startMinimal( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at starterApp(.)+starterApp/g ) );
+
+        a.fileProvider.fileDelete( starterPath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `in subprocess, stack starter : 1, stack instance : 0, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          stack : 0,
+          mode,
+          sync,
+          deasync,
+        },
+        stack : 1
+      };
+
+      let starterPath = a.program({ routine : starterApp, locals })
+
+      let o =
+      {
+        execPath : `node ${starterPath}`,
+        outputCollecting : 1
+      }
+
+      _.process.startMinimal( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at Object.<anonymous>(.)+starterApp/g ) );
+
+        a.fileProvider.fileDelete( starterPath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `in subprocess, stack starter : 0, stack instance : 1, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          stack : 1,
+          mode,
+          sync,
+          deasync,
+        },
+        stack : 0
+      };
+
+      let starterPath = a.program({ routine : starterApp, locals })
+
+      let o =
+      {
+        execPath : `node ${starterPath}`,
+        outputCollecting : 1
+      }
+
+      _.process.startMinimal( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, /at Object.<anonymous>(.)+starterApp/g ) );
+
+        a.fileProvider.fileDelete( starterPath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `in subprocess, stack starter : 1, stack instance : 1, sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let locals =
+      {
+        o :
+        {
+          execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+          stack : 1,
+          mode,
+          sync,
+          deasync,
+        },
+        stack : 1
+      };
+
+      let starterPath = a.program({ routine : starterApp, locals })
+
+      let o =
+      {
+        execPath : `node ${starterPath}`,
+        outputCollecting : 1
+      }
+
+      _.process.startMinimal( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.false( _.strHas( op.output, /at Object.<anonymous>(.)+starterApp/g ) );
+        test.false( _.strHas( op.output, /at starterApp(.)+starterApp/g ) );
+
+        a.fileProvider.fileDelete( starterPath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function starterApp()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    const starter = _.process.starter
+    ({
+        outputCollecting : 1,
+        stack,
+    })
+
+    starter( o );
+
+    return o.ready.then( function multiple1( op )
+    {
+      console.log( op.procedure._sourcePath );
+      return null;
+    })
+  }
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+}
+
+starterProcedureStack.timeOut = 5e5; /* Locally : 55.096s */
 
 //
 
@@ -9322,7 +10528,7 @@ function startMinimalOnTerminateSeveralCallbacksChronology( test )
       test.case = `mode : ${mode}, parent disconnects detached child process and exits, child contiues to work`
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         mode,
         stdio : 'pipe',
         outputPiping : 1,
@@ -10299,7 +11505,7 @@ function startMinimalOptionTimeOut( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : `node program1.js`,
+        execPath : mode === 'fork' ? 'program1' : `node program1`,
         mode,
         currentPath : a.routinePath,
         timeOut : context.t1*3,
@@ -10335,7 +11541,7 @@ function startMinimalOptionTimeOut( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program2.js' : `node program2.js`,
+        execPath : mode === 'fork' ? 'program2' : `node program2`,
         mode,
         currentPath : a.routinePath,
         timeOut : context.t1*3,
@@ -10379,8 +11585,8 @@ function startMinimalOptionTimeOut( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program3.js' : `node program3.js`,
-        args : 'program1.js',
+        execPath : mode === 'fork' ? 'program3' : `node program3`,
+        args : 'program1',
         mode,
         currentPath : a.routinePath,
         timeOut : context.t1*3,
@@ -10419,8 +11625,8 @@ function startMinimalOptionTimeOut( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program4.js' : `node program4.js`,
-        args : 'program2.js',
+        execPath : mode === 'fork' ? 'program4' : `node program4`,
+        args : 'program2',
         mode,
         currentPath : a.routinePath,
         timeOut : context.t1*3,
@@ -10594,7 +11800,7 @@ function startSingleAfterDeath( test )
       let stack = [];
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         mode,
         outputCollecting : 1,
         outputPiping : 1,
@@ -10668,7 +11874,7 @@ function startSingleAfterDeath( test )
 
     let o =
     {
-      execPath : 'node program2.js',
+      execPath : 'node program2',
       outputCollecting : 1,
       when : 'afterdeath',
       mode : 'spawn',
@@ -10741,7 +11947,7 @@ function startSingleAfterDeathTerminatingMain( test )
       let stack = [];
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         mode,
         outputCollecting : 1,
         outputPiping : 1,
@@ -10954,7 +12160,7 @@ function startSingleAfterDeathOutput( test )
     {
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         mode,
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11028,7 +12234,7 @@ function startSingleAfterDeathOutput( test )
 
     let o =
     {
-      execPath : 'node program2.js',
+      execPath : 'node program2',
       mode : 'spawn',
       currentPath : __dirname,
       when : 'afterdeath',
@@ -11091,7 +12297,7 @@ function startMinimalDetachingResourceReady( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
         mode,
         detaching : 1,
         currentPath : a.routinePath,
@@ -11180,7 +12386,7 @@ function startMinimalDetachingNoTerminationBegin( test )
       let testAppChildPath = a.program( testAppChild );
       let o =
       {
-        execPath : 'node testAppParent.js stdio : ignore ipc : false outputPiping : 0 outputCollecting : 0',
+        execPath : 'node testAppParent stdio : ignore ipc : false outputPiping : 0 outputCollecting : 0',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11235,7 +12441,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : ignore ipc : true outputPiping : 0 outputCollecting : 0',
+        execPath : 'node testAppParent stdio : ignore ipc : true outputPiping : 0 outputCollecting : 0',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11283,7 +12489,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : pipe',
+        execPath : 'node testAppParent stdio : pipe',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11337,7 +12543,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : pipe ipc : true',
+        execPath : 'node testAppParent stdio : pipe ipc : true',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11391,7 +12597,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
     let o =
     {
-      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
       mode,
       ipc : mode === 'fork' ? 1 : 0,
       detaching : true,
@@ -11452,7 +12658,7 @@ function startMinimalDetachedOutputStdioIgnore( test )
 
       let o =
       {
-        execPath : `node testAppParent.js mode : ${mode} stdio : ignore`,
+        execPath : `node testAppParent mode : ${mode} stdio : ignore`,
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11565,7 +12771,7 @@ function startMinimalDetachedOutputStdioIgnore( test )
 
     let o =
     {
-      execPath : 'testAppChild.js',
+      execPath : 'testAppChild',
       detaching : true,
     }
 
@@ -11620,7 +12826,7 @@ function startMinimalDetachedOutputStdioPipe( test )
 
       let o =
       {
-        execPath : `node testAppParent.js mode : ${mode} stdio : pipe`,
+        execPath : `node testAppParent mode : ${mode} stdio : pipe`,
         mode : 'spawn',
         outputCollecting : 1,
         outputPiping : 1,
@@ -11664,7 +12870,7 @@ function startMinimalDetachedOutputStdioPipe( test )
 
     let o =
     {
-      execPath : 'testAppChild.js',
+      execPath : 'testAppChild',
       detaching : true,
     }
 
@@ -11830,7 +13036,7 @@ function startMinimalDetachedOutputStdioInherit( test )
       test.case = `mode : ${mode}, stdio : inherit`;
       let o =
       {
-        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
         mode,
         stdio : 'inherit',
         detaching : 1,
@@ -11938,7 +13144,7 @@ function startMinimalDetachingIpc( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
         mode,
         outputPiping : 0,
         outputCollecting : 0,
@@ -11988,7 +13194,7 @@ function startMinimalDetachingIpc( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
         mode,
         outputCollecting : 1,
         stdio : 'pipe',
@@ -12084,7 +13290,7 @@ function startMinimalDetachingTrivial( test )
 
       let o =
       {
-        execPath : 'testAppParent.js',
+        execPath : 'testAppParent',
         outputCollecting : 1,
         mode : 'fork',
         stdio : 'pipe',
@@ -12300,7 +13506,7 @@ function startMinimalDetachingTrivial( test )
     _.include( 'wFiles' );
     let o =
     {
-      execPath : 'testAppChild.js',
+      execPath : 'testAppChild',
       mode,
       outputCollecting : 1,
       stdio : 'pipe',
@@ -12379,7 +13585,7 @@ function startMinimalDetachingChildExitsAfterParent( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js',
+        execPath : 'node testAppParent',
         mode : 'spawn',
         stdio : 'pipe',
         outputPiping : 1,
@@ -12487,7 +13693,7 @@ function startMinimalDetachingChildExitsAfterParent( test )
 
     let o =
     {
-      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
       stdio : 'ignore',
       outputPiping : 0,
       outputCollecting : 0,
@@ -12556,7 +13762,7 @@ function startMinimalDetachingChildExitsBeforeParent( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js',
+        execPath : 'node testAppParent',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -12619,7 +13825,7 @@ function startMinimalDetachingChildExitsBeforeParent( test )
   // {
   //   let o =
   //   {
-  //     execPath : 'node testAppParent.js',
+  //     execPath : 'node testAppParent',
   //     mode : 'spawn',
   //     outputCollecting : 1,
   //     currentPath : a.routinePath,
@@ -12684,7 +13890,7 @@ function startMinimalDetachingChildExitsBeforeParent( test )
 
     let o =
     {
-      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
       stdio : 'ignore',
       outputPiping : 0,
       outputCollecting : 0,
@@ -13068,7 +14274,7 @@ function startMinimalDetachingChildExistsBeforeParentWaitForTermination( test )
       test.case = `mode : ${mode}, detaching on, disconnected child`
       let o =
       {
-        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -13170,7 +14376,7 @@ function startMinimalDetachingEndCompetitorIsExecuted( test )
 
       let o =
       {
-        execPath : mode === 'fork' ?  'testAppChild.js' : 'node testAppChild.js',
+        execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -13336,7 +14542,7 @@ function startMinimalDetachingTerminationBegin( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : ignore outputPiping : 0 outputCollecting : 0',
+        execPath : 'node testAppParent stdio : ignore outputPiping : 0 outputCollecting : 0',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -13394,7 +14600,7 @@ function startMinimalDetachingTerminationBegin( test )
 
       let o =
       {
-        execPath : `node testAppParent.js stdio : ignore ${ mode === 'shell' ? '' : 'ipc:1'} outputPiping : 0 outputCollecting : 0`,
+        execPath : `node testAppParent stdio : ignore ${ mode === 'shell' ? '' : 'ipc:1'} outputPiping : 0 outputCollecting : 0`,
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -13450,7 +14656,7 @@ function startMinimalDetachingTerminationBegin( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : pipe',
+        execPath : 'node testAppParent stdio : pipe',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -13507,7 +14713,7 @@ function startMinimalDetachingTerminationBegin( test )
 
       let o =
       {
-        execPath : `node testAppParent.js stdio : pipe ${ mode === 'shell' ? '' : 'ipc:1'}`,
+        execPath : `node testAppParent stdio : pipe ${ mode === 'shell' ? '' : 'ipc:1'}`,
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -13568,7 +14774,7 @@ function startMinimalDetachingTerminationBegin( test )
 
     let o =
     {
-      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
       mode,
       detaching : true,
     }
@@ -13656,7 +14862,7 @@ function startMinimalDetachingWaitForDisconnect( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js',
+        execPath : 'node testAppParent',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -13708,7 +14914,7 @@ function startMinimalDetachingWaitForDisconnect( test )
 
     let o =
     {
-      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
       mode,
       detaching : 2,
     }
@@ -13794,7 +15000,7 @@ function startMinimalTrueDetachedWaitForParentDeath( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js',
+        execPath : 'node testAppParent',
         mode : 'spawn',
         currentPath : a.routinePath,
       }
@@ -13833,7 +15039,7 @@ function startMinimalTrueDetachedWaitForParentDeath( test )
 
     let o =
     {
-      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
       args : [ process.pid ],
       mode,
       detaching : 2,
@@ -13887,13 +15093,13 @@ function startMinimalEventClose( test )
   let ipc = [ false, true ]
   let disconnecting = [ false, true ];
 
-  modes.forEach( mode =>
+  modes.forEach( ( mode ) =>
   {
-    ipc.forEach( ipc =>
+    ipc.forEach( ( ipc ) =>
     {
-      disconnecting.forEach( disconnecting =>
+      disconnecting.forEach( ( disconnecting ) =>
       {
-        a.ready.then( () => run( mode,ipc,disconnecting ) );
+        a.ready.then( () => run( mode, ipc, disconnecting ) );
       })
     })
   })
@@ -13945,7 +15151,7 @@ function startMinimalEventClose( test )
     {
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         stdio : 'ignore',
         detaching : 0,
@@ -14021,15 +15227,15 @@ function startMinimalEventExit( test )
   let detaching = [ false, true ]
   let disconnecting = [ false, true ];
 
-  modes.forEach( mode =>
+  modes.forEach( ( mode ) =>
   {
-    stdio.forEach( stdio =>
+    stdio.forEach( ( stdio ) =>
     {
-      ipc.forEach( ipc =>
+      ipc.forEach( ( ipc ) =>
       {
-        detaching.forEach( detaching =>
+        detaching.forEach( ( detaching ) =>
         {
-          disconnecting.forEach( disconnecting =>
+          disconnecting.forEach( ( disconnecting ) =>
           {
             a.ready.then(() => run( mode, stdio, ipc, detaching, disconnecting ) );
           })
@@ -14042,7 +15248,7 @@ function startMinimalEventExit( test )
   {
     var dim = [ data.length / 6, 6 ];
     var style = 'doubleBorder';
-    var topHead = [ 'mode', 'stdio','ipc', 'detaching', 'disconnecting', 'event exit' ];
+    var topHead = [ 'mode', 'stdio', 'ipc', 'detaching', 'disconnecting', 'event exit' ];
     var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
 
     var exp =
@@ -14121,7 +15327,7 @@ function startMinimalEventExit( test )
     {
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         outputPiping : 0,
         outputCollecting : 0,
@@ -14197,7 +15403,7 @@ function startMinimalDetachingThrowing( test )
 
     var o =
     {
-      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
       mode,
       stdio : 'inherit',
       currentPath : a.routinePath,
@@ -14285,7 +15491,7 @@ function startNjsDetachingChildThrowing( test )
 
       let o =
       {
-        execPath : 'testAppChild.js',
+        execPath : 'testAppChild',
         mode,
         outputCollecting : 1,
         stdio : 'pipe',
@@ -14399,7 +15605,7 @@ function startMinimalOnStart( test )
       test.case = 'detaching off, no errors'
       let o =
       {
-        execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
+        execPath : !fork ? 'node testAppChild' : 'testAppChild',
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -14484,7 +15690,7 @@ function startMinimalOnStart( test )
       test.case = 'detaching on, conStart and result are same and give resource on start'
       let o =
       {
-        execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
+        execPath : !fork ? 'node testAppChild' : 'testAppChild',
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -14551,7 +15757,7 @@ function startMinimalOnStart( test )
       track = [];
       let o =
       {
-        execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
+        execPath : !fork ? 'node testAppChild' : 'testAppChild',
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -14607,7 +15813,7 @@ function startMinimalOnStart( test )
       test.case = 'detaching on, disconnected forked child'
       let o =
       {
-        execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
+        execPath : !fork ? 'node testAppChild' : 'testAppChild',
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -14710,7 +15916,7 @@ function startMinimalOnTerminate( test )
       test.case = 'detaching off'
       let o =
       {
-        execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
+        execPath : mode !== 'fork' ? 'node testAppChild' : 'testAppChild',
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -14743,7 +15949,7 @@ function startMinimalOnTerminate( test )
       test.case = 'detaching off, disconnect'
       let o =
       {
-        execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
+        execPath : mode !== 'fork' ? 'node testAppChild' : 'testAppChild',
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -14790,7 +15996,7 @@ function startMinimalOnTerminate( test )
       let conTerminate = new _.Consequence();
       let o =
       {
-        execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
+        execPath : mode !== 'fork' ? 'node testAppChild' : 'testAppChild',
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -14827,7 +16033,7 @@ function startMinimalOnTerminate( test )
       let conTerminate = new _.Consequence();
       let o =
       {
-        execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
+        execPath : mode !== 'fork' ? 'node testAppChild' : 'testAppChild',
         mode,
         stdio : 'pipe',
         currentPath : a.routinePath,
@@ -14875,7 +16081,7 @@ function startMinimalOnTerminate( test )
       let conTerminate = new _.Consequence();
       let o =
       {
-        execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
+        execPath : mode !== 'fork' ? 'node testAppChild' : 'testAppChild',
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -14921,7 +16127,7 @@ function startMinimalOnTerminate( test )
       let conTerminate = new _.Consequence();
       let o =
       {
-        execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
+        execPath : mode !== 'fork' ? 'node testAppChild' : 'testAppChild',
         args : [ 'throwing:1' ],
         mode,
         stdio : 'ignore',
@@ -14961,7 +16167,7 @@ function startMinimalOnTerminate( test )
       let conTerminate = new _.Consequence();
       let o =
       {
-        execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
+        execPath : mode !== 'fork' ? 'node testAppChild' : 'testAppChild',
         args : [ 'throwing:1' ],
         mode,
         stdio : 'ignore',
@@ -15054,7 +16260,7 @@ function startMinimalNoEndBug1( test )
       test.case = `mode : ${mode}, detaching on, error`;
       let o =
       {
-        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
         mode,
         stdio : [ 'ignore', 'ignore', 'ignore', null ],
         currentPath : a.routinePath,
@@ -19854,16 +21060,20 @@ function starterFields( test )
   test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
   test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
   test.identical( start.head, _.process.start.head );
-  test.identical( start.body, _.process.start.body );
-  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) );
+  // test.identical( start.body, _.process.start.body ); /* created through `routine.uniteCloning`, reference is not the same */
+  test.identical( start.body.defaults, _.process.start.body.defaults );
+  test.identical( start.body.name, _.process.start.body.name );
+  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ); /* starter doesn't have option::procedure */
 
   test.case = 'execPath';
   var start = _.process.starter( 'node -v' );
   test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
   test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
   test.identical( start.head, _.process.start.head );
-  test.identical( start.body, _.process.start.body );
-  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) );
+  // test.identical( start.body, _.process.start.body ); /* created through `routine.uniteCloning`, reference is not the same */
+  test.identical( start.body.defaults, _.process.start.body.defaults );
+  test.identical( start.body.name, _.process.start.body.name );
+  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ); /* starter doesn't have option::procedure */
   test.identical( start.predefined.execPath, 'node -v' );
 
   test.case = 'object';
@@ -19877,11 +21087,13 @@ function starterFields( test )
   test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
   test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
   test.identical( start.head, _.process.start.head );
-  test.identical( start.body, _.process.start.body );
-  test.true( _.arraySetIdentical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) ) );
+  // test.identical( start.body, _.process.start.body ); /* created through `routine.uniteCloning`, reference is not the same */
+  test.identical( start.body.defaults, _.process.start.body.defaults );
+  test.identical( start.body.name, _.process.start.body.name );
+  test.true( _.arraySetIdentical( _.mapKeys( start.predefined ), _.mapKeys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ) ); /* starter doesn't have option::procedure */
   test.identical( start.predefined.execPath, 'node -v' );
   test.identical( start.predefined.args, [ 'arg1', 'arg2' ] );
-  test.identical( start.predefined.ready, ready  );
+  test.identical( start.predefined.ready, ready );
 }
 
 //
@@ -23765,7 +24977,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
   {
     let commonOptions =
     {
-      execPath : mode === 'fork' ? 'testApp.js' : 'node testApp.js',
+      execPath : mode === 'fork' ? 'testApp' : 'node testApp',
       mode,
       currentPath : a.routinePath,
     }
@@ -23971,7 +25183,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
 
       let o2 =
       {
-        execPath : 'node testAppParent.js',
+        execPath : 'node testAppParent',
         mode : 'spawn',
         ipc : 1,
         currentPath : a.routinePath,
@@ -24208,7 +25420,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
 
       let o2 =
       {
-        execPath : 'node testAppParent.js',
+        execPath : 'node testAppParent',
         mode : 'spawn',
         ipc : 1,
         currentPath : a.routinePath,
@@ -26489,7 +27701,7 @@ function startMinimalOptionStreamSizeLimit( test )
       let returned = test.shouldThrowErrorSync( () => _.process.startMinimal( options ) )
 
       test.true( _.errIs( returned ) );
-      test.true( _.strHas( returned.message, `code : 'ENOBUFS'`) )
+      test.true( _.strHas( returned.message, 'ENOBUFS' ) )
 
       test.notIdentical( options.exitCode, 0 );
 
@@ -29546,7 +30758,7 @@ function startMinimalDiffPid( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : ignore outputPiping : 0 outputCollecting : 0',
+        execPath : 'node testAppParent stdio : ignore outputPiping : 0 outputCollecting : 0',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -29610,7 +30822,7 @@ function startMinimalDiffPid( test )
 
     let o =
     {
-      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
       mode,
       detaching : true,
     }
@@ -31213,7 +32425,7 @@ function killOptionWithChildren( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : mode === 'fork' ? 'testApp2.js' : 'node testApp2.js',
+      execPath : mode === 'fork' ? 'testApp2' : 'node testApp2',
       currentPath : __dirname,
       mode,
       stdio : 'inherit',
@@ -31241,7 +32453,7 @@ function killOptionWithChildren( test )
     let detaching = process.argv[ 2 ] === 'detached';
     var o1 =
     {
-      execPath : mode === 'fork' ? 'testApp2.js' : 'node testApp2.js',
+      execPath : mode === 'fork' ? 'testApp2' : 'node testApp2',
       currentPath : __dirname,
       mode,
       detaching,
@@ -31251,7 +32463,7 @@ function killOptionWithChildren( test )
     _.process.startMinimal( o1 );
     var o2 =
     {
-      execPath : mode === 'fork' ? 'testApp2.js' : 'node testApp2.js',
+      execPath : mode === 'fork' ? 'testApp2' : 'node testApp2',
       currentPath : __dirname,
       mode,
       detaching,
@@ -35596,7 +36808,7 @@ function terminateFirstChild( test )
 
       let o =
       {
-        execPath : mode === `fork` ? `program1.js` : `node program1.js`,
+        execPath : mode === `fork` ? `program1` : `node program1`,
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -35734,7 +36946,7 @@ function terminateFirstChild( test )
 
     var o =
     {
-      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
+      execPath : mode === 'fork' ? 'program2' : 'node program2',
       currentPath : __dirname,
       mode,
       stdio : 'pipe',
@@ -35834,7 +37046,7 @@ function terminateSecondChild( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -35936,7 +37148,7 @@ function terminateSecondChild( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
+      execPath : mode === 'fork' ? 'program2' : 'node program2',
       currentPath : __dirname,
       mode,
       stdio : 'inherit',
@@ -36034,7 +37246,7 @@ function terminateDetachedFirstChild( test )
 
       let o =
       {
-        execPath : 'node program1.js',
+        execPath : 'node program1',
         currentPath : a.routinePath,
         mode : 'spawn',
         outputPiping : 1,
@@ -36149,7 +37361,7 @@ function terminateDetachedFirstChild( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
+      execPath : mode === 'fork' ? 'program2' : 'node program2',
       currentPath : __dirname,
       mode,
       stdio : 'pipe',
@@ -36413,7 +37625,7 @@ function terminateWithDetachedChild( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -36545,7 +37757,7 @@ function terminateWithDetachedChild( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
+      execPath : mode === 'fork' ? 'program2' : 'node program2',
       currentPath : __dirname,
       mode,
       stdio : 'pipe',
@@ -36630,7 +37842,7 @@ function terminateSeveralChildren( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -36863,8 +38075,8 @@ function terminateSeveralChildren( test )
       throwingExitCode : 0,
     }
 
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2.js', mode : 'spawn' }));
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3.js', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3', mode : 'spawn' }));
 
     let timer = _.time.outError( context.t1*32 );
 
@@ -36960,7 +38172,7 @@ function terminateSeveralDetachedChildren( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -37069,8 +38281,8 @@ function terminateSeveralDetachedChildren( test )
       throwingExitCode : 0,
     }
 
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2.js', mode : 'spawn' }));
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3.js', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3', mode : 'spawn' }));
 
     let timer = _.time.outError( context.t1*25 );
 
@@ -37163,7 +38375,7 @@ function terminateDeadProcess( test )
       test.case = `mode : ${mode}`;
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -38883,7 +40095,7 @@ function children( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : 'node testApp2.js',
+      execPath : 'node testApp2',
       currentPath : __dirname,
       mode : 'spawn',
       inputMirroring : 0
@@ -39051,7 +40263,7 @@ function childrenOptionFormatList( test )
     _.include( 'wProcess' );
     var o =
     {
-      execPath : 'node testApp2.js',
+      execPath : 'node testApp2',
       currentPath : __dirname,
       mode : 'spawn',
       inputMirroring : 0,
@@ -39538,6 +40750,11 @@ const Proto =
     startProcedureTrivial, /* with routine::starter */
     startProcedureExists, /* with routine::starter */
     startSingleProcedureStack,
+    startAllProcedureSourcePath,
+    startAllProcedureSourcePathInSubprocess,
+    startAllProcedureStack,
+    starterProcedureSourcePath, /* with routine::starter */
+    starterProcedureStack, /* with routine::starter */
     startMultipleProcedureStack,
     startMinimalOnTerminateSeveralCallbacksChronology,
     startMinimalChronology,
@@ -39550,8 +40767,8 @@ const Proto =
     startMinimalOptionWhenDelay,
     startMinimalOptionWhenTime,
     startMinimalOptionTimeOut,
-    startSingleAfterDeath,
-    startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */
+    // startSingleAfterDeath, /* xxx : qqq : for Yevhen : restore */
+    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */ /* xxx : qqq : for Yevhen : restore */
     startSingleAfterDeathOutput,
 
     // detaching
@@ -39710,7 +40927,7 @@ const Proto =
 
     spawnTimeOf,
 
-    _startTree,
+    // _startTree, /* xxx : qqq : for Yevhen : restore */
 
     // experiments
 
