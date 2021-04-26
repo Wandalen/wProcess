@@ -215,7 +215,7 @@ function assetFor( test, name )
 
   let oprogram = a.program;
   program_body.defaults = a.program.defaults;
-  a.program = _.routine.uniteCloning_( a.program.head, program_body );
+  a.program = _.routine.uniteCloning_replaceByUnite( a.program.head, program_body );
   return a;
 
   /* */
@@ -228,8 +228,8 @@ function assetFor( test, name )
       toolsPath : _.module.resolve( 'wTools' ),
     };
     o.locals = o.locals || locals;
-    _.mapSupplement( o.locals, locals );
-    _.mapSupplement( o.locals.context, locals.context );
+    _.props.supplement( o.locals, locals );
+    _.props.supplement( o.locals.context, locals.context );
     let programPath = a.path.nativize( oprogram.body.call( a, o ) ); /* zzz : modify a.program()? */
     return programPath;
   }
@@ -283,7 +283,7 @@ ${programPath}:end
         mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       return _.process.startMinimal( options )
       .then( function()
@@ -307,7 +307,7 @@ ${programPath}:end
         mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       return _.process.startMinimal( options )
       .then( function()
@@ -331,7 +331,7 @@ ${programPath}:end
         mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       return _.process.startMinimal( options )
       .then( function()
@@ -355,7 +355,7 @@ ${programPath}:end
         mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       return _.process.startMinimal( options )
       .then( function()
@@ -379,7 +379,7 @@ ${programPath}:end
         mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       return _.process.startMinimal( options )
       .then( function()
@@ -404,7 +404,7 @@ ${programPath}:end
         stdio : 'pipe'
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       return _.process.startMinimal( options )
       .then( function()
@@ -431,7 +431,7 @@ ${programPath}:end
         outputPiping : 0,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       return _.process.startMinimal( options )
       .then( function()
@@ -456,7 +456,7 @@ ${programPath}:end
         mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       return test.mustNotThrowError( _.process.startMinimal( options ) )
       .then( () =>
@@ -488,7 +488,7 @@ ${programPath}:end
         mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       return test.shouldThrowErrorAsync( _.process.startMinimal( options ),
       ( err, arg ) =>
@@ -525,7 +525,7 @@ ${programPath}:end
         mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       return test.shouldThrowErrorAsync( _.process.startMinimal( options ), ( err, arg ) =>
       {
@@ -562,7 +562,7 @@ ${programPath}:end
     .then( function( arg )
     {
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       return _.process.startMinimal( options )
       .then( function()
@@ -603,7 +603,7 @@ ${programPath}:end
         stdio : 'pipe'
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
 
       if( mode === 'fork' ) /* Error in assert 'Expects string or strings {-o.execPath-}, but got Function' */
       return test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
@@ -1534,7 +1534,7 @@ function startMinimalSync( test )
 
     /* stdio : pipe */
 
-    var options = _.mapSupplement( {}, o2, o3 );
+    var options = _.props.supplement( {}, o2, o3 );
     _.process.startMinimal( options );
     test.identical( options.exitCode, 0 );
     test.identical( options.output, expectedOutput );
@@ -1545,7 +1545,7 @@ function startMinimalSync( test )
     o2.outputCollecting = 0;
     o2.outputPiping = 0;
 
-    var options = _.mapSupplement( {}, o2, o3 );
+    var options = _.props.supplement( {}, o2, o3 );
     _.process.startMinimal( options )
     test.identical( options.exitCode, 0 );
     test.identical( options.output, null );
@@ -1561,7 +1561,7 @@ function startMinimalSync( test )
       timeOut : 2*context.t1
     }
 
-    var options = _.mapSupplement( {}, o2, o3 );
+    var options = _.props.supplement( {}, o2, o3 );
     test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
 
     /* */
@@ -1573,7 +1573,7 @@ function startMinimalSync( test )
       mode,
       stdio : 'pipe'
     }
-    var options = _.mapSupplement( {}, o2, o3 );
+    var options = _.props.supplement( {}, o2, o3 );
     test.mustNotThrowError( () => _.process.startMinimal( options ) )
     test.identical( options.exitCode, 0 );
 
@@ -1586,7 +1586,7 @@ function startMinimalSync( test )
       mode,
       stdio : 'pipe'
     }
-    var options = _.mapSupplement( {}, o2, o3 );
+    var options = _.props.supplement( {}, o2, o3 );
     test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
     test.identical( options.exitCode, 1 );
 
@@ -1599,7 +1599,7 @@ function startMinimalSync( test )
       mode,
       stdio : 'pipe'
     }
-    var options = _.mapSupplement( {}, o2, o3 );
+    var options = _.props.supplement( {}, o2, o3 );
     test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
     test.identical( options.exitCode, 2 );
 
@@ -1726,7 +1726,7 @@ function startSingleSyncDeasync( test )
         stdio : 'pipe'
       }
 
-      var options = _.mapSupplement( {}, o2, o3 );
+      var options = _.props.supplement( {}, o2, o3 );
       var returned = _.process.startSingle( options );
 
       if( env.sync )
@@ -1779,7 +1779,7 @@ function startSingleSyncDeasync( test )
         outputPiping : 0
       }
 
-      var options = _.mapSupplement( {}, o2, o3 );
+      var options = _.props.supplement( {}, o2, o3 );
       var returned = _.process.startSingle( options );
 
       if( env.sync )
@@ -1830,7 +1830,7 @@ function startSingleSyncDeasync( test )
         timeOut : 2*context.t1,
       }
 
-      var options = _.mapSupplement( {}, o2, o3 );
+      var options = _.props.supplement( {}, o2, o3 );
 
       if( env.sync )
       return test.shouldThrowErrorSync( () => _.process.startSingle( options ) );
@@ -1850,7 +1850,7 @@ function startSingleSyncDeasync( test )
         stdio : 'pipe'
       }
 
-      var options = _.mapSupplement( {}, o2, o3 );
+      var options = _.props.supplement( {}, o2, o3 );
       var returned = _.process.startSingle( options );
 
       if( env.sync )
@@ -1900,7 +1900,7 @@ function startSingleSyncDeasync( test )
         stdio : 'pipe'
       }
 
-      var options = _.mapSupplement( {}, o2, o3 );
+      var options = _.props.supplement( {}, o2, o3 );
 
       if( env.sync )
       {
@@ -12603,7 +12603,7 @@ function startMinimalDetachingNoTerminationBegin( test )
       detaching : true,
     }
 
-    _.mapExtend( o, args.map );
+    _.props.extend( o, args.map );
     if( o.ipc !== undefined )
     o.ipc = _.boolFrom( o.ipc );
 
@@ -12775,7 +12775,7 @@ function startMinimalDetachedOutputStdioIgnore( test )
       detaching : true,
     }
 
-    _.mapExtend( o, args.map );
+    _.props.extend( o, args.map );
     if( o.ipc !== undefined )
     o.ipc = _.boolFrom( o.ipc );
 
@@ -12874,7 +12874,7 @@ function startMinimalDetachedOutputStdioPipe( test )
       detaching : true,
     }
 
-    _.mapExtend( o, args.map );
+    _.props.extend( o, args.map );
     if( o.ipc !== undefined )
     o.ipc = _.boolFrom( o.ipc );
 
@@ -14779,7 +14779,7 @@ function startMinimalDetachingTerminationBegin( test )
       detaching : true,
     }
 
-    _.mapExtend( o, args.map );
+    _.props.extend( o, args.map );
     if( o.ipc !== undefined )
     o.ipc = _.boolFrom( o.ipc );
 
@@ -14919,7 +14919,7 @@ function startMinimalDetachingWaitForDisconnect( test )
       detaching : 2,
     }
 
-    _.mapExtend( o, args.map );
+    _.props.extend( o, args.map );
 
     _.process.startMinimal( o );
 
@@ -17642,7 +17642,7 @@ function startMultipleConcurrentConsequences( test )
         mode : env.mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMultiple( options );
 
       processTrack( options );
@@ -17757,7 +17757,7 @@ ${options.sessions[ 1 ].procedure.id}.end
         mode : env.mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = null;
 
       if( env.sync )
@@ -17872,7 +17872,7 @@ ${options.sessions[ 1 ].procedure.id}.end
         mode : env.mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = null;
 
       if( env.sync )
@@ -17989,7 +17989,7 @@ ${options.sessions[ 1 ].procedure.id}.end
         mode : env.mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMultiple( options );
 
       processTrack( options );
@@ -18107,7 +18107,7 @@ ${options.sessions[ 1 ].procedure.id}.end
         mode : env.mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = null;
 
       if( env.sync )
@@ -18224,7 +18224,7 @@ ${options.sessions[ 1 ].procedure.id}.end
         mode : env.mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = null;
 
       if( env.sync )
@@ -19327,7 +19327,7 @@ function startNjsWithReadyDelayStructural( test )
 
       options.ready.then( ( op ) =>
       {
-        let exp2 = _.mapExtend( null, exp );
+        let exp2 = _.props.extend( null, exp );
         exp2.pnd = options.pnd;
         exp2.procedure = options.procedure;
         exp2.streamOut = options.streamOut;
@@ -19367,7 +19367,7 @@ function startNjsWithReadyDelayStructural( test )
           exp2.exitReason = 'normal';
         }
 
-        test.identical( _.property.onlyOwn( options ), exp2 );
+        test.identical( _.props.onlyOwn( options ), exp2 );
         test.identical( !!options.pnd, !env.dry );
         test.true( _.routineIs( options.disconnect ) );
         test.true( _.routineIs( options._end ) );
@@ -19394,7 +19394,7 @@ function startNjsWithReadyDelayStructural( test )
       }
       else
       {
-        let exp2 = _.mapExtend( null, exp );
+        let exp2 = _.props.extend( null, exp );
         exp2.execPath = env.mode === 'fork' ? exp2.execPath : 'node';
         exp2.args = env.mode === 'fork' ? [] : [ programPath ];
         exp2.args2 = env.mode === 'fork' ? [] : [ programPath ];
@@ -19410,7 +19410,7 @@ function startNjsWithReadyDelayStructural( test )
         exp2.output = env.dry ? '' :'program1:begin\n';
         delete exp2.end;
 
-        test.identical( _.property.onlyOwn( options ), exp2 );
+        test.identical( _.props.onlyOwn( options ), exp2 );
       }
 
       test.true( _.routineIs( options.disconnect ) );
@@ -20273,7 +20273,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
       options.ready.then( ( op ) =>
       {
-        let exp2 = _.mapExtend( null, exp );
+        let exp2 = _.props.extend( null, exp );
 
         exp2.sessions = options.sessions;
         exp2.state = 'terminated';
@@ -20308,7 +20308,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
           exp2.exitReason = 'normal';
         }
 
-        test.identical( _.property.onlyOwn( options ), exp2 );
+        test.identical( _.props.onlyOwn( options ), exp2 );
         test.true( !options.pnd );
         test.true( !options.disconnect );
         test.identical( _.streamIs( options.streamOut ), !env.sync || ( !!env.sync && !!env.deasync ) );
@@ -20371,7 +20371,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         return null;
       });
 
-      let exp3 = _.mapExtend( null, exp );
+      let exp3 = _.props.extend( null, exp );
       if( env.sync || env.deasync )
       {
         exp3.ended = true;
@@ -21057,23 +21057,23 @@ function starterFields( test )
   test.case = 'defaults';
   var start = _.process.starter();
 
-  test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
-  test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
+  test.contains( _.props.keys( start ), _.props.keys( _.process.start ) );
+  test.identical( _.props.keys( start.defaults ), _.props.keys( _.process.start.body.defaults ) );
   test.identical( start.head, _.process.start.head );
   // test.identical( start.body, _.process.start.body ); /* created through `routine.uniteCloning`, reference is not the same */
   test.identical( start.body.defaults, _.process.start.body.defaults );
   test.identical( start.body.name, _.process.start.body.name );
-  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ); /* starter doesn't have option::procedure */
+  test.identical( _.props.keys( start.predefined ), _.props.keys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ); /* starter doesn't have option::procedure */
 
   test.case = 'execPath';
   var start = _.process.starter( 'node -v' );
-  test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
-  test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
+  test.contains( _.props.keys( start ), _.props.keys( _.process.start ) );
+  test.identical( _.props.keys( start.defaults ), _.props.keys( _.process.start.body.defaults ) );
   test.identical( start.head, _.process.start.head );
   // test.identical( start.body, _.process.start.body ); /* created through `routine.uniteCloning`, reference is not the same */
   test.identical( start.body.defaults, _.process.start.body.defaults );
   test.identical( start.body.name, _.process.start.body.name );
-  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ); /* starter doesn't have option::procedure */
+  test.identical( _.props.keys( start.predefined ), _.props.keys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ); /* starter doesn't have option::procedure */
   test.identical( start.predefined.execPath, 'node -v' );
 
   test.case = 'object';
@@ -21084,13 +21084,13 @@ function starterFields( test )
     args : [ 'arg1', 'arg2' ],
     ready
   });
-  test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
-  test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
+  test.contains( _.props.keys( start ), _.props.keys( _.process.start ) );
+  test.identical( _.props.keys( start.defaults ), _.props.keys( _.process.start.body.defaults ) );
   test.identical( start.head, _.process.start.head );
   // test.identical( start.body, _.process.start.body ); /* created through `routine.uniteCloning`, reference is not the same */
   test.identical( start.body.defaults, _.process.start.body.defaults );
   test.identical( start.body.name, _.process.start.body.name );
-  test.true( _.arraySetIdentical( _.mapKeys( start.predefined ), _.mapKeys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ) ); /* starter doesn't have option::procedure */
+  test.true( _.arraySetIdentical( _.props.keys( start.predefined ), _.props.keys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ) ); /* starter doesn't have option::procedure */
   test.identical( start.predefined.execPath, 'node -v' );
   test.identical( start.predefined.args, [ 'arg1', 'arg2' ] );
   test.identical( start.predefined.ready, ready );
@@ -24847,7 +24847,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : 'ignore',
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       _.process.startMinimal( o );
 
@@ -24873,7 +24873,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         outputCollecting : 0,
         stdio : 'ignore',
       }
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
     })
@@ -24889,7 +24889,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         outputCollecting : 1,
         stdio : 'ignore',
       }
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
     })
@@ -24905,7 +24905,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         outputCollecting : 1,
         stdio : 'ignore',
       }
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
     })
@@ -24922,7 +24922,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : 'pipe',
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       _.process.startMinimal( o );
 
@@ -24949,7 +24949,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : 'pipe',
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       _.process.startMinimal( o );
 
@@ -24976,7 +24976,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : 'pipe',
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       _.process.startMinimal( o );
 
@@ -25004,7 +25004,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : 'pipe',
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       _.process.startMinimal( o );
 
@@ -25032,7 +25032,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : 'inherit',
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       let o2 =
       {
@@ -25072,7 +25072,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : 'inherit',
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
     })
@@ -25089,7 +25089,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : 'inherit',
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
     })
@@ -25106,7 +25106,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : 'inherit',
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
     })
@@ -25123,7 +25123,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : [ 'ignore', 'ignore', 'ignore', mode === 'fork' ? 'ipc' : null ],
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
     })
@@ -25140,7 +25140,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : [ 'inherit', 'inherit', 'inherit', mode === 'fork' ? 'ipc' : null ],
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       return test.shouldThrowErrorSync(  () => _.process.startMinimal( o ) );
     })
@@ -25157,7 +25157,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : [ 'pipe', 'pipe', 'pipe', mode === 'fork' ? 'ipc' : null ],
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       _.process.startMinimal( o );
 
@@ -25185,7 +25185,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : [ 'ignore', 'pipe', 'ignore', mode === 'fork' ? 'ipc' : null ],
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       _.process.startMinimal( o );
 
@@ -25213,7 +25213,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : [ 'ignore', 'ignore', 'pipe', mode === 'fork' ? 'ipc' : null ],
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       _.process.startMinimal( o );
 
@@ -25241,7 +25241,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : [ 'ignore', 'pipe', 'inherit', mode === 'fork' ? 'ipc' : null ],
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       _.process.startMinimal( o );
 
@@ -25269,7 +25269,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : [ 'ignore', 'inherit', 'pipe', mode === 'fork' ? 'ipc' : null ],
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       let o2 =
       {
@@ -25310,7 +25310,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
         stdio : [ 'ignore', 'pipe', 'pipe', mode === 'fork' ? 'ipc' : null ],
       }
 
-      _.mapExtend( o, commonOptions );
+      _.props.extend( o, commonOptions );
 
       _.process.startMinimal( o );
 
@@ -25417,11 +25417,11 @@ function startMinimalOptionVerbosity( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"` ), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')` ), 1 );
         else
-        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')` ), 1 );
         test.identical( _.strCount( loggerOutput, 'message' ), 1 );
         test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 0 );
         return true;
@@ -25451,11 +25451,11 @@ function startMinimalOptionVerbosity( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"` ), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')` ), 1 );
         else
-        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')` ), 1 );
         test.identical( _.strCount( loggerOutput, 'message' ), 2 );
         test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 0 );
         return true;
@@ -25485,11 +25485,11 @@ function startMinimalOptionVerbosity( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"` ), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')` ), 1 );
         else
-        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')` ), 1 );
         test.identical( _.strCount( loggerOutput, 'message' ), 2 );
         test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 1 );
         return true;
@@ -25519,11 +25519,11 @@ function startMinimalOptionVerbosity( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"` ), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')` ), 1 );
         else
-        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')` ), 1 );
         test.identical( _.strCount( loggerOutput, 'message' ), 2 );
         test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 1 );
         return true;
@@ -28779,7 +28779,7 @@ function startMultipleOptionCurrentPath( test )
     {
       test.case = `mode : ${mode}, execPath : single, currentPath : multiple`;
 
-      let returned = _.process.startMultiple( _.mapSupplement( { mode : `${mode}` }, o2 ) );
+      let returned = _.process.startMultiple( _.props.supplement( { mode : `${mode}` }, o2 ) );
 
       returned.then( ( op ) =>
       {
@@ -28803,7 +28803,7 @@ function startMultipleOptionCurrentPath( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, execPath : multiple, currentPath : multiple`;
-      let returned = _.process.startMultiple( _.mapSupplement( { mode : `${mode}`, execPath : [ mode === 'fork' ? programPath : 'node ' + programPath, mode === 'fork' ? programPath : 'node ' + programPath ] }, o2 ) );
+      let returned = _.process.startMultiple( _.props.supplement( { mode : `${mode}`, execPath : [ mode === 'fork' ? programPath : 'node ' + programPath, mode === 'fork' ? programPath : 'node ' + programPath ] }, o2 ) );
 
       returned.then( ( op ) =>
       {
@@ -28845,7 +28845,7 @@ function startMultipleOptionCurrentPath( test )
 
   // /* */
 
-  // _.process.start( _.mapSupplement( { mode : 'shell' }, o2 ) );
+  // _.process.start( _.props.supplement( { mode : 'shell' }, o2 ) );
 
   // a.ready.then( ( op ) =>
   // {
@@ -28863,7 +28863,7 @@ function startMultipleOptionCurrentPath( test )
 
   // /* */
 
-  // _.process.start( _.mapSupplement( { mode : 'spawn' }, o2 ) );
+  // _.process.start( _.props.supplement( { mode : 'spawn' }, o2 ) );
 
   // a.ready.then( ( op ) =>
   // {
@@ -28881,7 +28881,7 @@ function startMultipleOptionCurrentPath( test )
 
   // /* */
 
-  // _.process.start( _.mapSupplement( { mode : 'fork', execPath : programPath }, o2 ) );
+  // _.process.start( _.props.supplement( { mode : 'fork', execPath : programPath }, o2 ) );
 
   // a.ready.then( ( op ) =>
   // {
@@ -28899,7 +28899,7 @@ function startMultipleOptionCurrentPath( test )
 
   // /*  */
 
-  // _.process.start( _.mapSupplement( { mode : 'spawn', execPath : [ 'node ' + programPath, 'node ' + programPath ] }, o2 ) );
+  // _.process.start( _.props.supplement( { mode : 'spawn', execPath : [ 'node ' + programPath, 'node ' + programPath ] }, o2 ) );
 
   // a.ready.then( ( op ) =>
   // {
@@ -28960,7 +28960,7 @@ function startMultipleWithEmptySessions( test )
       test.case = `mode : ${mode}, execPath : empty, currentPath : empty`;
 
       let o2 = { currentPath : [], execPath : [] };
-      let returned = _.process.startMultiple( _.mapSupplement( o2, o ) );
+      let returned = _.process.startMultiple( _.props.supplement( o2, o ) );
       returned.then( ( op ) =>
       {
         test.identical( op.sessions, [] );
@@ -28978,7 +28978,7 @@ function startMultipleWithEmptySessions( test )
       test.case = `mode : ${mode}, execPath : empty, currentPath : single`;
 
       let o2 = { currentPath : a.routinePath, execPath : [] };
-      let returned = _.process.startMultiple( _.mapSupplement( o2, o ) );
+      let returned = _.process.startMultiple( _.props.supplement( o2, o ) );
       returned.then( ( op ) =>
       {
         test.identical( op.sessions, [] );
@@ -28996,7 +28996,7 @@ function startMultipleWithEmptySessions( test )
       test.case = `mode : ${mode}, execPath : command, currentPath : empty`;
 
       let o2 = { currentPath : [], execPath : mode === 'fork' ? programPath : 'node ' + programPath };
-      let returned = _.process.startMultiple( _.mapSupplement( o2, o ) );
+      let returned = _.process.startMultiple( _.props.supplement( o2, o ) );
       returned.then( ( op ) =>
       {
         test.identical( op.sessions, [] );
@@ -30680,7 +30680,7 @@ function startMinimalDiffPid( test )
       detaching : true,
     }
 
-    _.mapExtend( o, args.map );
+    _.props.extend( o, args.map );
     if( o.ipc !== undefined )
     o.ipc = _.boolFrom( o.ipc );
 
@@ -32975,7 +32975,7 @@ function endSignalsBasic( test )
         mode,
       }
 
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33030,7 +33030,7 @@ program1:end
         args : [ `withTools:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33088,7 +33088,7 @@ program1:end
         args : [ `withSleep:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33146,7 +33146,7 @@ program1:end
         args : [ `withSleep:1`, `withTools:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var time1 = _.time.now();
       var returned = _.process.startMinimal( options );
       _.time.out( context.t1 * 5, () =>
@@ -33214,7 +33214,7 @@ program1:end
         args : [ `withDeasync:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33290,7 +33290,7 @@ deasync:end
         args : [],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33345,7 +33345,7 @@ program1:end
         args : [ `withTools:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33400,7 +33400,7 @@ program1:end
         args : [ `withSleep:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var time1;
       var returned = _.process.startMinimal( options );
       _.time.out( context.t1 * 5, () =>
@@ -33458,7 +33458,7 @@ program1:end
         args : [ `withSleep:1`, `withTools:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33516,7 +33516,7 @@ program1:end
         args : [ `withDeasync:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33593,7 +33593,7 @@ deasync:end
         args : [],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33710,7 +33710,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
         args : [ `withTools:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33773,7 +33773,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
         args : [ `withSleep:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33834,7 +33834,7 @@ sleep:begin
         args : [ `withSleep:1`, `withTools:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33897,7 +33897,7 @@ sleep:begin
         args : [ `withDeasync:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -33981,7 +33981,7 @@ deasync:begin
         args : [],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -34202,7 +34202,7 @@ deasync:begin
         args : [ `withTools:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -34266,7 +34266,7 @@ deasync:begin
         args : [ `withSleep:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -34327,7 +34327,7 @@ sleep:begin
         args : [ `withSleep:1`, `withTools:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -34411,7 +34411,7 @@ sleep:begin
         args : [ `withDeasync:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -34537,7 +34537,7 @@ deasync:begin
         args : [],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -34635,7 +34635,7 @@ deasync:begin
         args : [ `withTools:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -34702,7 +34702,7 @@ program1:end
         args : [ `withSleep:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -34774,7 +34774,7 @@ program1:end
         args : [ `withTools:1`, `withSleep:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -34846,7 +34846,7 @@ program1:end
         args : [ `withDeasync:1` ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -35039,7 +35039,7 @@ function endSignalsOnExit( test )
         args : [ 'withExitHandler:1', 'withTools:1' ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -35114,7 +35114,7 @@ exit:end
         args : [ 'withExitHandler:1', 'withTools:1' ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -35182,7 +35182,7 @@ exit:end
         args : [ 'withExitHandler:1', 'withTools:1' ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -35250,7 +35250,7 @@ exit:end
         args : [ 'withExitHandler:1', 'withTools:1' ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -35387,7 +35387,7 @@ exit:end
         args : [ 'withExitHandler:1', 'withTools:1' ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -35453,7 +35453,7 @@ Killed
         args : [ 'withExitHandler:1', 'withTools:1' ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 5, () =>
@@ -35605,7 +35605,7 @@ function endSignalsOnExitExitAgain( test )
         args : [ 'withExitHandler:1', 'withTools:1', 'withCode:0' ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 3, () =>
@@ -35679,7 +35679,7 @@ exit:${exitCode}
         args : [ 'withExitHandler:1', 'withTools:1', 'withCode:1' ],
         mode,
       }
-      var options = _.mapSupplement( null, o2, o3 );
+      var options = _.props.supplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 3, () =>
@@ -37928,8 +37928,8 @@ function terminateSeveralChildren( test )
       throwingExitCode : 0,
     }
 
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2', mode : 'spawn' }));
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3', mode : 'spawn' }));
+    _.process.startMinimal( _.props.extend( null, o, { execPath : 'node program2', mode : 'spawn' }));
+    _.process.startMinimal( _.props.extend( null, o, { execPath : 'node program3', mode : 'spawn' }));
 
     let timer = _.time.outError( context.t1*32 );
 
@@ -38134,8 +38134,8 @@ function terminateSeveralDetachedChildren( test )
       throwingExitCode : 0,
     }
 
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2', mode : 'spawn' }));
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3', mode : 'spawn' }));
+    _.process.startMinimal( _.props.extend( null, o, { execPath : 'node program2', mode : 'spawn' }));
+    _.process.startMinimal( _.props.extend( null, o, { execPath : 'node program3', mode : 'spawn' }));
 
     let timer = _.time.outError( context.t1*25 );
 
@@ -39310,7 +39310,7 @@ function killComplex( test )
     const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-    var testAppPath = _.fileProvider.path.nativize( _.path.join( __dirname, 'testApp.js' ) );
+    var testAppPath = _.fileProvider.path.nativize( _.path.join( __dirname, 'testApp' ) );
     var o = { execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath, mode, throwingExitCode : 0 }
     var ready = _.process.startMinimal( o )
     process.send( o.pnd.pid );
@@ -39860,8 +39860,8 @@ function children( test )
       throwingExitCode : 0
     }
 
-    let o1 = _.mapExtend( null, o );
-    let o2 = _.mapExtend( null, o );
+    let o1 = _.props.extend( null, o );
+    let o2 = _.props.extend( null, o );
 
     let r1 = _.process.startMinimal( o1 );
     let r2 = _.process.startMinimal( o2 );
@@ -40331,7 +40331,7 @@ function experimentIpcDeasync( test )
   //   },
   //   after( asyncId )
   //   {
-  //     // console.log( `after . asyncId:${asyncId}`);
+  //     // console.log( `after . asyncId:${asyncId}` );
   //   },
   //   destroy( asyncId )
   //   {
@@ -40435,7 +40435,7 @@ function experiment( test )
   })
   .then( function( arg )
   {
-    var options = _.mapSupplement( null, o2, o3 );
+    var options = _.props.supplement( null, o2, o3 );
 
     return _.process.start( options )
     .then( function()

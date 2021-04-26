@@ -286,8 +286,8 @@ function onCheckDescriptor( test )
   var result = [];
   var onEvent = () => result.push( result.length );
   var descriptor = _.process.on( 'uncaughtError', onEvent );
-  test.identical( _.mapKeys( descriptor ), [ 'uncaughtError' ] );
-  test.identical( _.mapKeys( descriptor.uncaughtError ), [ 'off', 'enabled', 'first', 'callbackMap' ] );
+  test.identical( _.props.keys( descriptor ), [ 'uncaughtError' ] );
+  test.identical( _.props.keys( descriptor.uncaughtError ), [ 'off', 'enabled', 'first', 'callbackMap' ] );
   test.identical( descriptor.uncaughtError.enabled, true );
   test.identical( descriptor.uncaughtError.first, 0 );
   test.equivalent( descriptor.uncaughtError.callbackMap, { uncaughtError : onEvent } );
@@ -300,8 +300,8 @@ function onCheckDescriptor( test )
   var result = [];
   var onEvent = () => result.push( result.length );
   var descriptor = _.process.on({ callbackMap : { 'uncaughtError' : onEvent } });
-  test.identical( _.mapKeys( descriptor ), [ 'uncaughtError' ] );
-  test.identical( _.mapKeys( descriptor.uncaughtError ), [ 'off', 'enabled', 'first', 'callbackMap' ] );
+  test.identical( _.props.keys( descriptor ), [ 'uncaughtError' ] );
+  test.identical( _.props.keys( descriptor.uncaughtError ), [ 'off', 'enabled', 'first', 'callbackMap' ] );
   test.identical( descriptor.uncaughtError.enabled, true );
   test.identical( descriptor.uncaughtError.first, 0 );
   test.equivalent( descriptor.uncaughtError.callbackMap, { uncaughtError : onEvent } );

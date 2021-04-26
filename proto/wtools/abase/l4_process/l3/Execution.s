@@ -44,7 +44,7 @@ function startMinimalHeadCommon( routine, args )
   else
   o = args[ 0 ];
 
-  o = _.routineOptions( routine, o );
+  o = _.routine.options_( routine, o );
 
   _.assert( arguments.length === 2 );
   _.assert( args.length === 1, 'Expects single argument' );
@@ -345,7 +345,7 @@ function startMinimal_body( o )
     {
       if( Config.debug )
       {
-        let keys = _.mapKeys( o.when );
+        let keys = _.props.keys( o.when );
         _.assert( _.mapIs( o.when ) );
         _.assert( keys.length === 1 && _.longHas( [ 'time', 'delay' ], keys[ 0 ] ) );
         _.assert( _.numberIs( o.when.delay ) || _.numberIs( o.when.time ) )
@@ -1376,7 +1376,7 @@ startMinimal_body.defaults =
 
 /* xxx : move advanced options to _.process.startSingle() */
 
-let startMinimal = _.routine.uniteCloning_( startMinimal_head, startMinimal_body );
+let startMinimal = _.routine.uniteCloning_replaceByUnite( startMinimal_head, startMinimal_body );
 
 //
 
@@ -1654,7 +1654,7 @@ startSingle_body.defaults =
 
 }
 
-let startSingle = _.routine.uniteCloning_( startSingle_head, startSingle_body );
+let startSingle = _.routine.uniteCloning_replaceByUnite( startSingle_head, startSingle_body );
 
 //
 
@@ -1942,7 +1942,7 @@ function startMultiple_body( o )
     {
       let currentReady = new _.Consequence();
       sessionId += 1;
-      let o2 = _.mapExtend( null, o );
+      let o2 = _.props.extend( null, o );
       o2.conStart = null;
       o2.conTerminate = null;
       o2.conDisconnect = null;
@@ -2249,11 +2249,11 @@ startMultiple_body.defaults =
 
 }
 
-let startMultiple = _.routine.uniteCloning_( startMultiple_head, startMultiple_body );
+let startMultiple = _.routine.uniteCloning_replaceByUnite( startMultiple_head, startMultiple_body );
 
 //
 
-let startPassingThrough = _.routine.uniteCloning_( startMultiple_head, startMultiple_body );
+let startPassingThrough = _.routine.uniteCloning_replaceByUnite( startMultiple_head, startMultiple_body );
 
 var defaults = startPassingThrough.defaults;
 
@@ -2305,7 +2305,7 @@ function startNjs_body( o )
   if( !System )
   System = require( 'os' );
 
-  _.assertRoutineOptions( startNjs_body, o );
+  _.routine.assertOptions( startNjs_body, o );
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
@@ -2355,7 +2355,7 @@ defaults.applyingExitCode = 1;
 defaults.stdio = 'inherit';
 defaults.mode = 'fork';
 
-let startNjs = _.routine.uniteCloning_( startMultiple_head, startNjs_body );
+let startNjs = _.routine.uniteCloning_replaceByUnite( startMultiple_head, startNjs_body );
 
 //
 
@@ -2391,7 +2391,7 @@ let startNjs = _.routine.uniteCloning_( startMultiple_head, startNjs_body );
  * @namespace Tools.process
  */
 
-let startNjsPassingThrough = _.routine.uniteCloning_( startMultiple_head, startNjs.body );
+let startNjsPassingThrough = _.routine.uniteCloning_replaceByUnite( startMultiple_head, startNjs.body );
 
 var defaults = startNjsPassingThrough.defaults;
 
@@ -2484,7 +2484,7 @@ function starter( o0 )
   _.assert( arguments.length === 0 || arguments.length === 1 );
   if( _.strIs( o0 ) )
   o0 = { execPath : o0 }
-  o0 = _.routineOptions( starter, o0 );
+  o0 = _.routine.options_( starter, o0 );
   o0.ready = o0.ready || new _.Consequence().take( null );
 
   _.routineExtend( er, _.process.startMultiple );
@@ -2512,22 +2512,22 @@ function starter( o0 )
       - env                                 : aux
     */
     let o = optionsFrom( arguments[ 0 ] );
-    let o00 = _.mapExtend( null, o0 );
+    let o00 = _.props.extend( null, o0 );
     for( let k in o00 )
     {
       if( _.arrayIs( o00[ k ] ) )
       o00[ k ] = o00[ k ].slice();
       else if( _.aux.is( o00[ k ] ) )
-      o00[ k ] = _.mapExtend( null, o00[ k ] );
+      o00[ k ] = _.props.extend( null, o00[ k ] );
     }
     merge( o00, o );
-    _.mapExtend( o, o00 )
+    _.props.extend( o, o00 )
 
     for( let a = 1 ; a < arguments.length ; a++ )
     {
       let o1 = optionsFrom( arguments[ a ] );
       merge( o, o1 );
-      _.mapExtend( o, o1 );
+      _.props.extend( o, o1 );
     }
 
     if( o.stack === null || o.stack === undefined )
@@ -2594,7 +2594,7 @@ function starter( o0 )
       delete src.execPath;
     }
 
-    _.mapExtend( dst, src );
+    _.props.extend( dst, src );
 
     return dst;
   }
@@ -2648,7 +2648,7 @@ function signal_head( routine, args )
   else if( _.process.isNativeDescriptor( o ) )
   o = { pnd : o };
 
-  o = _.routineOptions( routine, o );
+  o = _.routine.options_( routine, o );
 
   if( o.pnd )
   {
@@ -2909,14 +2909,14 @@ signal_body.defaults =
   sync : 0,
 }
 
-let _signal = _.routine.uniteCloning_( signal_head, signal_body );
+let _signal = _.routine.uniteCloning_replaceByUnite( signal_head, signal_body );
 
 //
 
 function kill_body( o )
 {
   _.assert( arguments.length === 1 );
-  let o2 = _.mapExtend( null, o );
+  let o2 = _.props.extend( null, o );
   o2.signal = 'SIGKILL';
   o2.timeOut = 5000;
   return _.process._signal.body( o2 );
@@ -2927,7 +2927,7 @@ kill_body.defaults =
   ... _.mapBut_( null, _signal.defaults, [ 'signal', 'timeOut' ] ),
 }
 
-let kill = _.routine.uniteCloning_( signal_head, kill_body );
+let kill = _.routine.uniteCloning_replaceByUnite( signal_head, kill_body );
 
 
 //
@@ -2949,7 +2949,7 @@ terminate_body.defaults =
   ... _.mapBut_( null, _signal.defaults, [ 'signal' ] ),
 }
 
-let terminate = _.routine.uniteCloning_( signal_head, terminate_body );
+let terminate = _.routine.uniteCloning_replaceByUnite( signal_head, terminate_body );
 
 //
 
@@ -3053,7 +3053,7 @@ waitForDeath_body.defaults =
   sync : 0
 }
 
-let waitForDeath = _.routine.uniteCloning_( signal_head, waitForDeath_body )
+let waitForDeath = _.routine.uniteCloning_replaceByUnite( signal_head, waitForDeath_body )
 
 //
 
@@ -3064,7 +3064,7 @@ function children( o )
   else if( _.process.isNativeDescriptor( o ) )
   o = { process : o }
 
-  _.routineOptions( children, o )
+  _.routine.options_( children, o )
   _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
   _.assert( _.longHas( [ 'list', 'tree' ], o.format ) );
@@ -3183,7 +3183,7 @@ function execPathOf( o )
   else if( _.process.isNativeDescriptor( o ) )
   o = { pnd : o };
 
-  o = _.routineOptions( execPathOf, o );
+  o = _.routine.options_( execPathOf, o );
 
   if( o.pnd )
   {
@@ -3291,7 +3291,7 @@ function spawnTimeOf( o )
   else if( _.process.isNativeDescriptor( o ) )
   o = { pnd : o };
 
-  o = _.routineOptions( spawnTimeOf, o );
+  o = _.routine.options_( spawnTimeOf, o );
 
   if( o.pnd )
   {
@@ -3375,7 +3375,7 @@ function _startTree( o )
 {
   o = o || {};
 
-  _.routineOptions( _startTree, o );
+  _.routine.options_( _startTree, o );
 
   if( o.executionTime === null )
   o.executionTime = [ 50, 100 ];
@@ -3550,7 +3550,7 @@ let Extension =
 
 }
 
-_.mapExtend( Self, Extension );
+_.props.extend( Self, Extension );
 _.assert( _.routineIs( _.process.start ) );
 
 // --
