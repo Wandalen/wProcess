@@ -26952,16 +26952,16 @@ function startMultipleOptionOutputAdditiveWithStderr( test )
       _.time.out( context.t1 * 15, () =>
       {
         // console.log( `out t1 * 15, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
-        if( !tops.outputAdditive )
-        {
-          test.identical( o.output, '' );
-        }
-        else
+        if( tops.outputAdditive )
         {
           if( tops.concurrent )
           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2` );
           else
           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2` );
+        }
+        else
+        {
+          test.identical( o.output, '' );
         }
         return null;
       })
@@ -26985,10 +26985,10 @@ function startMultipleOptionOutputAdditiveWithStderr( test )
         }
         else
         {
-          if( !tops.outputAdditive ) /* First process haven't finished yet, no output */
-          test.identical( o.output, '' );
-          else /* Only a part of the output from the first process is logged */
+          if( tops.outputAdditive ) /* First process haven't finished yet, no output */
           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2\nError1\n` );
+          else /* Only a part of the output from the first process is logged */
+          test.identical( o.output, '' );
         }
 
         return null;
