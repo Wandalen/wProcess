@@ -3,14 +3,14 @@
 
 'use strict';
 
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = _.process = _.process || Object.create( null );
+const _global = _global_;
+const _ = _global_.wTools;
+const Self = _.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
 // --
-// checker
+// dichotomy
 // --
 
 let ProcessMinimalInput = _.Blueprint
@@ -173,7 +173,7 @@ let ToolsExtension =
 
 }
 
-_.mapExtend( _, ToolsExtension );
+_.props.extend( _, ToolsExtension );
 
 // --
 // export
