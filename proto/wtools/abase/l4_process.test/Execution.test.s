@@ -12311,7 +12311,7 @@ function startMinimalDetachingResourceReady( test )
       o.conStart.thenGive( ( op ) =>
       {
         track.push( 'conStart' );
-        test.true( _.objectIs( op ) );
+        test.true( _.object.isBasic( op ) );
         test.identical( op, o );
         test.true( _.process.isAlive( o.pnd.pid ) );
         o.pnd.kill();
@@ -29713,7 +29713,7 @@ function startSingleOptionProcedure( test )
         test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
         test.true( _.strHas( op.procedure._name, 'PID:') );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
 
         return null;
       })
@@ -29808,7 +29808,7 @@ function startSingleOptionProcedure( test )
         test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
         test.true( _.strHas( op.procedure._name, 'PID:') );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
 
         return null;
       })
@@ -29857,7 +29857,7 @@ function startSingleOptionProcedure( test )
         test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
         test.true( _.strHas( op.procedure._name, 'PID:') );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
 
         return null;
       })
@@ -29906,7 +29906,7 @@ function startSingleOptionProcedure( test )
         test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
         test.true( _.strHas( op.procedure._name, 'PID:') );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
         test.identical( op.procedure._stack, 'stack' );
 
         return null;
@@ -29997,7 +29997,7 @@ function startMultipleOptionProcedure( test )
         test.identical( op, options );
         test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
         test.identical( op.procedure._name, null );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
         test.identical( op.procedure._object.execPath, [ `${env.mode === 'fork' ? programPath : 'node ' + programPath}`, `${env.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
         op.sessions.forEach( ( session ) =>
@@ -30006,7 +30006,7 @@ function startMultipleOptionProcedure( test )
           test.identical( session.ended, true );
           test.equivalent( session.output, `[ 'a' ]` );
           test.true( _.strHas( session.procedure._name, 'PID:') );
-          test.true( _.objectIs( session.procedure._object ) );
+          test.true( _.object.isBasic( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
         }) /* qqq for Yevhen : ! | aaa : Done. */
 
@@ -30112,7 +30112,7 @@ function startMultipleOptionProcedure( test )
         test.identical( op, options );
         test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
         test.identical( op.procedure._name, null );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
         test.identical( op.procedure._object.execPath, [ `${env.mode === 'fork' ? programPath : 'node ' + programPath}`, `${env.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
         op.sessions.forEach( ( session ) =>
@@ -30121,7 +30121,7 @@ function startMultipleOptionProcedure( test )
           test.identical( session.ended, true );
           test.equivalent( session.output, `[ 'a' ]` );
           test.true( _.strHas( session.procedure._name, 'PID:') );
-          test.true( _.objectIs( session.procedure._object ) );
+          test.true( _.object.isBasic( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
         })
 
@@ -30179,7 +30179,7 @@ function startMultipleOptionProcedure( test )
           test.identical( session.ended, true );
           test.equivalent( session.output, `[ 'a' ]` );
           test.true( _.strHas( session.procedure._name, 'PID:') );
-          test.true( _.objectIs( session.procedure._object ) );
+          test.true( _.object.isBasic( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
         })
 
@@ -30239,7 +30239,7 @@ function startMultipleOptionProcedure( test )
           test.identical( session.ended, true );
           test.equivalent( session.output, `[ 'a' ]` );
           test.true( _.strHas( session.procedure._name, 'PID:') );
-          test.true( _.objectIs( session.procedure._object ) );
+          test.true( _.object.isBasic( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
           test.notIdentical( session.procedure._stack, 'stack' );
         })

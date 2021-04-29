@@ -92,7 +92,7 @@ function startMinimalHeadCommon( routine, args )
   o.outputColoring = { out : 1, err : 1 };
   if( _.boolLikeFalse( o.outputColoring ) )
   o.outputColoring = { out : 0, err : 0 };
-  _.assert( _.objectIs( o.outputColoring ) );
+  _.assert( _.object.isBasic( o.outputColoring ) );
   _.assert
   (
     _.boolLike( o.outputColoring.out ),
@@ -175,7 +175,7 @@ function startMinimal_head( routine, args )
 
   _.assert( arguments.length === 2 );
 
-  _.assert( _.longHas( [ 'instant' ], o.when ) || _.objectIs( o.when ), `Unsupported starting mode: ${o.when}` );
+  _.assert( _.longHas( [ 'instant' ], o.when ) || _.object.isBasic( o.when ), `Unsupported starting mode: ${o.when}` );
 
   _.assert
   (
@@ -320,7 +320,7 @@ function startMinimal_body( o )
 
     /* output */
 
-    _.assert( _.objectIs( o.outputColoring ) );
+    _.assert( _.object.isBasic( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     /* ipc */
@@ -1381,7 +1381,7 @@ function startSingle_head( routine, args )
 
   _.assert( arguments.length === 2 );
 
-  _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.objectIs( o.when ), `Unsupported starting mode: ${o.when}` );
+  _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.object.isBasic( o.when ), `Unsupported starting mode: ${o.when}` );
 
   return o;
 }
@@ -1654,7 +1654,7 @@ function startMultiple_head( routine, args )
 
   _.assert( arguments.length === 2 );
 
-  _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.objectIs( o.when ), `Unsupported starting mode: ${o.when}` );
+  _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.object.isBasic( o.when ), `Unsupported starting mode: ${o.when}` );
   _.assert
   (
     !o.concurrent || !o.sync || o.deasync
@@ -1841,7 +1841,7 @@ function startMultiple_body( o )
       o.conTerminate = new _.Consequence({ _procedure : false }).finally( o.conTerminate );
     }
 
-    _.assert( _.objectIs( o.outputColoring ) );
+    _.assert( _.object.isBasic( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     if( o.outputAdditive === null )

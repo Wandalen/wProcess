@@ -27,7 +27,7 @@ function isNativeDescriptor( src )
 
 function isSession( src )
 {
-  if( !_.objectIs( src ) )
+  if( !_.object.isBasic( src ) )
   return false;
   return src.ipc !== undefined && src.procedure !== undefined && src.process !== undefined;
 }
@@ -40,7 +40,7 @@ function pidFrom( src )
 
   if( _.numberIs( src ) )
   return src;
-  if( _.objectIs( src ) )
+  if( _.object.isBasic( src ) )
   {
     if( src.process )
     src = src.process;
