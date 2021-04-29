@@ -3,9 +3,9 @@
 
 'use strict';
 
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = _.process = _.process || Object.create( null );
+const _global = _global_;
+const _ = _global_.wTools;
+const Self = _.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
@@ -28,7 +28,7 @@ _.assert( !!_realGlobal_ );
  *
  * @example
  *
- * let _ = require('wTools')
+ * const _ = require('wTools')
  * _.include( 'wProcessBasic' )
  * let result = _.process.input();
  * console.log( result );
@@ -60,7 +60,7 @@ function _inputInSamFormatNodejs( o )
 {
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
-  o = _.routineOptions( _inputInSamFormatNodejs, arguments );
+  o = _.routine.options_( _inputInSamFormatNodejs, arguments );
 
   if( _.boolLike( o.keyValDelimeter ) )
   o.keyValDelimeter = !!o.keyValDelimeter;
@@ -128,7 +128,7 @@ function _inputInSamFormatNodejs( o )
     subjectWinPathsMaybe : process.platform === 'win32',
   });
 
-  _.mapExtend( result, r );
+  _.props.extend( result, r );
 
   return result;
 
@@ -164,7 +164,7 @@ function _inputInSamFormatBrowser( o )
   // debugger; /* xxx */
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
-  o = _.routineOptions( _inputInSamFormatBrowser, arguments );
+  o = _.routine.options_( _inputInSamFormatBrowser, arguments );
 
   if( o.caching )
   if( _inputCache && o.keyValDelimeter === _inputCache.keyValDelimeter )
@@ -206,13 +206,14 @@ _inputInSamFormatBrowser.defaults = Object.create( _inputInSamFormatDefaults.def
  * @namespace Tools.process
  */
 
+/* xxx : qqq : deprecate? */
 function inputReadTo( o )
 {
 
   if( arguments[ 1 ] !== undefined )
   o = { dst : arguments[ 0 ], namesMap : arguments[ 1 ] };
 
-  o = _.routineOptions( inputReadTo, o );
+  o = _.routine.options_( inputReadTo, o );
 
   if( !o.propertiesMap )
   o.propertiesMap = _.process.input().map;
@@ -256,7 +257,7 @@ function inputReadTo( o )
 
   if( o.only )
   {
-    let but = Object.keys( _.mapBut( o.propertiesMap, o.namesMap ) );
+    let but = Object.keys( _.mapBut_( null, o.propertiesMap, o.namesMap ) );
     if( but.length )
     {
       throw _.err( `Unknown application arguments : ${but.join( ', ' )}` );
@@ -305,7 +306,7 @@ function anchor( o )
 {
   o = o || {};
 
-  _.routineOptions( anchor, arguments );
+  _.routine.options_( anchor, arguments );
 
   let a = _.strStructureParse
   ({
@@ -316,7 +317,7 @@ function anchor( o )
 
   if( o.extend )
   {
-    _.mapExtend( a, o.extend );
+    _.props.extend( a, o.extend );
   }
 
   if( o.del )
@@ -457,9 +458,9 @@ function systemEntryAdd( o )
 
   // if( !_.mapIs( o ) )
   // o = { appPath : arguments[ 0 ] }
-  _.assert( _.mapIs( o ), `Expects option map {- o -}, but got: ${_.strType( o )} ` )
+  _.assert( _.mapIs( o ), `Expects option map {- o -}, but got: ${_.entity.strType( o )} ` )
 
-  _.routineOptions( systemEntryAdd, o );
+  _.routine.options_( systemEntryAdd, o );
 
   if( _.boolLikeTrue( o.logger ) )
   o.logger = _.LoggerPrime();
@@ -605,7 +606,7 @@ let Extension =
 
 }
 
-_.mapExtend( Self, Extension );
+_.props.extend( Self, Extension );
 _.assert( _.routineIs( _.process.start ) );
 
 // --

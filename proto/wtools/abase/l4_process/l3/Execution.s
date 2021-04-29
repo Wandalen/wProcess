@@ -3,10 +3,10 @@
 
 'use strict';
 
-let System, ChildProcess, StripAnsi, WindowsProcessTree, Stream;
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = _.process = _.process || Object.create( null );
+let System, ChildProcess, WindowsProcessTree, Stream;
+const _global = _global_;
+const _ = _global_.wTools;
+const Self = _.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
@@ -44,7 +44,7 @@ function startMinimalHeadCommon( routine, args )
   else
   o = args[ 0 ];
 
-  o = _.routineOptions( routine, o );
+  o = _.routine.options_( routine, o );
 
   _.assert( arguments.length === 2 );
   _.assert( args.length === 1, 'Expects single argument' );
@@ -53,7 +53,7 @@ function startMinimalHeadCommon( routine, args )
   _.assert
   (
     o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) || _.routineIs( o.args )
-    , `If defined option::arg should be either [ string, array, routine ], but it is ${_.strType( o.args )}`
+    , `If defined option::arg should be either [ string, array, routine ], but it is ${_.entity.strType( o.args )}`
   );
 
   /* timeOut */
@@ -61,7 +61,7 @@ function startMinimalHeadCommon( routine, args )
   _.assert
   (
     o.timeOut === null || _.numberIs( o.timeOut ),
-    `Expects null or number {-o.timeOut-}, but got ${_.strType( o.timeOut )}`
+    `Expects null or number {-o.timeOut-}, but got ${_.entity.strType( o.timeOut )}`
   );
   _.assert
   (
@@ -127,7 +127,7 @@ function startMinimalHeadCommon( routine, args )
   );
 
   if( o.outputAdditive === null )
-  o.outputAdditive = true;
+  o.outputAdditive = true; /* yyy */
   o.outputAdditive = !!o.outputAdditive;
   _.assert( _.boolLike( o.outputAdditive ) );
 
@@ -180,13 +180,13 @@ function startMinimal_head( routine, args )
   _.assert
   (
     o.execPath === null || _.strIs( o.execPath )
-    , `Expects string or strings {-o.execPath-}, but got ${_.strType( o.execPath )}`
+    , `Expects string or strings {-o.execPath-}, but got ${_.entity.strType( o.execPath )}`
   );
 
   _.assert
   (
     o.currentPath === null || _.strIs( o.currentPath )
-    , `Expects string or strings {-o.currentPath-}, but got ${_.strType( o.currentPath )}`
+    , `Expects string or strings {-o.currentPath-}, but got ${_.entity.strType( o.currentPath )}`
   );
 
   return o;
@@ -269,8 +269,8 @@ function startMinimal_body( o )
 
     /* procedure */
 
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    o.stack = _.Procedure.Stack( o.stack, 3 );
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for Yevhen : bad  | aaa : fixed. */
+    o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
 
   }
 
@@ -340,7 +340,7 @@ function startMinimal_body( o )
     {
       if( Config.debug )
       {
-        let keys = _.mapKeys( o.when );
+        let keys = _.props.keys( o.when );
         _.assert( _.mapIs( o.when ) );
         _.assert( keys.length === 1 && _.longHas( [ 'time', 'delay' ], keys[ 0 ] ) );
         _.assert( _.numberIs( o.when.delay ) || _.numberIs( o.when.time ) )
@@ -402,7 +402,7 @@ function startMinimal_body( o )
     _.assert
     (
       _.arrayIs( o.args ) || _.strIs( o.args )
-      , `If defined option::arg should be either [ string, array ], but it is ${_.strType( o.args )}`
+      , `If defined option::arg should be either [ string, array ], but it is ${_.entity.strType( o.args )}`
     );
 
     argsForm();
@@ -421,9 +421,9 @@ function startMinimal_body( o )
     if( !ChildProcess )
     ChildProcess = require( 'child_process' );
 
-    if( o.outputGraying )
-    if( !StripAnsi )
-    StripAnsi = require( 'strip-ansi' );
+    // if( o.outputGraying )
+    // if( !StripAnsi )
+    // StripAnsi = require( 'strip-ansi' );
 
     if( o.outputColoring.err || o.outputColoring.out && typeof module !== 'undefined' )
     try
@@ -553,7 +553,7 @@ function startMinimal_body( o )
     if( Config.debug )
     _.assert
     (
-      _.fileProvider.isDir( o.currentPath ),
+      _.fileProvider.resolvedIsDir( o.currentPath ),
       () => `Current path ( ${o.currentPath} ) doesn\'t exist or it\'s not a directory.\n> ${o.execPath2}`
     );
 
@@ -744,6 +744,7 @@ function startMinimal_body( o )
 
     if( !o.outputAdditive )
     {
+      debugger;
       if( _decoratedOutOutput )
       o.logger.log( _decoratedOutOutput );
       if( _decoratedErrOutput )
@@ -789,6 +790,7 @@ function startMinimal_body( o )
 
     if( o.outputAdditive && _outAdditive )
     {
+      debugger;
       o.logger.log( _outAdditive );
       _outAdditive = '';
     }
@@ -988,7 +990,7 @@ function startMinimal_body( o )
 
   function pipe()
   {
-    debugger
+    // debugger
     if( o.dry )
     return;
 
@@ -1176,7 +1178,7 @@ function startMinimal_body( o )
 
   function handleStreamOutput( data, channel )
   {
-    debugger
+    // debugger
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
 
@@ -1184,7 +1186,8 @@ function startMinimal_body( o )
     data = String( data );
 
     if( o.outputGraying )
-    data = StripAnsi( data );
+    data = _.ct.stripAnsi( data );
+    // data = StripAnsi( data );
 
     if( channel === 'err' )
     _errOutput += data;
@@ -1236,7 +1239,6 @@ function startMinimal_body( o )
 
   function log( msg, channel )
   {
-    debugger;
     _.assert( channel === 'err' || channel === 'out' );
 
     if( msg === undefined )
@@ -1288,6 +1290,7 @@ function startMinimal_body( o )
           _outAdditive += left;
         }
       }
+      /* qqq : for Yevhen : bad : it cant be working */
       if( channel === 'err' )
       o.logger.error( msg );
       else
@@ -1368,7 +1371,7 @@ startMinimal_body.defaults =
 
 /* xxx : move advanced options to _.process.startSingle() */
 
-let startMinimal = _.routineUnite( startMinimal_head, startMinimal_body );
+let startMinimal = _.routine.uniteCloning_replaceByUnite( startMinimal_head, startMinimal_body );
 
 //
 
@@ -1430,7 +1433,7 @@ function startSingle_body( o )
     /* procedure */
 
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    o.stack = _.Procedure.Stack( o.stack, 3 );
+    o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
 
   }
 
@@ -1496,7 +1499,7 @@ function startSingle_body( o )
 
   function formAfterDeath()
   {
-    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../wtools/Tools.s' ) );
+    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../node_modules/Tools' ) );
     let excludeOptions =
     {
       ready : null,
@@ -1508,7 +1511,7 @@ function startSingle_body( o )
       when : null,
       sessionId : null
     }
-    let locals = { toolsPath, o : _.mapBut( o, excludeOptions ), parentPid : process.pid };
+    let locals = { toolsPath, o : _.mapBut_( null, o, excludeOptions ), parentPid : process.pid };
     let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
     let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
 
@@ -1529,7 +1532,7 @@ function startSingle_body( o )
 
   function afterDeathSecondaryProcess()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     // let ipc = require( ipcPath );
@@ -1630,7 +1633,7 @@ function startSingle_body( o )
 startSingle_body.defaults =
 {
 
-  ... _.mapBut( startMinimal.defaults, [ 'onStart', 'onTerminate', 'onDisconnect' ] ),
+  ... _.mapBut_( null, startMinimal.defaults, [ 'onStart', 'onTerminate', 'onDisconnect' ] ),
 
   when : 'instant',
 
@@ -1641,7 +1644,7 @@ startSingle_body.defaults =
 
 }
 
-let startSingle = _.routineUnite( startSingle_head, startSingle_body );
+let startSingle = _.routine.uniteCloning_replaceByUnite( startSingle_head, startSingle_body );
 
 //
 
@@ -1660,12 +1663,12 @@ function startMultiple_head( routine, args )
   _.assert
   (
     o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath )
-    , `Expects string or strings {-o.execPath-}, but got ${_.strType( o.execPath )}`
+    , `Expects string or strings {-o.execPath-}, but got ${_.entity.strType( o.execPath )}`
   );
   _.assert
   (
     o.currentPath === null || _.strIs( o.currentPath ) || _.strsAreAll( o.currentPath )
-    , `Expects string or strings {-o.currentPath-}, but got ${_.strType( o.currentPath )}`
+    , `Expects string or strings {-o.currentPath-}, but got ${_.entity.strType( o.currentPath )}`
   );
 
   return o;
@@ -1720,7 +1723,7 @@ function startMultiple_head( routine, args )
  *
  * @example //short way, command and arguments in one string
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -1735,7 +1738,7 @@ function startMultiple_head( routine, args )
  *
  * @example //command and arguments as options
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -1789,8 +1792,8 @@ function startMultiple_body( o )
 
   function form0()
   {
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    o.stack = _.Procedure.Stack( o.stack, 3 );
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for Yevhen : bad  | aaa : fixed. */
+    o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
   }
 
   /* */
@@ -1924,7 +1927,7 @@ function startMultiple_body( o )
     {
       let currentReady = new _.Consequence();
       sessionId += 1;
-      let o2 = _.mapExtend( null, o );
+      let o2 = _.props.extend( null, o );
       o2.conStart = null;
       o2.conTerminate = null;
       o2.conDisconnect = null;
@@ -1970,7 +1973,7 @@ function startMultiple_body( o )
         readyName : 'ready',
         onRun : ( session ) =>
         {
-          _.assertMapHasAll( session, _.process.startSingle.defaults );
+          _.map.assertHasAll( session, _.process.startSingle.defaults );
           _.process.startSingle.body.call( _.process, session );
           if( !o.dry )
           if( o.streamOut || o.streamErr )
@@ -2212,7 +2215,8 @@ function startMultiple_body( o )
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
     if( o.outputGraying )
-    data = StripAnsi( data );
+    data = _.ct.stripAnsi( data );
+    // data = StripAnsi( data );
     if( o.outputCollecting )
     o.output += data;
   }
@@ -2224,17 +2228,17 @@ function startMultiple_body( o )
 startMultiple_body.defaults =
 {
 
-  ... _.mapBut( startSingle.defaults, [ 'sessionId' ] ),
+  ... _.mapBut_( null, startSingle.defaults, [ 'sessionId' ] ),
 
   concurrent : 0,
 
 }
 
-let startMultiple = _.routineUnite( startMultiple_head, startMultiple_body );
+let startMultiple = _.routine.uniteCloning_replaceByUnite( startMultiple_head, startMultiple_body );
 
 //
 
-let startPassingThrough = _.routineUnite( startMultiple_head, startMultiple_body );
+let startPassingThrough = _.routine.uniteCloning_replaceByUnite( startMultiple_head, startMultiple_body );
 
 var defaults = startPassingThrough.defaults;
 
@@ -2262,7 +2266,7 @@ defaults.mode = 'spawn';
  *
  * @example
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2286,7 +2290,7 @@ function startNjs_body( o )
   if( !System )
   System = require( 'os' );
 
-  _.assertRoutineOptions( startNjs_body, o );
+  _.routine.assertOptions( startNjs_body, o );
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
@@ -2336,7 +2340,7 @@ defaults.applyingExitCode = 1;
 defaults.stdio = 'inherit';
 defaults.mode = 'fork';
 
-let startNjs = _.routineUnite( startMultiple_head, startNjs_body );
+let startNjs = _.routine.uniteCloning_replaceByUnite( startMultiple_head, startNjs_body );
 
 //
 
@@ -2354,7 +2358,7 @@ let startNjs = _.routineUnite( startMultiple_head, startNjs_body );
  *
  * @example
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2372,7 +2376,7 @@ let startNjs = _.routineUnite( startMultiple_head, startNjs_body );
  * @namespace Tools.process
  */
 
-let startNjsPassingThrough = _.routineUnite( startMultiple_head, startNjs.body );
+let startNjsPassingThrough = _.routine.uniteCloning_replaceByUnite( startMultiple_head, startNjs.body );
 
 var defaults = startNjsPassingThrough.defaults;
 
@@ -2395,7 +2399,7 @@ defaults.mode = 'fork';
  *
  * @example //single command execution
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2412,7 +2416,7 @@ defaults.mode = 'fork';
  *
  * @example //multiple commands execution with same args
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2431,7 +2435,7 @@ defaults.mode = 'fork';
  * //multiple commands execution with same args, using sinle consequence
  * //second command will be executed when first is finished
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2465,7 +2469,7 @@ function starter( o0 )
   _.assert( arguments.length === 0 || arguments.length === 1 );
   if( _.strIs( o0 ) )
   o0 = { execPath : o0 }
-  o0 = _.routineOptions( starter, o0 );
+  o0 = _.routine.options_( starter, o0 );
   o0.ready = o0.ready || new _.Consequence().take( null );
 
   _.routineExtend( er, _.process.startMultiple );
@@ -2475,17 +2479,51 @@ function starter( o0 )
 
   function er()
   {
+    /*
+      non-primitive options :
+
+      - execPath( in multiple runs )        : array
+      - currentPath( in multiple runs )     : array
+      - args                                : array
+      - interpreterArgs                     : array
+      - stdio                               : array
+      - logger                              : object
+      - procedure                           : object
+      - ready                               : routine
+      - conStart                            : routine
+      - conTerminate                        : routine
+      - conDisconnect                       : routine
+      - outputColoring                      : aux
+      - env                                 : aux
+    */
     let o = optionsFrom( arguments[ 0 ] );
-    let o00 = _.mapExtend( null, o0 );
+    let o00 = _.props.extend( null, o0 );
+    for( let k in o00 )
+    {
+      if( _.arrayIs( o00[ k ] ) )
+      o00[ k ] = o00[ k ].slice();
+      else if( _.aux.is( o00[ k ] ) )
+      o00[ k ] = _.props.extend( null, o00[ k ] );
+    }
     merge( o00, o );
-    _.mapExtend( o, o00 )
+    _.props.extend( o, o00 )
 
     for( let a = 1 ; a < arguments.length ; a++ )
     {
       let o1 = optionsFrom( arguments[ a ] );
       merge( o, o1 );
-      _.mapExtend( o, o1 );
+      _.props.extend( o, o1 );
     }
+
+    /*
+      if o.stack to starter is number add it to the delta,
+      if not, overwrite with o.stack passed to instance
+    */
+    /* xxx : qqq : for Yevhen : bad | aaa : fixed. */
+    if( _.numberIs( o0.stack ) )
+    o.stack = _.Procedure.Stack( o.stack, 1 + o0.stack );
+    else
+    o.stack = _.Procedure.Stack( o.stack, 1 );
 
     return _.process.startMultiple( o );
   }
@@ -2495,7 +2533,7 @@ function starter( o0 )
     if( _.strIs( options ) || _.arrayIs( options ) )
     options = { execPath : options }
     options = options || Object.create( null );
-    _.assertMapHasOnly( options, starter.defaults );
+    _.map.assertHasOnly( options, starter.defaults );
     return options;
   }
 
@@ -2503,14 +2541,14 @@ function starter( o0 )
   {
     if( _.strIs( src ) || _.arrayIs( src ) )
     src = { execPath : src }
-    _.assertMapHasOnly( src, starter.defaults );
+    _.map.assertHasOnly( src, starter.defaults );
 
     if( src.execPath !== null && src.execPath !== undefined && dst.execPath !== null && dst.execPath !== undefined )
     {
       _.assert
       (
         _.arrayIs( src.execPath ) || _.strIs( src.execPath ),
-        () => `Expects string or array, but got ${_.strType( src.execPath )}`
+        () => `Expects string or array, but got ${_.entity.strType( src.execPath )}`
       );
       if( _.arrayIs( src.execPath ) )
       src.execPath = _.arrayFlatten( src.execPath );
@@ -2520,21 +2558,23 @@ function starter( o0 )
       */
 
       if( _.arrayIs( dst.execPath ) || _.arrayIs( src.execPath ) )
-      dst.execPath = _.eachSample( [ dst.execPath, src.execPath ] ).map( ( path ) => path.join( ' ' ) );
+      dst.execPath = _.eachSample_( [ dst.execPath, src.execPath ] ).map( ( path ) => path.join( ' ' ) );
       else
       dst.execPath = dst.execPath + ' ' + src.execPath;
 
       delete src.execPath;
     }
 
-    _.mapExtend( dst, src );
+    _.props.extend( dst, src );
 
     return dst;
   }
 
 }
 
-starter.defaults = Object.create( startMultiple.defaults );
+// starter.defaults = Object.create( startMultiple.defaults );
+// starter.defaults = _.mapBut_( startMultiple.defaults, [ 'procedure' ] ); /* qqq : for Yevhen : very bad */
+starter.defaults = _.mapBut_( null, startMultiple.defaults, [ 'procedure' ] );
 
 // --
 // children
@@ -2579,7 +2619,7 @@ function signal_head( routine, args )
   else if( _.process.isNativeDescriptor( o ) )
   o = { pnd : o };
 
-  o = _.routineOptions( routine, o );
+  o = _.routine.options_( routine, o );
 
   if( o.pnd )
   {
@@ -2768,7 +2808,7 @@ function signal_body( o )
     // if( p )
     {
       let processInfo = processInfoGet( p );
-      _._errFields( err, { processInfo : processInfo } )
+      _.error.concealedSet( err, { processInfo : processInfo } )
       _.err( err, processInfo );
       // console.log( 'handleError2 :', processInfo );
     }
@@ -2840,14 +2880,14 @@ signal_body.defaults =
   sync : 0,
 }
 
-let _signal = _.routineUnite( signal_head, signal_body );
+let _signal = _.routine.uniteCloning_replaceByUnite( signal_head, signal_body );
 
 //
 
 function kill_body( o )
 {
   _.assert( arguments.length === 1 );
-  let o2 = _.mapExtend( null, o );
+  let o2 = _.props.extend( null, o );
   o2.signal = 'SIGKILL';
   o2.timeOut = 5000;
   return _.process._signal.body( o2 );
@@ -2855,10 +2895,10 @@ function kill_body( o )
 
 kill_body.defaults =
 {
-  ... _.mapBut( _signal.defaults, [ 'signal', 'timeOut' ] ),
+  ... _.mapBut_( null, _signal.defaults, [ 'signal', 'timeOut' ] ),
 }
 
-let kill = _.routineUnite( signal_head, kill_body );
+let kill = _.routine.uniteCloning_replaceByUnite( signal_head, kill_body );
 
 
 //
@@ -2877,10 +2917,10 @@ function terminate_body( o )
 
 terminate_body.defaults =
 {
-  ... _.mapBut( _signal.defaults, [ 'signal' ] ),
+  ... _.mapBut_( null, _signal.defaults, [ 'signal' ] ),
 }
 
-let terminate = _.routineUnite( signal_head, terminate_body );
+let terminate = _.routine.uniteCloning_replaceByUnite( signal_head, terminate_body );
 
 //
 
@@ -2984,7 +3024,7 @@ waitForDeath_body.defaults =
   sync : 0
 }
 
-let waitForDeath = _.routineUnite( signal_head, waitForDeath_body )
+let waitForDeath = _.routine.uniteCloning_replaceByUnite( signal_head, waitForDeath_body )
 
 //
 
@@ -2995,7 +3035,7 @@ function children( o )
   else if( _.process.isNativeDescriptor( o ) )
   o = { process : o }
 
-  _.routineOptions( children, o )
+  _.routine.options_( children, o )
   _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
   _.assert( _.longHas( [ 'list', 'tree' ], o.format ) );
@@ -3114,7 +3154,7 @@ function execPathOf( o )
   else if( _.process.isNativeDescriptor( o ) )
   o = { pnd : o };
 
-  o = _.routineOptions( execPathOf, o );
+  o = _.routine.options_( execPathOf, o );
 
   if( o.pnd )
   {
@@ -3222,7 +3262,7 @@ function spawnTimeOf( o )
   else if( _.process.isNativeDescriptor( o ) )
   o = { pnd : o };
 
-  o = _.routineOptions( spawnTimeOf, o );
+  o = _.routine.options_( spawnTimeOf, o );
 
   if( o.pnd )
   {
@@ -3306,7 +3346,7 @@ function _startTree( o )
 {
   o = o || {};
 
-  _.routineOptions( _startTree, o );
+  _.routine.options_( _startTree, o );
 
   if( o.executionTime === null )
   o.executionTime = [ 50, 100 ];
@@ -3369,7 +3409,7 @@ function _startTree( o )
 
   function program()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -3408,7 +3448,7 @@ function _startTree( o )
 
   function child()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -3481,7 +3521,7 @@ let Extension =
 
 }
 
-_.mapExtend( Self, Extension );
+_.props.extend( Self, Extension );
 _.assert( _.routineIs( _.process.start ) );
 
 // --

@@ -4,14 +4,14 @@
 'use strict';
 
 let System, ChildProcess, StripAnsi, WindowsKill, WindowsProcessTree;
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = _.process = _.process || Object.create( null );
+const _global = _global_;
+const _ = _global_.wTools;
+const Self = _.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
 // --
-// checker
+// dichotomy
 // --
 
 function isNativeDescriptor( src )
@@ -55,7 +55,7 @@ function pidFrom( src )
     return src.pid;
   }
 
-  _.assert( 0, `Cant get PID from ${_.strType( src )}` );
+  _.assert( 0, `Cant get PID from ${_.entity.strType( src )}` );
 }
 
 // --
@@ -73,7 +73,7 @@ function tempOpen_head( routine, args )
   else
   o = args[ 0 ];
 
-  o = _.routineOptions( routine, o );
+  o = _.routine.options_( routine, o );
 
   _.assert( arguments.length === 2 );
   _.assert( args.length === 1, 'Expects single argument' );
@@ -83,9 +83,9 @@ function tempOpen_head( routine, args )
 
 function tempOpen_body( o )
 {
-  _.assertRoutineOptions( tempOpen, arguments );
+  _.routine.assertOptions( tempOpen, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
-  _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.strType( o.sourceCode ) );
+  _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.entity.strType( o.sourceCode ) );
 
   let tempDirPath = _.path.tempOpen( _.path.realMainDir(), 'ProcessTempOpen' );
   let filePath = _.path.join( tempDirPath, _.idWithDateAndTime() + '.ss' );
@@ -97,7 +97,7 @@ function tempOpen_body( o )
 var defaults = tempOpen_body.defaults = Object.create( null );
 defaults.sourceCode = null;
 
-let tempOpen = _.routineUnite( tempOpen_head, tempOpen_body );
+let tempOpen = _.routine.uniteCloning_replaceByUnite( tempOpen_head, tempOpen_body );
 
 //
 
@@ -113,7 +113,7 @@ function tempClose_head( routine, args )
   if( !o )
   o = Object.create( null );
 
-  o = _.routineOptions( routine, o );
+  o = _.routine.options_( routine, o );
 
   _.assert( arguments.length === 2 );
   _.assert( args.length <= 1, 'Expects single argument or none' );
@@ -123,9 +123,9 @@ function tempClose_head( routine, args )
 
 function tempClose_body( o )
 {
-  _.assertRoutineOptions( tempClose, arguments );
+  _.routine.assertOptions( tempClose, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
-  _.assert( _.strIs( o.filePath ) || o.filePath === null, 'Expects string or null {-o.filePath-}, but got', _.strType( o.filePath ) );
+  _.assert( _.strIs( o.filePath ) || o.filePath === null, 'Expects string or null {-o.filePath-}, but got', _.entity.strType( o.filePath ) );
 
   if( !o.filePath )
   {
@@ -147,7 +147,7 @@ function tempClose_body( o )
 var defaults = tempClose_body.defaults = Object.create( null );
 defaults.filePath = null;
 
-let tempClose = _.routineUnite( tempClose_head, tempClose_body );
+let tempClose = _.routine.uniteCloning_replaceByUnite( tempClose_head, tempClose_body );
 
 // --
 // eventer
@@ -227,7 +227,7 @@ function _exitHandlerRepair()
         let err = _._err
         ({
           args : [ `Exit signal : ${signal} ( 128+${signalCode} )` ],
-          fields : { exitSignal : signal },
+          concealed : { exitSignal : signal },
           reason : 'exit signal',
         });
         _.process.exitReason( err );
@@ -784,9 +784,8 @@ let Extension =
 
 }
 
-_.mapExtend( Self, Extension );
-_.mapSupplement( Self._ehandler.events, Events );
-// _.assert( _.routineIs( _.process.start ) );
+_.props.extend( Self, Extension );
+_.props.supplement( Self._ehandler.events, Events );
 _.assert( !_.process.start );
 _.process._Setup1();
 

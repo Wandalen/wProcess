@@ -5,19 +5,15 @@
 
 if( typeof module !== 'undefined' )
 {
-
-  let _ = require( './../../../wtools/Tools.s' );
+  const _ = require( './../../../node_modules/Tools' );
   _.include( 'wTesting' );
   _.include( 'wFiles' );
   _.include( 'wProcessWatcher' );
-
   require( '../l4_process/module/Process.s' );
-
 }
 
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = {};
+const _global = _global_;
+const _ = _global_.wTools;
 
 // --
 // context
@@ -290,8 +286,8 @@ function onCheckDescriptor( test )
   var result = [];
   var onEvent = () => result.push( result.length );
   var descriptor = _.process.on( 'uncaughtError', onEvent );
-  test.identical( _.mapKeys( descriptor ), [ 'uncaughtError' ] );
-  test.identical( _.mapKeys( descriptor.uncaughtError ), [ 'off', 'enabled', 'first', 'callbackMap' ] );
+  test.identical( _.props.keys( descriptor ), [ 'uncaughtError' ] );
+  test.identical( _.props.keys( descriptor.uncaughtError ), [ 'off', 'enabled', 'first', 'callbackMap' ] );
   test.identical( descriptor.uncaughtError.enabled, true );
   test.identical( descriptor.uncaughtError.first, 0 );
   test.equivalent( descriptor.uncaughtError.callbackMap, { uncaughtError : onEvent } );
@@ -304,8 +300,8 @@ function onCheckDescriptor( test )
   var result = [];
   var onEvent = () => result.push( result.length );
   var descriptor = _.process.on({ callbackMap : { 'uncaughtError' : onEvent } });
-  test.identical( _.mapKeys( descriptor ), [ 'uncaughtError' ] );
-  test.identical( _.mapKeys( descriptor.uncaughtError ), [ 'off', 'enabled', 'first', 'callbackMap' ] );
+  test.identical( _.props.keys( descriptor ), [ 'uncaughtError' ] );
+  test.identical( _.props.keys( descriptor.uncaughtError ), [ 'off', 'enabled', 'first', 'callbackMap' ] );
   test.identical( descriptor.uncaughtError.enabled, true );
   test.identical( descriptor.uncaughtError.first, 0 );
   test.equivalent( descriptor.uncaughtError.callbackMap, { uncaughtError : onEvent } );
@@ -533,7 +529,7 @@ function _argCmdEscape( test )
 
 //
 
-var Proto =
+const Proto =
 {
 
   name : 'Tools.l4.process.Basic',
@@ -566,11 +562,9 @@ var Proto =
 
 }
 
-_.mapExtend( Self, Proto );
-
 //
 
-Self = wTestSuite( Self );
+const Self = wTestSuite( Proto );
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self )
 
