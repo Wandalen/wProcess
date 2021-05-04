@@ -269,7 +269,7 @@ function startMinimal_body( o )
 
     /* procedure */
 
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for Yevhen : bad  | aaa : fixed. */
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for junior : bad  | aaa : fixed. */
     o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
 
   }
@@ -1290,7 +1290,7 @@ function startMinimal_body( o )
           _outAdditive += left;
         }
       }
-      /* qqq : for Yevhen : bad : it cant be working */
+      /* qqq : for junior : bad : it cant be working */
       if( channel === 'err' )
       o.logger.error( msg );
       else
@@ -1792,7 +1792,7 @@ function startMultiple_body( o )
 
   function form0()
   {
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for Yevhen : bad  | aaa : fixed. */
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for junior : bad  | aaa : fixed. */
     o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
   }
 
@@ -2519,7 +2519,7 @@ function starter( o0 )
       if o.stack to starter is number add it to the delta,
       if not, overwrite with o.stack passed to instance
     */
-    /* xxx : qqq : for Yevhen : bad | aaa : fixed. */
+    /* xxx : qqq : for junior : bad | aaa : fixed. */
     if( _.numberIs( o0.stack ) )
     o.stack = _.Procedure.Stack( o.stack, 1 + o0.stack );
     else
@@ -2573,7 +2573,7 @@ function starter( o0 )
 }
 
 // starter.defaults = Object.create( startMultiple.defaults );
-// starter.defaults = _.mapBut_( startMultiple.defaults, [ 'procedure' ] ); /* qqq : for Yevhen : very bad */
+// starter.defaults = _.mapBut_( startMultiple.defaults, [ 'procedure' ] ); /* qqq : for junior : very bad */
 starter.defaults = _.mapBut_( null, startMultiple.defaults, [ 'procedure' ] );
 
 // --

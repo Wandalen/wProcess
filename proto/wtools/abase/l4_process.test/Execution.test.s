@@ -26425,7 +26425,7 @@ function startMultipleOutput( test )
           test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
           var exp = `**<conStart>**<2.out.end>**<conTerminate>**`;
           test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          /* qqq2 for Yevhen : bad! | aaa : Fixed. */
+          /* qqq2 for junior : bad! | aaa : Fixed. */
 
         }
 
@@ -40620,8 +40620,8 @@ const Proto =
     startMinimalOptionWhenDelay,
     startMinimalOptionWhenTime,
     startMinimalOptionTimeOut,
-    // startSingleAfterDeath, /* xxx : qqq : for Yevhen : restore */
-    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */ /* xxx : qqq : for Yevhen : restore */
+    // startSingleAfterDeath, /* xxx : qqq : for junior : restore */
+    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */ /* xxx : qqq : for junior : restore */
     startSingleAfterDeathOutput,
 
     // detaching
@@ -40779,7 +40779,7 @@ const Proto =
 
     spawnTimeOf,
 
-    // _startTree, /* xxx : qqq : for Yevhen : restore */
+    // _startTree, /* xxx : qqq : for junior : restore */
 
     // experiments
 
