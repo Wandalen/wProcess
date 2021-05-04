@@ -227,8 +227,8 @@ function inputReadTo( o )
   }
 
   _.assert( arguments.length === 1 || arguments.length === 2 )
-  _.assert( _.objectIs( o.dst ), 'Expects map {-o.dst-}' );
-  _.assert( _.objectIs( o.namesMap ), 'Expects map {-o.namesMap-}' );
+  _.assert( _.object.isBasic( o.dst ), 'Expects map {-o.dst-}' );
+  _.assert( _.object.isBasic( o.namesMap ), 'Expects map {-o.namesMap-}' );
 
   /*
      Dmytro : keeps the order of properties in command if ordered map is used

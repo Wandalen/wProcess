@@ -92,7 +92,7 @@ function startMinimalHeadCommon( routine, args )
   o.outputColoring = { out : 1, err : 1 };
   if( _.boolLikeFalse( o.outputColoring ) )
   o.outputColoring = { out : 0, err : 0 };
-  _.assert( _.objectIs( o.outputColoring ) );
+  _.assert( _.object.isBasic( o.outputColoring ) );
   _.assert
   (
     _.boolLike( o.outputColoring.out ),
@@ -175,7 +175,7 @@ function startMinimal_head( routine, args )
 
   _.assert( arguments.length === 2 );
 
-  _.assert( _.longHas( [ 'instant' ], o.when ) || _.objectIs( o.when ), `Unsupported starting mode: ${o.when}` );
+  _.assert( _.longHas( [ 'instant' ], o.when ) || _.object.isBasic( o.when ), `Unsupported starting mode: ${o.when}` );
 
   _.assert
   (
@@ -199,7 +199,7 @@ function startMinimal_body( o )
 
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  /* qqq for Yevhen : use buffer instead */
+  /* qqq for junior : use buffer instead */
   let _errOutput = '';
   let _decoratedOutOutput = '';
   let _outAdditive = '';
@@ -269,7 +269,7 @@ function startMinimal_body( o )
 
     /* procedure */
 
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for Yevhen : bad  | aaa : fixed. */
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for junior : bad  | aaa : fixed. */
     o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
 
   }
@@ -320,7 +320,7 @@ function startMinimal_body( o )
 
     /* output */
 
-    _.assert( _.objectIs( o.outputColoring ) );
+    _.assert( _.object.isBasic( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     /* ipc */
@@ -1200,14 +1200,14 @@ function startMinimal_body( o )
     if( !o.outputPiping )
     return;
 
-    /* yyy qqq for Yevhen : cover and complete */
+    /* yyy qqq for junior : cover and complete */
     // data = _.strRemoveEnd( data, '\n' );
 
     let splits;
     if( o.outputPrefixing || ( channel === 'err' && o.outputColoring.err ) || ( channel === 'out' && o.outputColoring.out ) )
     splits = data.split( '\n' );
 
-    /* qqq for Yevhen : changed how option outputPrefixing works | aaa : Done. */
+    /* qqq for junior : changed how option outputPrefixing works | aaa : Done. */
     if( o.outputPrefixing )
     {
       let prefix = channel === 'err' ? _errPrefix : _outPrefix;
@@ -1270,7 +1270,7 @@ function startMinimal_body( o )
       }
       else
       {
-        /* xxx yyy qqq for Yevhen : not implemeted yet | aaa : Implemented. */
+        /* xxx yyy qqq for junior : not implemeted yet | aaa : Implemented. */
         if( !_.strHas( msg, '\n' ) )
         {
           if( channel === 'err' )
@@ -1290,7 +1290,7 @@ function startMinimal_body( o )
           _outAdditive += left;
         }
       }
-      /* qqq : for Yevhen : bad : it cant be working */
+      /* qqq : for junior : bad : it cant be working */
       if( channel === 'err' )
       o.logger.error( msg );
       else
@@ -1301,7 +1301,7 @@ function startMinimal_body( o )
       _decoratedOutOutput += msg;
       if( channel === 'err' )
       _decoratedErrOutput += msg;
-      /* yyy qqq for Yevhen : cover */
+      /* yyy qqq for junior : cover */
       // _decoratedOutOutput += msg + '\n';
       // if( channel === 'err' )
       // _decoratedErrOutput += msg + '\n';
@@ -1355,14 +1355,14 @@ startMinimal_body.defaults =
   streamSizeLimit : null,
   timeOut : null,
 
-  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */  /* qqq for Yevhen : cover | aaa : Done. */
+  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */  /* qqq for junior : cover | aaa : Done. */
   applyingExitCode : 0,
 
   verbosity : 2,
   outputPrefixing : 0,
   outputPiping : null,
   outputCollecting : 0,
-  outputAdditive : null, /* qqq for Yevhen : cover the option | aaa : Done. */
+  outputAdditive : null, /* qqq for junior : cover the option | aaa : Done. */
   outputColoring : 1,
   outputGraying : 0,
   inputMirroring : 1,
@@ -1381,7 +1381,7 @@ function startSingle_head( routine, args )
 
   _.assert( arguments.length === 2 );
 
-  _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.objectIs( o.when ), `Unsupported starting mode: ${o.when}` );
+  _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.object.isBasic( o.when ), `Unsupported starting mode: ${o.when}` );
 
   return o;
 }
@@ -1654,7 +1654,7 @@ function startMultiple_head( routine, args )
 
   _.assert( arguments.length === 2 );
 
-  _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.objectIs( o.when ), `Unsupported starting mode: ${o.when}` );
+  _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.object.isBasic( o.when ), `Unsupported starting mode: ${o.when}` );
   _.assert
   (
     !o.concurrent || !o.sync || o.deasync
@@ -1792,7 +1792,7 @@ function startMultiple_body( o )
 
   function form0()
   {
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for Yevhen : bad  | aaa : fixed. */
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) ) /* xxx : qqq : for junior : bad  | aaa : fixed. */
     o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
   }
 
@@ -1841,7 +1841,7 @@ function startMultiple_body( o )
       o.conTerminate = new _.Consequence({ _procedure : false }).finally( o.conTerminate );
     }
 
-    _.assert( _.objectIs( o.outputColoring ) );
+    _.assert( _.object.isBasic( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     if( o.outputAdditive === null )
@@ -2519,7 +2519,7 @@ function starter( o0 )
       if o.stack to starter is number add it to the delta,
       if not, overwrite with o.stack passed to instance
     */
-    /* xxx : qqq : for Yevhen : bad | aaa : fixed. */
+    /* xxx : qqq : for junior : bad | aaa : fixed. */
     if( _.numberIs( o0.stack ) )
     o.stack = _.Procedure.Stack( o.stack, 1 + o0.stack );
     else
@@ -2558,7 +2558,7 @@ function starter( o0 )
       */
 
       if( _.arrayIs( dst.execPath ) || _.arrayIs( src.execPath ) )
-      dst.execPath = _.eachSample_( [ dst.execPath, src.execPath ] ).map( ( path ) => path.join( ' ' ) );
+      dst.execPath = _.permutation.eachSample( [ dst.execPath, src.execPath ] ).map( ( path ) => path.join( ' ' ) );
       else
       dst.execPath = dst.execPath + ' ' + src.execPath;
 
@@ -2573,7 +2573,7 @@ function starter( o0 )
 }
 
 // starter.defaults = Object.create( startMultiple.defaults );
-// starter.defaults = _.mapBut_( startMultiple.defaults, [ 'procedure' ] ); /* qqq : for Yevhen : very bad */
+// starter.defaults = _.mapBut_( startMultiple.defaults, [ 'procedure' ] ); /* qqq : for junior : very bad */
 starter.defaults = _.mapBut_( null, startMultiple.defaults, [ 'procedure' ] );
 
 // --
@@ -2836,12 +2836,12 @@ function signal_body( o )
     {
       if( p.pnd )
       {
-        info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`; /* qqq for Yevhen : seems not covered */
+        info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`; /* qqq for junior : seems not covered */
       }
       else
       {
         let execPath = _.process.execPathOf({ pid : p.pid, sync : 1, throwing : 0 });
-        info = `\nPID : ${p.pid}\nExecPath : ${execPath}`; /* qqq for Yevhen : seems not covered */
+        info = `\nPID : ${p.pid}\nExecPath : ${execPath}`; /* qqq for junior : seems not covered */
       }
     }
     catch( err )
@@ -3248,7 +3248,7 @@ execPathOf.defaults =
   pid : null,
   pnd : null,
   throwing : 1,
-  sync : 1, /* qqq for Yevhen : cover option::sync. don't forget all cases thorwing error and option::throwing */
+  sync : 1, /* qqq for junior : cover option::sync. don't forget all cases thorwing error and option::throwing */
 }
 
 //

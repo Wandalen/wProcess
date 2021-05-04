@@ -919,7 +919,7 @@ function startMinimal( test )
     ready.then( function()
     {
       /*
-      qqq for Yevhen : not enough!
+      qqq for junior : not enough!
       zzz :
       Windows 15x, mode::fork
      / TestRoutine::startFork / test timeOut # 22 ) ... ok
@@ -5530,7 +5530,7 @@ function startMinimalExecPathSeveralCommands( test )
 
 //
 
-/* qqq for Yevhen : name and split cases | aaa : Done. */
+/* qqq for junior : name and split cases | aaa : Done. */
 function startExecPathNonTrivialModeShell( test )
 {
   let context = this;
@@ -10351,7 +10351,7 @@ function startMultipleProcedureStack( test )
     ready.then( function case1()
     {
       /*
-      qqq for Yevhen : not good enough. output of subprocess?
+      qqq for junior : not good enough. output of subprocess?
       zzz :
       Windows 13x, mode::fork
      / TestRoutine::startProcedureStackMultiple / sync:0 deasync:1 mode:fork stack:false # 538 ) : expected true ... ok
@@ -12311,7 +12311,7 @@ function startMinimalDetachingResourceReady( test )
       o.conStart.thenGive( ( op ) =>
       {
         track.push( 'conStart' );
-        test.true( _.objectIs( op ) );
+        test.true( _.object.isBasic( op ) );
         test.identical( op, o );
         test.true( _.process.isAlive( o.pnd.pid ) );
         o.pnd.kill();
@@ -26425,7 +26425,7 @@ function startMultipleOutput( test )
           test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
           var exp = `**<conStart>**<2.out.end>**<conTerminate>**`;
           test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          /* qqq2 for Yevhen : bad! | aaa : Fixed. */
+          /* qqq2 for junior : bad! | aaa : Fixed. */
 
         }
 
@@ -28066,7 +28066,7 @@ function startSingleOptionDry( test )
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
 
-        /* qqq for Yevhen : bad | aaa : Fixed. */
+        /* qqq for junior : bad | aaa : Fixed. */
         if( env.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
@@ -28091,7 +28091,7 @@ function startSingleOptionDry( test )
         return null;
       })
 
-      /* qqq for Yevhen : bad! */
+      /* qqq for junior : bad! */
       // return null;
       return o.conTerminate;
     })
@@ -28200,7 +28200,7 @@ function startSingleOptionDry( test )
     //     return null;
     //   })
     //
-    //   /* qqq for Yevhen : bad! */
+    //   /* qqq for junior : bad! */
     //   // return null;
     //   return o.conTerminate;
     // })
@@ -29840,7 +29840,7 @@ function startSingleOptionProcedure( test )
         test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
         test.true( _.strHas( op.procedure._name, 'PID:') );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
 
         return null;
       })
@@ -29935,7 +29935,7 @@ function startSingleOptionProcedure( test )
         test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
         test.true( _.strHas( op.procedure._name, 'PID:') );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
 
         return null;
       })
@@ -29984,7 +29984,7 @@ function startSingleOptionProcedure( test )
         test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
         test.true( _.strHas( op.procedure._name, 'PID:') );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
 
         return null;
       })
@@ -30033,7 +30033,7 @@ function startSingleOptionProcedure( test )
         test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
         test.true( _.strHas( op.procedure._name, 'PID:') );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
         test.identical( op.procedure._stack, 'stack' );
 
         return null;
@@ -30124,7 +30124,7 @@ function startMultipleOptionProcedure( test )
         test.identical( op, options );
         test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
         test.identical( op.procedure._name, null );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
         test.identical( op.procedure._object.execPath, [ `${env.mode === 'fork' ? programPath : 'node ' + programPath}`, `${env.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
         op.sessions.forEach( ( session ) =>
@@ -30133,9 +30133,9 @@ function startMultipleOptionProcedure( test )
           test.identical( session.ended, true );
           test.equivalent( session.output, `[ 'a' ]` );
           test.true( _.strHas( session.procedure._name, 'PID:') );
-          test.true( _.objectIs( session.procedure._object ) );
+          test.true( _.object.isBasic( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
-        }) /* qqq for Yevhen : ! | aaa : Done. */
+        }) /* qqq for junior : ! | aaa : Done. */
 
         return null;
       })
@@ -30239,7 +30239,7 @@ function startMultipleOptionProcedure( test )
         test.identical( op, options );
         test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
         test.identical( op.procedure._name, null );
-        test.true( _.objectIs( op.procedure._object ) );
+        test.true( _.object.isBasic( op.procedure._object ) );
         test.identical( op.procedure._object.execPath, [ `${env.mode === 'fork' ? programPath : 'node ' + programPath}`, `${env.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
         op.sessions.forEach( ( session ) =>
@@ -30248,7 +30248,7 @@ function startMultipleOptionProcedure( test )
           test.identical( session.ended, true );
           test.equivalent( session.output, `[ 'a' ]` );
           test.true( _.strHas( session.procedure._name, 'PID:') );
-          test.true( _.objectIs( session.procedure._object ) );
+          test.true( _.object.isBasic( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
         })
 
@@ -30306,7 +30306,7 @@ function startMultipleOptionProcedure( test )
           test.identical( session.ended, true );
           test.equivalent( session.output, `[ 'a' ]` );
           test.true( _.strHas( session.procedure._name, 'PID:') );
-          test.true( _.objectIs( session.procedure._object ) );
+          test.true( _.object.isBasic( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
         })
 
@@ -30366,7 +30366,7 @@ function startMultipleOptionProcedure( test )
           test.identical( session.ended, true );
           test.equivalent( session.output, `[ 'a' ]` );
           test.true( _.strHas( session.procedure._name, 'PID:') );
-          test.true( _.objectIs( session.procedure._object ) );
+          test.true( _.object.isBasic( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
           test.notIdentical( session.procedure._stack, 'stack' );
         })
@@ -33729,7 +33729,7 @@ deasync:end
         test.true( _.process.isAlive( options.pnd.pid ) );
         time1 = _.time.now();
         _.process.terminate({ pid : options.pnd.pid, withChildren : 1 }); /* zzz : here! */
-        /* qqq for Yevhen : please, mark important lines and remove ansi codes like in this test case | aaa : Done. */
+        /* qqq for junior : please, mark important lines and remove ansi codes like in this test case | aaa : Done. */
 
 /* xxx : windows
 qqq for Vova : where is ExecPath?
@@ -36578,7 +36578,7 @@ function terminate( test )
   }
 }
 
-terminate.description = /* qqq for Yevhen : name test cases please */
+terminate.description = /* qqq for junior : name test cases please */
 `
 Checks termination of the child process spawned with different modes.
 - Terminates process using descriptor( pnd )
@@ -40693,7 +40693,7 @@ const Proto =
     // basic
 
     startMinimalBasic,
-    startMinimal, /* qqq for Yevhen : subroutine for modes | aaa : Done. */
+    startMinimal, /* qqq for junior : subroutine for modes | aaa : Done. */
     startMinimalErrorHandling,
 
     // sync
@@ -40747,8 +40747,8 @@ const Proto =
     startMinimalOptionWhenDelay,
     startMinimalOptionWhenTime,
     startMinimalOptionTimeOut,
-    // startSingleAfterDeath, /* xxx : qqq : for Yevhen : restore */
-    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */ /* xxx : qqq : for Yevhen : restore */
+    // startSingleAfterDeath, /* xxx : qqq : for junior : restore */
+    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */ /* xxx : qqq : for junior : restore */
     startSingleAfterDeathOutput,
 
     // detaching
@@ -40823,7 +40823,7 @@ const Proto =
     startMultipleOutput,
     startMultipleOptionStdioIgnore,
     startSingleOptionOutputAdditive,
-    startMultipleOptionOutputAdditive, /* xxx qqq for Yevhen : fix | aaa : Done. */
+    startMultipleOptionOutputAdditive, /* xxx qqq for junior : fix | aaa : Done. */
     outputLogStderrWithoutError,
     outputLog,
     outputLogStreams,
@@ -40858,7 +40858,7 @@ const Proto =
     statusOf,
 
     exitReason,
-    exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
+    exitCode, /* qqq for junior : check order of test routines. it's messed up */
 
     // termination
 
@@ -40907,7 +40907,7 @@ const Proto =
 
     spawnTimeOf,
 
-    // _startTree, /* xxx : qqq : for Yevhen : restore */
+    // _startTree, /* xxx : qqq : for junior : restore */
 
     // experiments
 
