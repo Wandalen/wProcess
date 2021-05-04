@@ -50,14 +50,14 @@ let ProcessMinimalInput = _.Blueprint
   streamSizeLimit : null,
   timeOut : null,
 
-  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */ /* qqq for Yevhen : cover */
+  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */ /* qqq for junior : cover */
   applyingExitCode : 0,
 
   verbosity : 2,
   outputPrefixing : 0,
   outputPiping : null,
   outputCollecting : 0,
-  outputAdditive : null, /* qqq for Yevhen : cover the option */
+  outputAdditive : null, /* qqq for junior : cover the option */
   outputColoring : 1,
   outputGraying : 0,
   inputMirroring : 1,
@@ -126,14 +126,14 @@ let ProcessMultipleInput = _.Blueprint
   streamSizeLimit : null,
   timeOut : null,
 
-  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */ /* qqq for Yevhen : cover */
+  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */ /* qqq for junior : cover */
   applyingExitCode : 0,
 
   verbosity : 2,
   outputPrefixing : 0,
   outputPiping : null,
   outputCollecting : 0,
-  outputAdditive : null, /* qqq for Yevhen : cover the option */
+  outputAdditive : null, /* qqq for junior : cover the option */
   outputColoring : 1,
   outputGraying : 0,
   inputMirroring : 1,

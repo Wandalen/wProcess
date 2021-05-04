@@ -199,7 +199,7 @@ function startMinimal_body( o )
 
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  /* qqq for Yevhen : use buffer instead */
+  /* qqq for junior : use buffer instead */
   let _errOutput = '';
   let _decoratedOutOutput = '';
   let _outAdditive = '';
@@ -1200,14 +1200,14 @@ function startMinimal_body( o )
     if( !o.outputPiping )
     return;
 
-    /* yyy qqq for Yevhen : cover and complete */
+    /* yyy qqq for junior : cover and complete */
     // data = _.strRemoveEnd( data, '\n' );
 
     let splits;
     if( o.outputPrefixing || ( channel === 'err' && o.outputColoring.err ) || ( channel === 'out' && o.outputColoring.out ) )
     splits = data.split( '\n' );
 
-    /* qqq for Yevhen : changed how option outputPrefixing works | aaa : Done. */
+    /* qqq for junior : changed how option outputPrefixing works | aaa : Done. */
     if( o.outputPrefixing )
     {
       let prefix = channel === 'err' ? _errPrefix : _outPrefix;
@@ -1270,7 +1270,7 @@ function startMinimal_body( o )
       }
       else
       {
-        /* xxx yyy qqq for Yevhen : not implemeted yet | aaa : Implemented. */
+        /* xxx yyy qqq for junior : not implemeted yet | aaa : Implemented. */
         if( !_.strHas( msg, '\n' ) )
         {
           if( channel === 'err' )
@@ -1301,7 +1301,7 @@ function startMinimal_body( o )
       _decoratedOutOutput += msg;
       if( channel === 'err' )
       _decoratedErrOutput += msg;
-      /* yyy qqq for Yevhen : cover */
+      /* yyy qqq for junior : cover */
       // _decoratedOutOutput += msg + '\n';
       // if( channel === 'err' )
       // _decoratedErrOutput += msg + '\n';
@@ -1355,14 +1355,14 @@ startMinimal_body.defaults =
   streamSizeLimit : null,
   timeOut : null,
 
-  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */  /* qqq for Yevhen : cover | aaa : Done. */
+  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */  /* qqq for junior : cover | aaa : Done. */
   applyingExitCode : 0,
 
   verbosity : 2,
   outputPrefixing : 0,
   outputPiping : null,
   outputCollecting : 0,
-  outputAdditive : null, /* qqq for Yevhen : cover the option | aaa : Done. */
+  outputAdditive : null, /* qqq for junior : cover the option | aaa : Done. */
   outputColoring : 1,
   outputGraying : 0,
   inputMirroring : 1,
@@ -2836,12 +2836,12 @@ function signal_body( o )
     {
       if( p.pnd )
       {
-        info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`; /* qqq for Yevhen : seems not covered */
+        info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`; /* qqq for junior : seems not covered */
       }
       else
       {
         let execPath = _.process.execPathOf({ pid : p.pid, sync : 1, throwing : 0 });
-        info = `\nPID : ${p.pid}\nExecPath : ${execPath}`; /* qqq for Yevhen : seems not covered */
+        info = `\nPID : ${p.pid}\nExecPath : ${execPath}`; /* qqq for junior : seems not covered */
       }
     }
     catch( err )
@@ -3248,7 +3248,7 @@ execPathOf.defaults =
   pid : null,
   pnd : null,
   throwing : 1,
-  sync : 1, /* qqq for Yevhen : cover option::sync. don't forget all cases thorwing error and option::throwing */
+  sync : 1, /* qqq for junior : cover option::sync. don't forget all cases thorwing error and option::throwing */
 }
 
 //
