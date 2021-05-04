@@ -3004,7 +3004,7 @@ function systemEntryAddBasic( test )
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
     test.true( a.fileProvider.fileExistsAct( a.abs( 'dir/Index.js' ) ) )
-    test.true( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/Index.js' ) ) ) )
+    test.true( _.object.isBasic( a.fileProvider.filesRead( a.abs( 'dir/Index.js' ) ) ) )
 
     return null;
   } );
@@ -3048,7 +3048,7 @@ function systemEntryAddOptionAllowingMissed( test )
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
     test.true( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( _.object.isBasic( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -3079,7 +3079,7 @@ function systemEntryAddOptionAllowingNotInPath( test )
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
     test.true( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( _.object.isBasic( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -3110,7 +3110,7 @@ function systemEntryAddOptionForcing( test )
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
     test.true( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( _.object.isBasic( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -3129,7 +3129,7 @@ function systemEntryAddOptionForcing( test )
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
     test.true( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( _.object.isBasic( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
