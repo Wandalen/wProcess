@@ -5,7 +5,7 @@
 
 if( typeof module !== 'undefined' )
 {
-  let _ = require( '../../../../wtools/Tools.s' );
+  const _ = require( '../../../../node_modules/Tools' );
 
   require( '../l1/Basic.s' );
   require( '../l2/Process.s' );

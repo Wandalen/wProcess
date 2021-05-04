@@ -5,7 +5,7 @@
 
 if( typeof module !== 'undefined' )
 {
-  let _ = require( './../../../wtools/Tools.s' );
+  const _ = require( './../../../node_modules/Tools' );
   _.include( 'wTesting' );
   _.include( 'wFiles' );
   _.include( 'wProcessWatcher' );
@@ -13,9 +13,8 @@ if( typeof module !== 'undefined' )
   require( '../l4_process/module/Process.s' );
 }
 
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = {};
+const _global = _global_;
+const _ = _global_.wTools;
 
 // --
 // context
@@ -66,7 +65,7 @@ function input( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [],
         interpreterArgsStrings : '',
         scriptArgsString : '',
@@ -106,7 +105,7 @@ function input( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ '.will.yml' ],
         interpreterArgsStrings : '',
         scriptArgsString : '.will.yml',
@@ -146,7 +145,7 @@ function input( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ '.will.yml', 'file' ],
         interpreterArgsStrings : '',
         scriptArgsString : '.will.yml file',
@@ -186,7 +185,7 @@ function input( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ 'v:5' ],
         interpreterArgsStrings : '',
         scriptArgsString : 'v:5',
@@ -226,7 +225,7 @@ function input( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ 'v:5', 'r:some', 'a:1' ],
         interpreterArgsStrings : '',
         scriptArgsString : 'v:5 r:some a:1',
@@ -266,7 +265,7 @@ function input( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ '.will.yml', 'file', 'v:5', 'r:some', 'a:1' ],
         interpreterArgsStrings : '',
         scriptArgsString : '.will.yml file v:5 r:some a:1',
@@ -306,7 +305,7 @@ function input( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ '.will.yml', 'v:5', 'r:some', 'file', 'a:1' ],
         interpreterArgsStrings : '',
         scriptArgsString : '.will.yml v:5 r:some file a:1',
@@ -346,7 +345,7 @@ function input( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ],
         interpreterArgsStrings : '',
         scriptArgsString : '.will.yml v:5 r:some ; file a:1',
@@ -386,7 +385,7 @@ function input( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ '.will.yml v:5 r:some ; file a:1' ],
         interpreterArgsStrings : '',
         scriptArgsString : '".will.yml v:5 r:some ; file a:1"',
@@ -426,7 +425,7 @@ function input( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
         interpreterArgsStrings : '',
         scriptArgsString : _.path.nativize( a.abs( '.will.yml' ) ),
@@ -474,7 +473,7 @@ function input( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp2.js' ),
+        scriptPath : a.abs( 'testApp2' ),
         scriptArgs : [ '.will.yml' ],
         interpreterArgsStrings : '',
         scriptArgsString : '.will.yml',
@@ -504,7 +503,7 @@ function input( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let result = _.process.input();
@@ -515,7 +514,7 @@ function input( test )
 
   function testApp2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let result = _.process.input();
@@ -566,7 +565,7 @@ function inputWithNotDefaultDelimeters( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ 'v:5', 'r:some', 'a:1' ],
         interpreterArgsStrings : '',
         scriptArgsString : 'v:5 r:some a:1',
@@ -608,7 +607,7 @@ function inputWithNotDefaultDelimeters( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp.js' ),
+        scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ],
         interpreterArgsStrings : '',
         scriptArgsString : '.will.yml v:5 r:some ; file a:1',
@@ -658,7 +657,7 @@ function inputWithNotDefaultDelimeters( test )
         parsingArrays : true,
         interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
-        scriptPath : a.abs( 'testApp2.js' ),
+        scriptPath : a.abs( 'testApp2' ),
         scriptArgs : [ '.will.yml' ],
         interpreterArgsStrings : '',
         scriptArgsString : '.will.yml',
@@ -689,7 +688,7 @@ function inputWithNotDefaultDelimeters( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let o =
@@ -706,7 +705,7 @@ function inputWithNotDefaultDelimeters( test )
 
   function testApp2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let o =
@@ -1021,7 +1020,7 @@ function inputReadToWithArguments( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
@@ -1448,7 +1447,7 @@ function inputReadToWithOptionsMap( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
@@ -1583,7 +1582,7 @@ function inputReadToCheckInputInfluence( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
@@ -1675,7 +1674,7 @@ function processOnExitEvent( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -1826,7 +1825,7 @@ function processOffExitEvent( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -1949,7 +1948,7 @@ function processArgsBase( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
@@ -2197,7 +2196,7 @@ function processArgsPropertiesBase( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -2293,7 +2292,7 @@ function processArgsMultipleCommands( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -2391,7 +2390,7 @@ function processArgsPaths( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -2852,7 +2851,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -2902,7 +2901,7 @@ function realMainFile( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     console.log( _.process.realMainFile() )
@@ -3005,7 +3004,7 @@ function systemEntryAddBasic( test )
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
     test.true( a.fileProvider.fileExistsAct( a.abs( 'dir/Index.js' ) ) )
-    test.true( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/Index.js' ) ) ) )
+    test.true( _.object.isBasic( a.fileProvider.filesRead( a.abs( 'dir/Index.js' ) ) ) )
 
     return null;
   } );
@@ -3049,7 +3048,7 @@ function systemEntryAddOptionAllowingMissed( test )
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
     test.true( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( _.object.isBasic( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -3080,7 +3079,7 @@ function systemEntryAddOptionAllowingNotInPath( test )
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
     test.true( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( _.object.isBasic( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -3111,7 +3110,7 @@ function systemEntryAddOptionForcing( test )
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
     test.true( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( _.object.isBasic( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -3130,7 +3129,7 @@ function systemEntryAddOptionForcing( test )
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
     test.true( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( _.object.isBasic( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -3140,7 +3139,7 @@ function systemEntryAddOptionForcing( test )
 
 //
 
-var Proto =
+const Proto =
 {
 
   name : 'Tools.l3.process.Io',
@@ -3200,11 +3199,9 @@ var Proto =
 
 }
 
-_.mapExtend( Self, Proto );
-
 //
 
-Self = wTestSuite( Self );
+const Self = wTestSuite( Proto );
 
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self )
