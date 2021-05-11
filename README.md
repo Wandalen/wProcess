@@ -1,5 +1,5 @@
 
-# module::Process  [![status](https://github.com/Wandalen/wProcess/workflows/publish/badge.svg)](https://github.com/Wandalen/wProcess/actions?query=workflow%3Apublish) [![stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)](https://github.com/emersion/stability-badges#stable)
+# module::Process  [![status](https://github.com/Wandalen/wProcess/actions/workflows/StandardPublish.yml/badge.svg)](https://github.com/Wandalen/wProcess/actions/workflows/StandardPublish.yml) [![stable](https://img.shields.io/badge/stability-stable-brightgreen.svg)](https://github.com/emersion/stability-badges#stable)
 
 Collection of cross-platform routines to execute system commands, run shell, batches, launch external processes from JavaScript application. Module Process leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.
 
@@ -11,7 +11,7 @@ npm install
 node sample/trivial/Sample.s
 ```
 
-## To add to your project
+### To add to your project
 ```
 npm add 'wprocess@alpha'
 ```

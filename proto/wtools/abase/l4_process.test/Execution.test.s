@@ -26905,6 +26905,177 @@ startMultipleOptionOutputAdditive.rapidity = -1;
 
 //
 
+// function startMultipleOptionOutputAdditiveWithStderr( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let testAppPath = a.program( testApp );
+//   let testAppPath2 = a.program( testApp2 );
+//   let modes = [ 'fork', 'spawn', 'shell' ];
+//   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 0 }) ) );
+//   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 0 }) ) );
+//   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 1 }) ) );
+//   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 1 }) ) );
+//   return a.ready;
+//
+//   /* - */
+//
+//   function run( tops )
+//   {
+//     let ready = _.Consequence().take( null );
+//
+//     ready.then( () =>
+//     {
+//       test.case = `mode : ${tops.mode}, outputAdditive : ${tops.outputAdditive}, concurrent : ${tops.concurrent}`;
+//
+//       let locals =
+//       {
+//         mode : tops.mode,
+//         testAppPath,
+//         testAppPath2,
+//         outputAdditive : tops.outputAdditive,
+//         concurrent : tops.concurrent,
+//       }
+//
+//       let testAppPathParent = a.program({ routine : testAppParent, locals });
+//
+//       let o =
+//       {
+//         execPath : 'node ' + testAppPathParent,
+//         outputCollecting : 1,
+//       }
+//
+//       /*
+//         This executes before any of the processes finishes,
+//         with option::outputAdditing : 0 - no output is logged
+//       */
+//       _.time.out( context.t1 * 15, () =>
+//       {
+//         // console.log( `out t1 * 15, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
+//         if( tops.outputAdditive )
+//         {
+//           if( tops.concurrent )
+//           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2` );
+//           else
+//           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2` );
+//         }
+//         else
+//         {
+//           test.identical( o.output, '' );
+//         }
+//         return null;
+//       })
+//
+//       /*
+//         If concurrent : 1
+//         This executes after the second process finishes,
+//         with option::outputAdditing : 0 - no output is logged from the first process,
+//         all output is logged from the second process
+//       */
+//       _.time.out( context.t1 * 35, () =>
+//       {
+//         // console.log( `out t1 * 35, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
+//
+//         if( tops.concurrent )
+//         {
+//           if( tops.outputAdditive )
+//           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2\nOutput2.2\nError1\nError2\nError2.2\n` );
+//           else /* First process is still running. Second process is finished. */
+//           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput2\nOutput2.2\nError2\nError2.2\nError2\nError2.2\n` );
+//         }
+//         else
+//         {
+//           if( tops.outputAdditive ) /* First process haven't finished yet, no output */
+//           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2\nError1\n` );
+//           else /* Only a part of the output from the first process is logged */
+//           test.identical( o.output, '' );
+//         }
+//
+//         return null;
+//       })
+//
+//       return _.process.startMinimal( o )
+//       .then( ( op ) =>
+//       {
+//         // console.log( `outputAdditive : ${tops.outputAdditive}, concurrent : ${tops.concurrent} OP OOOOUUUUTTTT : +++++ ${o.output} +++++` );
+//         test.il( op.exitCode, 0 );
+//         test.il( op.ended, true );
+//
+//         let exp1 = '\nOutput1\nOutput2\nOutput1.2\nOutput2.2\nError1\nError2\nError2.2\nError1.2\n';
+//         let exp2 = '\nOutput1\nOutput1.2\nError1\nError1.2\n';
+//         let exp3 = '\nOutput2\nOutput2.2\nError2\nError2.2\n';
+//         let exp4 = '\nError1\nError1.2\n';
+//         let exp5 = '\nError2\nError2.2\n';
+//         if( tops.concurrent )
+//         {
+//           if( tops.outputAdditive )
+//           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp1}${exp1}` );
+//           else
+//           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}${exp5}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}${exp1}${exp4}` );
+//         }
+//         else
+//         {
+//           if( tops.outputAdditive )
+//           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}${exp2}${exp3}` );
+//           else
+//           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}${exp4}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}${exp2}${exp3}${exp5}` );
+//         }
+//
+//         a.fileProvider.fileDelete( testAppPathParent );
+//         return null;
+//       })
+//     })
+//
+//     return ready;
+//
+//   }
+//
+//   function testAppParent()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wProcess' );
+//
+//     var o =
+//     {
+//       execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
+//       currentPath : __dirname,
+//       outputCollecting : 1,
+//       outputColoring : 0,
+//       mode,
+//       outputAdditive,
+//       concurrent,
+//     }
+//     _.process.startMultiple( o )
+//     .then( ( op ) =>
+//     {
+//       console.log( op.output )
+//       return null;
+//     });
+//   }
+//
+//   function testApp()
+//   {
+//     console.log( 'Output1' )
+//     setTimeout( () => console.log( 'Output1.2' ), context.t1 * 10 );
+//     setTimeout( () => console.error( 'Error1' ), context.t1 * 20 );
+//     setTimeout( () => console.error( 'Error1.2' ), context.t1 * 40 );
+//   }
+//
+//   function testApp2()
+//   {
+//     setTimeout( () => console.log( 'Output2' ), context.t1 * 5 );
+//     setTimeout( () => console.log( 'Output2.2' ), context.t1 * 15 );
+//     setTimeout( () => console.error( 'Error2' ), context.t1 * 25 );
+//     setTimeout( () => console.error( 'Error2.2' ), context.t1 * 30 );
+//   }
+//
+// }
+//
+// startMultipleOptionOutputAdditiveWithStderr.timeOut = 7e6; /* Locally : 678.255s */
+// startMultipleOptionOutputAdditiveWithStderr.rapidity = -1;
+
+//
+
 function outputLog( test )
 {
   let context = this;
@@ -40697,6 +40868,7 @@ const Proto =
     startMultipleOptionStdioIgnore,
     startSingleOptionOutputAdditive,
     startMultipleOptionOutputAdditive, /* xxx qqq for junior : fix | aaa : Done. */
+    // startMultipleOptionOutputAdditiveWithStderr, /* xxx : review */
     outputLog,
     outputLogStreams,
 
