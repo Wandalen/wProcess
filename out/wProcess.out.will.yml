@@ -2,12 +2,9 @@ format: outwillfile-2.0
 root:
   - wProcess.out
 consistency:
-  ../.ex.will.yml: &ref_0
-    hash: ad280127a9f801a3bf1cdd9b30cb663b
-    size: 2161
-  ../.im.will.yml: &ref_1
-    hash: 30a81feb3065ecf3e2edd09e0b19b513
-    size: 5522
+  ../will.yml: &ref_0
+    hash: b4d5a6dac6460da1caec77d9dd5ac175
+    size: 7472
 module:
   wProcess.out:
     about:
@@ -22,22 +19,22 @@ module:
         an external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
-      interpreters: &ref_2
-        - njs >= 10.0.0
-        - chrome >= 60.0.0
-        - firefox >= 60.0.0
-      keywords: &ref_3
+      license: MIT
+      npm.name: wprocess
+      author: Kostiantyn Wandalen <wanalen@01.school>
+      keywords: &ref_1
         - wTools
         - exec file
         - shell script
         - run program
-      license: MIT
-      author: Kostiantyn Wandalen <wanalen@01.school>
-      contributors: &ref_4
+      contributors: &ref_2
         - Kostiantyn Wandalen <wanalen@01.school>
         - Volodymyr M. <volodymyr.migdal@gmail.com>
-      npm.name: wprocess
-      npm.scripts: &ref_5
+      interpreters: &ref_3
+        - njs >= 10.0.0
+        - chrome >= 60.0.0
+        - firefox >= 60.0.0
+      npm.scripts: &ref_4
         test: wtest .run proto/**
         docgen: wdocgen .build proto
     path:
@@ -52,15 +49,11 @@ module:
       module.original.willfiles:
         criterion:
           predefined: 1
-        path:
-          - ../.ex.will.yml
-          - ../.im.will.yml
+        path: ../will.yml
       module.peer.willfiles:
         criterion:
           predefined: 1
-        path:
-          - ../.ex.will.yml
-          - ../.im.will.yml
+        path: ../will.yml
       module.peer.in:
         criterion:
           predefined: 1
@@ -204,7 +197,7 @@ module:
         path: 'npm:///wTools'
         autoExporting: 0
         enabled: 0
-      wPathBasic:
+      wpathbasic:
         path: 'npm:///wpathbasic'
         autoExporting: 0
         enabled: 0
@@ -216,7 +209,7 @@ module:
         path: 'npm:///strip-ansi#6.0.0'
         autoExporting: 0
         enabled: 0
-      wGdf:
+      wgdf:
         path: 'npm:///wgdf'
         autoExporting: 0
         enabled: 0
@@ -228,11 +221,11 @@ module:
         path: 'npm:///wConsequence'
         autoExporting: 0
         enabled: 0
-      wBlueprint:
+      wblueprint:
         path: 'npm:///wblueprint'
         autoExporting: 0
         enabled: 0
-      wProcessTreeWindows:
+      w.process.tree.windows:
         path: 'npm:///w.process.tree.windows'
         autoExporting: 0
         enabled: 0
@@ -851,8 +844,7 @@ module:
           content: proto
           export: 1
     consistency:
-      ../.ex.will.yml: *ref_0
-      ../.im.will.yml: *ref_1
+      ../will.yml: *ref_0
   ../:
     about:
       name: wProcess
@@ -866,26 +858,22 @@ module:
         an external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
-      interpreters: *ref_2
-      keywords: *ref_3
       license: MIT
-      author: Kostiantyn Wandalen <wanalen@01.school>
-      contributors: *ref_4
       npm.name: wprocess
-      npm.scripts: *ref_5
+      author: Kostiantyn Wandalen <wanalen@01.school>
+      keywords: *ref_1
+      contributors: *ref_2
+      interpreters: *ref_3
+      npm.scripts: *ref_4
     path:
       module.willfiles:
         criterion:
           predefined: 1
-        path:
-          - .ex.will.yml
-          - .im.will.yml
+        path: will.yml
       module.original.willfiles:
         criterion:
           predefined: 1
-        path:
-          - .ex.will.yml
-          - .im.will.yml
+        path: will.yml
       module.peer.willfiles:
         criterion:
           predefined: 1
@@ -991,7 +979,7 @@ module:
         path: 'npm:///wTools'
         autoExporting: 0
         enabled: 0
-      wPathBasic:
+      wpathbasic:
         path: 'npm:///wpathbasic'
         autoExporting: 0
         enabled: 0
@@ -1003,7 +991,7 @@ module:
         path: 'npm:///strip-ansi#6.0.0'
         autoExporting: 0
         enabled: 0
-      wGdf:
+      wgdf:
         path: 'npm:///wgdf'
         autoExporting: 0
         enabled: 0
@@ -1015,11 +1003,11 @@ module:
         path: 'npm:///wConsequence'
         autoExporting: 0
         enabled: 0
-      wBlueprint:
+      wblueprint:
         path: 'npm:///wblueprint'
         autoExporting: 0
         enabled: 0
-      wProcessTreeWindows:
+      w.process.tree.windows:
         path: 'npm:///w.process.tree.windows'
         autoExporting: 0
         enabled: 0
@@ -1574,9 +1562,6 @@ module:
           - 'build::release'
           - 'build::npm'
     consistency:
-      ../.ex.will.yml:
-        hash: ad280127a9f801a3bf1cdd9b30cb663b
-        size: 2161
-      ../.im.will.yml:
-        hash: 30a81feb3065ecf3e2edd09e0b19b513
-        size: 5522
+      ../will.yml:
+        hash: b4d5a6dac6460da1caec77d9dd5ac175
+        size: 7472
