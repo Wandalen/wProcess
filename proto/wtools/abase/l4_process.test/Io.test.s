@@ -1842,7 +1842,7 @@ function processOffExitEvent( test )
 
     if( args.map.off )
     {
-      args.map.off = _.arrayAs( args.map.off );
+      args.map.off = _.array.as( args.map.off );
       _.each( args.map.off, ( name ) =>
       {
         _.assert( handlersMap[ name ] );

@@ -70,7 +70,7 @@ function startMinimalHeadCommon( routine, args )
 
   _.assert
   (
-    !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ),
+    !o.detaching || !_.longHas( _.array.as( o.stdio ), 'inherit' ),
     `Unsupported stdio: ${o.stdio} for process detaching. Parent will wait for child process.` /* zzz : check */
   );
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ], o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
@@ -1918,8 +1918,8 @@ function startMultiple_body( o )
 
   function run2()
   {
-    let execPath = _.arrayAs( o.execPath );
-    let currentPath = _.arrayAs( o.currentPath );
+    let execPath = _.array.as( o.execPath );
+    let currentPath = _.array.as( o.currentPath );
     let sessionId = 0;
 
     for( let p = 0 ; p < execPath.length ; p++ )
@@ -2857,7 +2857,7 @@ function signal_body( o )
 
   function handleResult( result )
   {
-    result = _.arrayAs( result );
+    result = _.array.as( result );
     for( let i = 0 ; i < result.length ; i++ )
     {
       if( result[ i ] !== true )

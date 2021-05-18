@@ -471,7 +471,7 @@ function systemEntryAdd( o )
   if( o.platform === null )
   o.platform = process.platform === 'win32' ? 'windows' : 'posix';
 
-  o.platform = _.arrayAs( o.platform );
+  o.platform = _.array.as( o.platform );
 
   if( o.allowingMissed === null )
   o.allowingMissed = !!o.forcing;

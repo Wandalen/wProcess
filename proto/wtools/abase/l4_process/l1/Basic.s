@@ -415,7 +415,7 @@ function exitWithBeep()
 function _argsForm( o )
 {
 
-  o.args = _.arrayAs( o.args );
+  o.args = _.array.as( o.args );
 
   let _argsLength = o.args.length;
 
