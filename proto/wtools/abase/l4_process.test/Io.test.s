@@ -743,6 +743,177 @@ function inputWithNotDefaultDelimeters( test )
 
 //
 
+function inputWithVectorizedProperties( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.path.nativize( a.program( testApp ) );
+
+  /* - */
+
+  a.ready.then( () =>
+  {
+    test.case = 'with quoted vectorized properties';
+    let o = optionsMake();
+    o.args = [ 'r:"[ a, b ]"', 'v:2' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp' ),
+        scriptArgs : [ 'r:"[ a, b ]"', 'v:2' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : 'r:"[ a, b ]" v:2',
+        subject : '',
+        map : { r : [ 'a', 'b' ], v : 2 },
+        subjects : [ '' ],
+        maps : [ { r : [ 'a', 'b' ], v : 2 } ],
+        original : 'r:"[ a, b ]" v:2',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'with unquoted vectorized properties';
+    let o = optionsMake();
+    o.args = [ 'r:[ a, b ]', 'v:2' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp' ),
+        scriptArgs : [ 'r:[ a, b ]', 'v:2' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : 'r:"[ a, b ]" v:2',
+        subject : '',
+        map : { r : [ 'a', 'b' ], v : 2 },
+        subjects : [ '' ],
+        maps : [ { r : [ 'a', 'b' ], v : 2 } ],
+        original : 'r:"[ a, b ]" v:2',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'with unquoted vectorized properties, key has spaces';
+    let o = optionsMake();
+    o.args = [ 'r a:[ a, b ]', 'v:2' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp' ),
+        scriptArgs : [ 'r a:[ a, b ]', 'v:2' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '"r a:[ a, b ]" v:2',
+        subject : 'r a:[ a, b ]',
+        map : { v : 2 },
+        subjects : [ 'r a:[ a, b ]' ],
+        maps : [ { v : 2 } ],
+        original : '"r a:[ a, b ]" v:2',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* - */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let result = _.process.input();
+    process.send( result );
+  }
+
+  /* */
+
+  function testApp2()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let result = _.process.input();
+    let result2 = _.process.input();
+    process.send([ result, result === result2 ]);
+  }
+
+  /* */
+
+  function optionsMake()
+  {
+    let o =
+    {
+      execPath : 'node ' + programPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    return o;
+  }
+}
+
+//
+
 function inputReadToWithArguments( test )
 {
   let context = this;
@@ -3153,12 +3324,14 @@ const Proto =
     suiteTempPath : null,
     assetsOriginalPath : null,
     appJsPath : null,
+    t0 : 100,
   },
 
   tests :
   {
     input,
     inputWithNotDefaultDelimeters,
+    inputWithVectorizedProperties,
 
     inputReadToWithArguments,
     inputReadToWithOptionsMap,
