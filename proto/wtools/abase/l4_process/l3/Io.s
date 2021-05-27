@@ -146,10 +146,13 @@ function _inputInSamFormatNodejs( o )
       if( quotes.ranges.length )
       return e;
 
-      let mapSplits = _.strIsolateLeftOrAll( e, o.keyValDelimeter );
-      if( mapSplits[ 1 ] !== undefined )
-      if( !_.strHas( mapSplits[ 0 ], /\s/ ) )
-      return `${ mapSplits[ 0 ] }:"${ mapSplits[ 2 ] }"`
+      if( o.keyValDelimeter )
+      {
+        let mapSplits = _.strIsolateLeftOrAll( e, o.keyValDelimeter );
+        if( mapSplits[ 1 ] !== undefined )
+        if( !_.strHas( mapSplits[ 0 ], /\s/ ) )
+        return `${ mapSplits[ 0 ] }:"${ mapSplits[ 2 ] }"`
+      }
 
       return `"${e}"`;
     })
