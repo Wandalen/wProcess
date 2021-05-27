@@ -3153,6 +3153,7 @@ const Proto =
     suiteTempPath : null,
     assetsOriginalPath : null,
     appJsPath : null,
+    t0 : 100,
   },
 
   tests :
