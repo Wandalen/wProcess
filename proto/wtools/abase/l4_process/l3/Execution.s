@@ -2470,7 +2470,7 @@ function starter( o0 )
   if( _.strIs( o0 ) )
   o0 = { execPath : o0 }
   o0 = _.routine.options_( starter, o0 );
-  o0.ready = o0.ready || new _.Consequence().take( null );
+  // o0.ready = o0.ready || new _.Consequence().take( null );
 
   _.routineExtend( er, _.process.startMultiple );
   er.predefined = o0;

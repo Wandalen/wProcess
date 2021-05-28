@@ -21098,6 +21098,153 @@ function starterFields( test )
 
 //
 
+function starterReady( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  const starter = _.process.starter
+  ({
+      outputCollecting : 1,
+      currentPath : a.abs( '.' )
+  })
+
+  const starter2 = _.process.starter
+  ({
+      outputCollecting : 1,
+      currentPath : a.abs( '.' ),
+      ready : new _.Consequence().take( null )
+  })
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, no o.ready in starter`;
+
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        mode,
+      }
+
+      let o2 =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        mode,
+      }
+
+      let process1 = starter( o );
+      let process2 = starter( o2 );
+
+      test.true( o.pnd !== null );
+      test.true( o.procedure !== null );
+
+      test.true( o2.pnd !== null );
+      test.true( o2.procedure !== null );
+
+      test.false( o.ready === o2.ready );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( o.pnd !== null );
+        test.true( o.procedure !== null );
+
+        return null;
+      })
+
+      o2.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( o2.pnd !== null );
+        test.true( o2.procedure !== null );
+        return null;
+      })
+
+      return _.time.out( context.t1 * 2 );
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, o.ready in starter`;
+
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        mode,
+      }
+
+      let o2 =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        mode,
+      }
+
+      let process1 = starter2( o );
+      let process2 = starter2( o2 );
+
+      test.true( o.pnd !== null );
+      test.true( o.procedure !== null );
+
+      /* process2 waits till process1 is finished */
+      test.true( o2.pnd === null );
+      test.true( o2.procedure === null );
+
+      test.true( o.ready === o2.ready );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( o.pnd !== null );
+        test.true( o.procedure !== null );
+
+        return 'hello';
+      })
+
+      o2.ready.then( ( op ) =>
+      {
+        test.identical( op, 'hello' ); /* op = returned value from o.ready */
+        return null;
+      })
+
+      return _.time.out( context.t1 * 5 );
+    })
+
+    /* */
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+}
+
+//
+
 function starterOptionsPollution( test )
 {
   let context = this;
@@ -40846,6 +40993,7 @@ const Proto =
     starter,
     starterArgs,
     starterFields,
+    starterReady,
     starterOptionsPollution,
 
     // output
