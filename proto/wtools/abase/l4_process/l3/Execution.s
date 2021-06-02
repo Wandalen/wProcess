@@ -53,7 +53,7 @@ function startMinimalHeadCommon( routine, args )
   _.assert
   (
     o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) || _.routineIs( o.args )
-    , `If defined option::arg should be either [ string, array, routine ], but it is ${_.entity.strType( o.args )}`
+    , () => `If defined option::arg should be either [ string, array, routine ], but it is ${_.entity.strType( o.args )}`
   );
 
   /* timeOut */
@@ -61,7 +61,7 @@ function startMinimalHeadCommon( routine, args )
   _.assert
   (
     o.timeOut === null || _.numberIs( o.timeOut ),
-    `Expects null or number {-o.timeOut-}, but got ${_.entity.strType( o.timeOut )}`
+    () => `Expects null or number {-o.timeOut-}, but got ${_.entity.strType( o.timeOut )}`
   );
   _.assert
   (
@@ -180,13 +180,13 @@ function startMinimal_head( routine, args )
   _.assert
   (
     o.execPath === null || _.strIs( o.execPath )
-    , `Expects string or strings {-o.execPath-}, but got ${_.entity.strType( o.execPath )}`
+    , () => `Expects string or strings {-o.execPath-}, but got ${_.entity.strType( o.execPath )}`
   );
 
   _.assert
   (
     o.currentPath === null || _.strIs( o.currentPath )
-    , `Expects string or strings {-o.currentPath-}, but got ${_.entity.strType( o.currentPath )}`
+    , () => `Expects string or strings {-o.currentPath-}, but got ${_.entity.strType( o.currentPath )}`
   );
 
   return o;
@@ -394,6 +394,8 @@ function startMinimal_body( o )
       o.procedure = _.Procedure({ _stack : o.stack });
     }
 
+    // if( _.routineIs( o.args ) )
+    // debugger;
     if( _.routineIs( o.args ) )
     o.args = o.args( o );
     if( o.args === null )
@@ -402,7 +404,7 @@ function startMinimal_body( o )
     _.assert
     (
       _.arrayIs( o.args ) || _.strIs( o.args )
-      , `If defined option::arg should be either [ string, array ], but it is ${_.entity.strType( o.args )}`
+      , () => `If defined option::arg should be either [ string, array ], but it is ${_.entity.strType( o.args )}`
     );
 
     argsForm();
@@ -1658,17 +1660,17 @@ function startMultiple_head( routine, args )
   _.assert
   (
     !o.concurrent || !o.sync || !!o.deasync
-    , `option::concurrent should be 0 if sync:1 and deasync:0`
+    , () => `option::concurrent should be 0 if sync:1 and deasync:0`
   );
   _.assert
   (
     o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath )
-    , `Expects string or strings {-o.execPath-}, but got ${_.entity.strType( o.execPath )}`
+    , () => `Expects string or strings {-o.execPath-}, but got ${_.entity.strType( o.execPath )}`
   );
   _.assert
   (
     o.currentPath === null || _.strIs( o.currentPath ) || _.strsAreAll( o.currentPath )
-    , `Expects string or strings {-o.currentPath-}, but got ${_.entity.strType( o.currentPath )}`
+    , () => `Expects string or strings {-o.currentPath-}, but got ${_.entity.strType( o.currentPath )}`
   );
 
   return o;
@@ -2469,7 +2471,7 @@ function starter( o0 )
   _.assert( arguments.length === 0 || arguments.length === 1 );
   if( _.strIs( o0 ) )
   o0 = { execPath : o0 }
-  o0 = _.routine.options_( starter, o0 );
+  o0 = _.routine.options_( starter, o0 || null );
   o0.ready = o0.ready || new _.Consequence().take( null );
 
   _.routineExtend( er, _.process.startMultiple );
