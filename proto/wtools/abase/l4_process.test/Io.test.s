@@ -2016,7 +2016,7 @@ function processOffExitEvent( test )
       args.map.off = _.array.as( args.map.off );
       _.each( args.map.off, ( name ) =>
       {
-        _.assert( handlersMap[ name ] );
+        _.assert( !!handlersMap[ name ] );
         _.process.off( 'exit', handlersMap[ name ] );
       })
     }

@@ -78,7 +78,7 @@ function startMinimalHeadCommon( routine, args )
   _.assert( o.conTerminate === null || _.routineIs( o.conTerminate ) );
   _.assert( o.conDisconnect === null || _.routineIs( o.conDisconnect ) );
   _.assert( o.ready === null || _.routineIs( o.ready ) );
-  _.assert( o.mode !== 'fork' || !o.sync || o.deasync, 'Mode::fork is available only if either sync:0 or deasync:1' );
+  _.assert( o.mode !== 'fork' || !o.sync || !!o.deasync, 'Mode::fork is available only if either sync:0 or deasync:1' );
 
   if( _.boolLike( o.throwingExitCode ) )
   o.throwingExitCode = o.throwingExitCode ? 'full' : false;
