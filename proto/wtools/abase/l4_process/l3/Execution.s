@@ -1657,7 +1657,7 @@ function startMultiple_head( routine, args )
   _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.object.isBasic( o.when ), `Unsupported starting mode: ${o.when}` );
   _.assert
   (
-    !o.concurrent || !o.sync || o.deasync
+    !o.concurrent || !o.sync || !!o.deasync
     , `option::concurrent should be 0 if sync:1 and deasync:0`
   );
   _.assert
@@ -2184,7 +2184,7 @@ function startMultiple_body( o )
   function streamPipe( dst, src )
   {
 
-    _.assert( !o.sync || o.deasync );
+    _.assert( !o.sync || !!o.deasync );
 
     if( _.longHas( dst._pipes, src ) )
     {
