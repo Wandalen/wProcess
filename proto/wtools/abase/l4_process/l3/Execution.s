@@ -6,7 +6,7 @@
 let System, ChildProcess, WindowsProcessTree, Stream;
 const _global = _global_;
 const _ = _global_.wTools;
-const Self = _.process = _.process || Object.create( null );
+_.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
@@ -3521,7 +3521,7 @@ let Extension =
 
 }
 
-_.props.extend( Self, Extension );
+/* _.props.extend */Object.assign( _.process, Extension );
 _.assert( _.routineIs( _.process.start ) );
 
 // --

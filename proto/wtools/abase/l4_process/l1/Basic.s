@@ -6,7 +6,7 @@
 let System, ChildProcess, StripAnsi, WindowsKill, WindowsProcessTree;
 const _global = _global_;
 const _ = _global_.wTools;
-const Self = _.process = _.process || Object.create( null );
+_.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
@@ -435,7 +435,7 @@ function _argsForm( o )
 
   if( o.execPath === null )
   {
-    _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
+    _.assert( o.args.length > 0, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
     o.execPath = o.args.shift();
     o.execPath2 = o.execPath;
     _argsLength = o.args.length;
@@ -784,8 +784,8 @@ let Extension =
 
 }
 
-_.props.extend( Self, Extension );
-_.props.supplement( Self._ehandler.events, Events );
+/* _.props.extend */Object.assign( _.process, Extension );
+_.props.supplement( _.process._ehandler.events, Events );
 _.assert( !_.process.start );
 _.process._Setup1();
 
