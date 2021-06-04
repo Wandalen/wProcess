@@ -926,7 +926,7 @@ function startMinimal( test )
       2020-11-25T10:55:41.8317809Z --------------- uncaught asynchronous error --------------->
       2020-11-25T10:55:41.8767341Z
       2020-11-25T10:55:41.8768147Z         kill EPERM
-      2020-11-25T10:55:41.8917163Z  = Message of error#10
+      2020-11-25T10:55:41.8917163Z  = Message of Error#10
       2020-11-25T10:55:41.8917977Z           errno : -4048
       2020-11-25T10:55:41.9119950Z     kill EPERM
       2020-11-25T10:55:41.9120605Z           code : 'EPERM'
@@ -11323,7 +11323,7 @@ function startSingleAfterDeathTerminatingMain( test )
 2020-12-04T22:33:32.8826750Z         * 10956 :         test.true( a.fileProvider.fileExists( program2PidPath ) );
 2020-12-04T22:33:32.8827750Z
 2020-12-04T22:33:32.8898210Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleAfterDeathTerminatingMain / child of secondary process is terminated # 6 ) : expected true ... failed
-2020-12-04T22:33:32.9010170Z          = Message of error#7
+2020-12-04T22:33:32.9010170Z          = Message of Error#7
 2020-12-04T22:33:32.9012190Z             fileReadAct( /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/ProcessBasic-2020-12-4-22-15-38-830-8052.tmp/startSingleAfterDeathTerminatingMain/program2Pid )
 2020-12-04T22:33:32.9015190Z             ENOENT: no such file or directory, open '/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/ProcessBasic-2020-12-4-22-15-38-830-8052.tmp/startSingleAfterDeathTerminatingMain/program2Pid'
 2020-12-04T22:33:32.9017310Z               errno : -2
@@ -12212,7 +12212,7 @@ function startMinimalDetachedOutputStdioPipe( test )
 2020-12-05T09:16:01.1396247Z  > node testAppChild.js
 2020-12-05T09:16:02.0428735Z --------------- uncaught asynchronous error --------------->
 2020-12-05T09:16:02.0432506Z
-2020-12-05T09:16:02.0433626Z  = Message of error#1
+2020-12-05T09:16:02.0433626Z  = Message of Error#1
 2020-12-05T09:16:02.0434358Z     Process returned exit code 4294967295
 2020-12-05T09:16:02.0435099Z     Launched as "node testAppChild.js"
 2020-12-05T09:16:02.0436510Z     Launched at "/D/Temp/ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp/startMinimalDetachedOutputStdioPipe"
@@ -12243,7 +12243,7 @@ function startMinimalDetachedOutputStdioPipe( test )
 2020-12-05T09:16:02.0526462Z
 2020-12-05T09:16:02.0527451Z --------------- uncaught asynchronous error ---------------<
 2020-12-05T09:16:02.0528348Z
-2020-12-05T09:16:02.0673890Z          = Message of error#125
+2020-12-05T09:16:02.0673890Z          = Message of Error#125
 2020-12-05T09:16:02.0674861Z             Process returned exit code 4294967295
 2020-12-05T09:16:02.0675764Z             Launched as "node testAppParent.js mode : shell stdio : pipe"
 2020-12-05T09:16:02.0677481Z             Launched at "/D/Temp/ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp/startMinimalDetachedOutputStdioPipe"
@@ -12251,7 +12251,7 @@ function startMinimalDetachedOutputStdioPipe( test )
 2020-12-05T09:16:02.0680836Z              -> Stderr
 2020-12-05T09:16:02.0681661Z              -  --------------- uncaught asynchronous error --------------->
 2020-12-05T09:16:02.0682506Z              -
-2020-12-05T09:16:02.0683247Z              -   = Message of error#1
+2020-12-05T09:16:02.0683247Z              -   = Message of Error#1
 2020-12-05T09:16:02.0683930Z              -      Process returned exit code 4294967295
 2020-12-05T09:16:02.0684705Z              -      Launched as "node testAppChild.js"
 2020-12-05T09:16:02.0686168Z              -      Launched at "/D/Temp/ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp/startMinimalDetachedOutputStdioPipe"
@@ -25166,7 +25166,7 @@ function startMinimalOptionVerbosityLogging( test )
         test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 0 );
         test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
         test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
-        test.true( !_.strHas( op.output, '= Message of error' ) );
+        test.true( !_.strHas( op.output, '= Message of Error' ) );
         test.true( !_.strHas( op.output, '= Beautified calls stack' ) );
         test.true( !_.strHas( op.output, '= Throws stack' ) );
         test.true( !_.strHas( op.output, '= Process' ) );
@@ -25253,7 +25253,7 @@ function startMinimalOptionVerbosityLogging( test )
         test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 1 );
         test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
         test.identical( _.strCount( op.output, '-> Stderr' ), 1 );
-        test.true( _.strHas( op.output, '= Message of error' ) );
+        test.true( _.strHas( op.output, '= Message of Error' ) );
         test.true( _.strHas( op.output, '= Beautified calls stack' ) );
         test.true( _.strHas( op.output, '= Throws stack' ) );
         test.true( _.strHas( op.output, '= Process' ) );
@@ -30833,7 +30833,7 @@ function kill( test )
 2020-12-05T09:48:29.5685477Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:73:19
 2020-12-05T09:48:29.6667567Z --------------- uncaught asynchronous error --------------->
 2020-12-05T09:48:29.6668468Z
-2020-12-05T09:48:29.6679226Z  = Message of error#364
+2020-12-05T09:48:29.6679226Z  = Message of Error#364
 2020-12-05T09:48:29.6679841Z     kill EPERM
 2020-12-05T09:48:29.6680654Z       errno : -4048
 2020-12-05T09:48:29.6681187Z       code : 'EPERM'
@@ -31879,7 +31879,7 @@ function startMinimalErrorAfterTerminationWithSend( test )
           2020-12-16T20:59:21.7116943Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 1 ) ... ok
           2020-12-16T20:59:21.7366568Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 2 ) ... ok
           2020-12-16T20:59:21.7456178Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 3 ) ... ok
-          2020-12-16T20:59:21.7485053Z  = Message of error#378
+          2020-12-16T20:59:21.7485053Z  = Message of Error#378
           2020-12-16T20:59:21.7485850Z     Channel closed
           2020-12-16T20:59:21.7486492Z     Error starting the process
           2020-12-16T20:59:21.7488450Z         Exec path : D:\Temp\ProcessBasic-2020-12-16-19-44-40-416-71b4.tmp\startMinimalErrorAfterTerminationWithSend\testApp.js
@@ -31958,7 +31958,7 @@ function startMinimalErrorAfterTerminationWithSend( test )
 /* happens on servers
 --------------- uncaught error --------------->
 
- = Message of error#387
+ = Message of Error#387
     Channel closed
     code : 'ERR_IPC_CHANNEL_CLOSED'
     Error starting the process
@@ -33092,7 +33092,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
 2020-12-04T21:37:26.2271744Z         kill EPERM
 2020-12-04T21:37:26.2272454Z
 2020-12-04T21:37:26.2282499Z           errno : -4048
-2020-12-04T21:37:26.2586257Z  = Message of error#371
+2020-12-04T21:37:26.2586257Z  = Message of Error#371
 2020-12-04T21:37:26.2629018Z           code : 'EPERM'
 2020-12-04T21:37:26.3145523Z     kill EPERM
 2020-12-04T21:37:26.3149448Z           syscall : 'kill'
@@ -35306,7 +35306,7 @@ function terminate( test )
       2020-11-30T15:34:30.1164087Z --------------- uncaught asynchronous error --------------->
       2020-11-30T15:34:30.1170776Z
       2020-11-30T15:34:30.1171561Z         kill EPERM
-      2020-11-30T15:34:30.1173713Z  = Message of error#367
+      2020-11-30T15:34:30.1173713Z  = Message of Error#367
       2020-11-30T15:34:30.1174175Z           errno : 'EPERM'
       2020-11-30T15:34:30.1177929Z     kill EPERM
       2020-11-30T15:34:30.1178315Z           code : 'EPERM'
@@ -36758,7 +36758,7 @@ program1::begin
 program2::begin
 SIGTERM
 --------------- uncaught error --------------->
- = Message of error#1
+ = Message of Error#1
     IPC channel is already disconnected
     Error starting the process
         Exec path : program2.js
@@ -36906,7 +36906,7 @@ function terminateWithDetachedChild( test )
       2020-11-30T18:29:54.4356321Z SIGTERM
       2020-11-30T18:29:54.4400160Z --------------- uncaught error --------------->
       2020-11-30T18:29:54.4401318Z 
-      2020-11-30T18:29:54.4424846Z = Message of error#2
+      2020-11-30T18:29:54.4424846Z = Message of Error#2
       2020-11-30T18:29:54.4426746Z     IPC channel is already disconnected
       2020-11-30T18:29:54.4428094Z       code : 'ERR_IPC_DISCONNECTED'
       2020-11-30T18:29:54.4429307Z     Error starting the process
@@ -38485,7 +38485,7 @@ function terminateDifferentStdio( test )
         signalSend : 544 name: node.exe
         signalSend : 552 name: csrss.exe
         ...
-          = Message of error#1
+          = Message of Error#1
             kill EPERM
             errno : 'EPERM'
             code : 'EPERM'
@@ -38502,7 +38502,7 @@ function terminateDifferentStdio( test )
         signalSend : 544 name: conhost.exe
         signalSend : 552 name: csrss.exe
         ...
-        = Message of error#1
+        = Message of Error#1
           kill EPERM
           errno : 'EPERM'
           code : 'EPERM'
@@ -39488,7 +39488,7 @@ function childrenOptionFormatList( test )
 2020-12-04T21:55:38.1764654Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::childrenOptionFormatList / parent -> child -> child # 5 ) : expected true ... ok
 2020-12-04T21:55:38.1876237Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::childrenOptionFormatList / parent -> child -> child # 6 ) ... ok
 2020-12-04T21:55:38.1979018Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::childrenOptionFormatList / parent -> child -> child # 7 ) ... ok
-2020-12-04T21:55:38.2102216Z          = Message of error#379
+2020-12-04T21:55:38.2102216Z          = Message of Error#379
 2020-12-04T21:55:38.2103034Z             Cannot read property 'name' of undefined
 2020-12-04T21:55:38.2103698Z
 2020-12-04T21:55:38.2104176Z          = Beautified calls stack
