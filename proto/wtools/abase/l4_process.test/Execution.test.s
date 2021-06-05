@@ -9144,9 +9144,10 @@ function starterProcedureStack( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
+  debugger;
   let programPath = a.program( program1 ).programPath;
+  debugger;
   let modes = [ 'fork', 'spawn', 'shell' ];
-
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
@@ -9181,7 +9182,7 @@ function starterProcedureStack( test )
         stack : 0
       };
 
-      let starterPath = a.program({ routine : starterApp, locals })
+      let starterPath = a.program({ routine : starterApp, locals }).programPath;
 
       let o =
       {
@@ -9224,7 +9225,7 @@ function starterProcedureStack( test )
         stack : 1
       };
 
-      let starterPath = a.program({ routine : starterApp, locals })
+      let starterPath = a.program({ routine : starterApp, locals }).programPath;
 
       let o =
       {
@@ -9267,7 +9268,7 @@ function starterProcedureStack( test )
         stack : 0
       };
 
-      let starterPath = a.program({ routine : starterApp, locals })
+      let starterPath = a.program({ routine : starterApp, locals }).programPath;
 
       let o =
       {
@@ -9310,7 +9311,7 @@ function starterProcedureStack( test )
         stack : 1
       };
 
-      let starterPath = a.program({ routine : starterApp, locals })
+      let starterPath = a.program({ routine : starterApp, locals }).programPath;
 
       let o =
       {
