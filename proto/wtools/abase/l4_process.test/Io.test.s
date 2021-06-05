@@ -811,12 +811,12 @@ function inputWithVectorizedProperties( test )
         scriptPath : a.abs( 'testApp' ),
         scriptArgs : [ 'r:[ a, b ]', 'v:2' ],
         interpreterArgsStrings : '',
-        scriptArgsString : 'r:"[ a, b ]" v:2',
+        scriptArgsString : 'r:[ a, b ] v:2',
         subject : '',
         map : { r : [ 'a', 'b' ], v : 2 },
         subjects : [ '' ],
         maps : [ { r : [ 'a', 'b' ], v : 2 } ],
-        original : 'r:"[ a, b ]" v:2',
+        original : 'r:[ a, b ] v:2',
       };
       test.identical( op, exp );
     });

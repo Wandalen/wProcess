@@ -4621,7 +4621,8 @@ function startMinimalExecPathQuotesClosing( test )
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"option: "value', 'with', 'space""' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"option: "value', 'with', 'space""' ] );
           test.identical( op.scriptArgs, [ 'option: value', 'with', 'space' ] );
-          test.identical( op.map, {} ); /* qqq : for Dmytro : regression related change in parsing? */
+          test.identical( op.map, { option : 'value with space' } );
+          // test.identical( op.map, {} ); /* aaa : for Dmytro : regression related change in parsing? */ /* Dmytro : this check is hack, parsed execPath in all modes should have options map */
         }
         else if( mode === 'spawn' )
         {
