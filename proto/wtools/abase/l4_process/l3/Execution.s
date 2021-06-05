@@ -2475,9 +2475,16 @@ function starter( o0 )
   o0.ready = o0.ready || new _.Consequence().take( null );
 
   _.routineExtend( er, _.process.startMultiple );
+  _.assert( er.defaults !== _.process.startMultiple.defaults );
   er.predefined = o0;
 
+  for( let k in o0 )
+  if( _.primitive.is( o0[ k ] ) )
+  er.defaults[ k ] = o0[ k ];
+
   return er;
+
+  /* */
 
   function er()
   {
@@ -2574,8 +2581,6 @@ function starter( o0 )
 
 }
 
-// starter.defaults = Object.create( startMultiple.defaults );
-// starter.defaults = _.mapBut_( startMultiple.defaults, [ 'procedure' ] ); /* qqq : for junior : very bad */
 starter.defaults = _.mapBut_( null, startMultiple.defaults, [ 'procedure' ] );
 
 // --

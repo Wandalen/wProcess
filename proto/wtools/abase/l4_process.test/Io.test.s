@@ -45,7 +45,7 @@ function input( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( testApp ).programPath );
 
   /* */
 
@@ -451,7 +451,7 @@ function input( test )
   a.ready.then( () =>
   {
     test.case = 'two calls of routine, should return cached result';
-    let programPath = a.path.nativize( a.program( testApp2 ) );
+    let programPath = a.path.nativize( a.program( testApp2 ).programPath );
     let o =
     {
       execPath : 'node ' + programPath,
@@ -544,7 +544,7 @@ function inputWithNotDefaultDelimeters( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( testApp ).programPath );
 
   /* */
 
@@ -635,7 +635,7 @@ function inputWithNotDefaultDelimeters( test )
   a.ready.then( () =>
   {
     test.case = 'two calls of routine';
-    let programPath = a.path.nativize( a.program( testApp2 ) );
+    let programPath = a.path.nativize( a.program( testApp2 ).programPath );
     let o =
     {
       execPath : 'node ' + programPath,
@@ -747,7 +747,7 @@ function inputWithVectorizedProperties( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( testApp ).programPath );
 
   /* - */
 
@@ -1718,7 +1718,7 @@ function inputReadToCheckInputInfluence( test )
     context : { t0 : context.t0 },
     toolsPath : _.module.resolve( 'wTools' ),
   };
-  let programPath = a.program( { routine : testApp, locals } );
+  let programPath = a.program({ routine : testApp, locals }).programPath;
 
   let o =
   {
@@ -1784,8 +1784,8 @@ function processOnExitEvent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );  /* zzz : a.path.nativize? */
-  // let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ).programPath );  /* zzz : a.path.nativize? */
+  // let programPath = a.program( testApp ).programPath;
 
   /* */
 
@@ -1875,7 +1875,7 @@ function processOffExitEvent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( testApp ).programPath );
 
   /* */
 
@@ -2050,7 +2050,7 @@ function processArgsBase( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( testApp ).programPath );
 
   let shell = _.process.starter
   ({
@@ -2139,7 +2139,7 @@ function processArgsPropertiesBase( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( testApp ).programPath );
 
   let shell = _.process.starter
   ({
@@ -2387,7 +2387,7 @@ function processArgsMultipleCommands( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( testApp ).programPath );
 
   let shell = _.process.starter
   ({
@@ -2483,7 +2483,7 @@ function processArgsPaths( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( testApp ).programPath );
 
   let shell = _.process.starter
   ({
@@ -2581,7 +2581,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( testApp ).programPath );
 
   let shell = _.process.starter
   ({
@@ -3044,7 +3044,7 @@ function realMainFile( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let testAppPathNative = a.path.nativize( testAppPath );
 
   a.ready.then( () =>

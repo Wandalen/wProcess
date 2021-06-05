@@ -230,8 +230,9 @@ function assetFor( test, name )
     o.locals = o.locals || locals;
     _.props.supplement( o.locals, locals );
     _.props.supplement( o.locals.context, locals.context );
-    let programPath = a.path.nativize( oprogram.body.call( a, o ) ); /* zzz : modify a.program()? */
-    return programPath;
+    let result = oprogram.body.call( a, o );
+    result.programPath = a.path.nativize( result.programPath );
+    return result;
   }
 
 }
@@ -244,8 +245,8 @@ function startMinimalBasic( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
-  let programPath2 = a.program( program2 );
+  let programPath = a.program( program1 ).programPath;
+  let programPath2 = a.program( program2 ).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -641,6 +642,7 @@ ${programPath}:end
   {
     console.log( process.argv.slice( 2 ).join( ' ' ) );
   }
+
 }
 
 startMinimalBasic.timeOut = 31e4; /* Locally : 30.986s. Time out on git after 1 min ( started : 04.04.24, time out : 04.05.28 ) */
@@ -672,7 +674,7 @@ function startMinimal( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -770,7 +772,7 @@ function startMinimal( test )
         console.log( process.execArgv );
       }
 
-      let programPath = a.program( testApp2 );
+      let programPath = a.program( testApp2 ).programPath;
 
       let o =
       {
@@ -813,7 +815,7 @@ function startMinimal( test )
         console.log( process.execArgv );
       }
 
-      let programPath = a.program( testApp3 );
+      let programPath = a.program( testApp3 ).programPath;
 
       let o =
       {
@@ -856,7 +858,7 @@ function startMinimal( test )
         })
       }
 
-      let programPath = a.program( testApp4 );
+      let programPath = a.program( testApp4 ).programPath;
 
       let o =
       {
@@ -948,7 +950,7 @@ function startMinimal( test )
         }, context.t1 * 5 ) /* 5000 */
       }
 
-      let programPath = a.program( testApp5 );
+      let programPath = a.program( testApp5 ).programPath;
 
       let o =
       {
@@ -988,7 +990,7 @@ function startMinimal( test )
         }, context.t1 * 5 ) /* 5000 */
       }
 
-      let programPath = a.program( testApp6 );
+      let programPath = a.program( testApp6 ).programPath;
 
       let o =
       {
@@ -1032,8 +1034,8 @@ function startMinimalErrorHandling( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
-  let testAppPath2 = a.program( program2 );
+  let testAppPath = a.program( program1 ).programPath;
+  let testAppPath2 = a.program( program2 ).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -1498,7 +1500,7 @@ function startMinimalSync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
 
   let modes = [ 'spawn', 'shell' ];
 
@@ -1665,7 +1667,7 @@ function startSingleSyncDeasync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -1963,7 +1965,7 @@ function startMinimalSyncDeasyncTimeOut( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+  let programPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, timeOut : null, mode }) ) );
@@ -2035,7 +2037,7 @@ function startMinimalSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+  let programPath = a.program( testApp ).programPath;
   let modes = [  'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
@@ -2102,7 +2104,7 @@ function startMultipleSyncDeasync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+  let programPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
@@ -2225,7 +2227,7 @@ function startMinimalWithoutExecPath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+  let programPath = a.program( testApp ).programPath;
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -2345,7 +2347,7 @@ function startMinimalArgsOption( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+  let programPath = a.program( testApp ).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -2465,8 +2467,8 @@ function startMinimalArgumentsParsing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPathNoSpace = a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) });
-  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) });
+  let testAppPathNoSpace = a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) }).programPath;
+  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }).programPath;
 
   /* for combination:
       path to exe file : [ with space, without space ]
@@ -3002,8 +3004,8 @@ function startMinimalArgumentsParsingNonTrivial( test )
 
   let a = context.assetFor( test, false );
 
-  let testAppPathNoSpace = a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) });
-  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) });
+  let testAppPathNoSpace = a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) }).programPath;
+  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -3590,7 +3592,7 @@ function startMinimalArgumentsNestedQuotes( test )
 
   let a = context.assetFor( test, false );
 
-  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) });
+  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -4012,11 +4014,10 @@ function startMinimalExecPathQuotesClosing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPathSpace = a.path.nativize( a.path.normalize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) ) );
+  let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }).programPath );
   let modes = [ 'fork', 'spawn', 'shell' ];
   // let modes = [ 'shell' ]; /* xxx2 */
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
   return a.ready;
 
   /* */
@@ -4763,7 +4764,7 @@ function startMinimalExecPathSeveralCommands( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( app );
+  let testAppPath = a.program( app ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -4841,7 +4842,7 @@ function startExecPathNonTrivialModeShell( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.path.normalize( a.program( app ) ) );
+  let testAppPath = a.path.nativize( a.program( app ).programPath );
 
   let shell = _.process.starter
   ({
@@ -5786,7 +5787,7 @@ function startMinimalImportantExecPathPassingThrough( test )
       options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
 
-    let programPath = a.program({ routine : testAppParent, locals });
+    let programPath = a.program({ routine : testAppParent, locals }).programPath;
 
     let options =
     {
@@ -5819,7 +5820,7 @@ function startMinimalImportantExecPathPassingThrough( test )
       options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
 
-    let programPath = a.program({ routine : testAppParent, locals });
+    let programPath = a.program({ routine : testAppParent, locals }).programPath;
 
     let options =
     {
@@ -5852,7 +5853,7 @@ function startMinimalImportantExecPathPassingThrough( test )
       options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
 
-    let programPath = a.program({ routine : testAppParent, locals });
+    let programPath = a.program({ routine : testAppParent, locals }).programPath;
 
     let options =
     {
@@ -5912,7 +5913,7 @@ function startMinimalImportantExecPathPassingThrough( test )
       options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
 
-    let programPath = a.program({ routine : testAppParent, locals });
+    let programPath = a.program({ routine : testAppParent, locals }).programPath;
 
     let options =
     {
@@ -5959,7 +5960,7 @@ function startMinimalImportantExecPathPassingThrough( test )
       options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
 
-    let programPath = a.program({ routine : testAppParent, locals });
+    let programPath = a.program({ routine : testAppParent, locals }).programPath;
 
     let options =
     {
@@ -6013,7 +6014,7 @@ function startMinimalImportantExecPathPassingThrough( test )
       options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
 
-    let programPath = a.program({ routine : testAppParent, locals });
+    let programPath = a.program({ routine : testAppParent, locals }).programPath;
 
     let options =
     {
@@ -6059,7 +6060,7 @@ function startMinimalImportantExecPathPassingThrough( test )
       options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
 
-    let programPath = a.program({ routine : testAppParent, locals });
+    let programPath = a.program({ routine : testAppParent, locals }).programPath;
 
     let options =
     {
@@ -6093,7 +6094,7 @@ function startMinimalImportantExecPathPassingThrough( test )
       options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
 
-    let programPath = a.program({ routine : testAppParent, locals });
+    let programPath = a.program({ routine : testAppParent, locals }).programPath;
 
     let options =
     {
@@ -6127,7 +6128,7 @@ function startMinimalImportantExecPathPassingThrough( test )
       options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
 
-    let programPath = a.program({ routine : testAppParent, locals });
+    let programPath = a.program({ routine : testAppParent, locals }).programPath;
 
     let options =
     {
@@ -6184,7 +6185,7 @@ function startNormalizedExecPath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.path.normalize( a.program( testApp ) ) );
+  let testAppPath = a.path.nativize( a.program( testApp ).programPath );
 
   /* */
 
@@ -6307,7 +6308,7 @@ function startMinimalExecPathWithSpace( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( { routine : testApp, dirPath : 'path with space' } );
+  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' }).programPath;
 
   let execPathWithSpace = 'node ' + testAppPath;
 
@@ -6515,8 +6516,8 @@ function startMinimalDifferentTypesOfPaths( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let execPath = a.program({ routine : testApp });
-  let execPathWithSpace = a.program({ routine : testApp, dirPath : 'path with space' });
+  let execPath = a.program({ routine : testApp }).programPath;
+  let execPathWithSpace = a.program({ routine : testApp, dirPath : 'path with space' }).programPath;
   execPathWithSpace = a.fileProvider.path.normalize( execPathWithSpace );
   let execPathWithSpaceNative = a.fileProvider.path.nativize( execPathWithSpace );
 
@@ -6943,8 +6944,8 @@ function startNjsPassingThroughExecPathWithSpace( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPathParent = a.program( testAppParent );
-  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
+  let testAppPathParent = a.program( testAppParent ).programPath;
+  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' }).programPath;
   let execPathWithSpace = testAppPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -7156,8 +7157,8 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
 {
   let context = this;
   let a = context.assetFor( test, 'basic' );
-  let testAppPathParent = a.program( testAppParent );
-  let testAppPath = a.program( testApp );
+  let testAppPathParent = a.program( testAppParent ).programPath;
+  let testAppPath = a.program( testApp ).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -7174,7 +7175,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
     {
       test.case = `mode : ${mode}, execute simple js program with normalized path`
 
-      let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
+      let execPath = a.path.nativize( testAppPath );
       let o =
       {
         execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
@@ -7271,7 +7272,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
     {
       test.case = `mode : ${mode}, execute simple js program with normalized path, parent args : [ 'arg' ]`
 
-      let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
+      let execPath = a.path.nativize( testAppPath );
       let o =
       {
         execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
@@ -7372,8 +7373,8 @@ function startMinimalPassingThroughExecPathWithSpace( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
-  let testAppPathParent = a.program( testAppParent );
+  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' }).programPath;
+  let testAppPathParent = a.program( testAppParent ).programPath;
   // let execPathWithSpace = 'node ' + testAppPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -7771,7 +7772,7 @@ function startProcedureTrivial( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let start = _.process.starter
   ({
     currentPath : a.routinePath,
@@ -7833,7 +7834,7 @@ function startProcedureExists( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
+  let testAppPath = a.program( program1 ).programPath;
 
   let start = _.process.starter
   ({
@@ -7913,7 +7914,7 @@ function startSingleProcedureStack( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -8168,7 +8169,7 @@ function startAllProcedureSourcePath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -8302,7 +8303,7 @@ function startAllProcedureSourcePathInSubprocess( test )
   let context = this;
   let a = context.assetFor( test, false );
 
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -8337,7 +8338,7 @@ function startAllProcedureSourcePathInSubprocess( test )
         }
       }
 
-      let startSinglePath = a.program({ routine : startSingleApp, locals });
+      let startSinglePath = a.program({ routine : startSingleApp, locals }).programPath;
 
       let o =
       {
@@ -8382,7 +8383,7 @@ function startAllProcedureSourcePathInSubprocess( test )
         }
       }
 
-      let startMinimalPath = a.program({ routine : startMinimalApp, locals });
+      let startMinimalPath = a.program({ routine : startMinimalApp, locals }).programPath;
 
       let o =
       {
@@ -8426,7 +8427,7 @@ function startAllProcedureSourcePathInSubprocess( test )
         }
       }
 
-      let startMultiplePath = a.program({ routine : startMultipleApp, locals });
+      let startMultiplePath = a.program({ routine : startMultipleApp, locals }).programPath;
 
       let o =
       {
@@ -8522,7 +8523,7 @@ function startAllProcedureStack( test )
   let context = this;
   let a = context.assetFor( test, false );
 
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -8558,7 +8559,7 @@ function startAllProcedureStack( test )
         }
       }
 
-      let startSinglePath = a.program({ routine : startSingleApp, locals });
+      let startSinglePath = a.program({ routine : startSingleApp, locals }).programPath;
 
       let o =
       {
@@ -8603,7 +8604,7 @@ function startAllProcedureStack( test )
         }
       }
 
-      let startMinimalPath = a.program({ routine : startMinimalApp, locals });
+      let startMinimalPath = a.program({ routine : startMinimalApp, locals }).programPath;
 
       let o =
       {
@@ -8647,7 +8648,7 @@ function startAllProcedureStack( test )
         }
       }
 
-      let startMultiplePath = a.program({ routine : startMultipleApp, locals });
+      let startMultiplePath = a.program({ routine : startMultipleApp, locals }).programPath;
 
       let o =
       {
@@ -8691,7 +8692,7 @@ function startAllProcedureStack( test )
         }
       }
 
-      let startSinglePath = a.program({ routine : startSingleApp, locals });
+      let startSinglePath = a.program({ routine : startSingleApp, locals }).programPath;
 
       let o =
       {
@@ -8736,7 +8737,7 @@ function startAllProcedureStack( test )
         }
       }
 
-      let startMinimalPath = a.program({ routine : startMinimalApp, locals });
+      let startMinimalPath = a.program({ routine : startMinimalApp, locals }).programPath;
 
       let o =
       {
@@ -8780,7 +8781,7 @@ function startAllProcedureStack( test )
         }
       }
 
-      let startMultiplePath = a.program({ routine : startMultipleApp, locals });
+      let startMultiplePath = a.program({ routine : startMultipleApp, locals }).programPath;
 
       let o =
       {
@@ -9068,7 +9069,7 @@ function starterProcedureSourcePath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   const starter = _.process.starter
@@ -9142,7 +9143,7 @@ function starterProcedureStack( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
@@ -9374,7 +9375,7 @@ function startMultipleProcedureStack( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
@@ -9817,7 +9818,7 @@ function startMinimalOnTerminateSeveralCallbacksChronology( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -9909,7 +9910,7 @@ function startMinimalChronology( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let track;
   let niteration = 0;
 
@@ -10164,8 +10165,8 @@ function startMultipleState( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppErrorPath = a.program( testAppError );
+  let testAppPath = a.program( testApp ).programPath;
+  let testAppErrorPath = a.program( testAppError ).programPath;
   var modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -10414,7 +10415,7 @@ function startSingleReadyDelay( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   // let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => single( 0, 0, mode ) ) );
@@ -10493,7 +10494,7 @@ function startMultipleReadyDelay( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
@@ -10645,7 +10646,7 @@ function startMinimalOptionWhenDelay( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   // let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
@@ -10719,7 +10720,7 @@ function startMinimalOptionWhenTime( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -10793,10 +10794,10 @@ function startMinimalOptionTimeOut( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath1 = a.program({ routine : program1 });
-  let programPath2 = a.program({ routine : program2 });
-  let programPath3 = a.program({ routine : program3 });
-  let programPath4 = a.program({ routine : program4 });
+  let programPath1 = a.program({ routine : program1 }).programPath;
+  let programPath2 = a.program({ routine : program2 }).programPath;
+  let programPath3 = a.program({ routine : program3 }).programPath;
+  let programPath4 = a.program({ routine : program4 }).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -11086,8 +11087,8 @@ function startSingleAfterDeath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let program1Path = a.program( program1 );
-  let program2Path = a.program( program2 );
+  let program1Path = a.program( program1 ).programPath;
+  let program2Path = a.program( program2 ).programPath;
   let program2PidPath = a.abs( a.routinePath, 'program2Pid' );
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -11233,8 +11234,8 @@ function startSingleAfterDeathTerminatingMain( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let program1Path = a.program( program1 );
-  let program2Path = a.program( program2 );
+  let program1Path = a.program( program1 ).programPath;
+  let program2Path = a.program( program2 ).programPath;
   let program2PidPath = a.abs( a.routinePath, 'program2Pid' );
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -11450,8 +11451,8 @@ function startSingleAfterDeathOutput( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let program1Path = a.program( program1 );
-  let program2Path = a.program( program2 );
+  let program1Path = a.program( program1 ).programPath;
+  let program2Path = a.program( program2 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -11587,7 +11588,7 @@ function startMinimalDetachingResourceReady( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.program( testAppChild ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -11688,8 +11689,8 @@ function startMinimalDetachingNoTerminationBegin( test )
       if( mode === 'fork' ) /* In mode::fork option::ipc must be true.*/
       return test.true( true );
 
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } });
-      let testAppChildPath = a.program( testAppChild );
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } }).programPath;
+      let testAppChildPath = a.program( testAppChild ).programPath;
       let o =
       {
         execPath : 'node testAppParent stdio : ignore ipc : false outputPiping : 0 outputCollecting : 0',
@@ -11742,8 +11743,8 @@ function startMinimalDetachingNoTerminationBegin( test )
       if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication. */
       return test.true( true );
 
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } });
-      let testAppChildPath = a.program( testAppChild );
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } }).programPath;
+      let testAppChildPath = a.program( testAppChild ).programPath;
 
       let o =
       {
@@ -11790,8 +11791,8 @@ function startMinimalDetachingNoTerminationBegin( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, stdio:pipe, parent should wait for child to exit`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } });
-      let testAppChildPath = a.program( testAppChild );
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } }).programPath;
+      let testAppChildPath = a.program( testAppChild ).programPath;
 
       let o =
       {
@@ -11844,8 +11845,8 @@ function startMinimalDetachingNoTerminationBegin( test )
       if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication. */
       return test.true( true );
 
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } });
-      let testAppChildPath = a.program( testAppChild );
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } }).programPath;
+      let testAppChildPath = a.program( testAppChild ).programPath;
 
       let o =
       {
@@ -11946,8 +11947,8 @@ function startMinimalDetachedOutputStdioIgnore( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.program( testAppParent ).programPath;
+  let testAppChildPath = a.program( testAppChild ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -12116,8 +12117,8 @@ function startMinimalDetachedOutputStdioPipe( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.program( testAppParent ).programPath;
+  let testAppChildPath = a.program( testAppChild ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -12318,7 +12319,7 @@ function startMinimalDetachedOutputStdioInherit( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.program( testAppChild ).programPath;
 
   /* */
 
@@ -12433,7 +12434,7 @@ function startMinimalDetachingIpc( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.program( testAppChild ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -12591,8 +12592,8 @@ function startMinimalDetachingTrivial( test )
       test.case = `mode : ${mode}, trivial use case`;
 
       let testFilePath = a.abs( a.routinePath, 'testFile' );
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } });
-      let testAppChildPath = a.program( testAppChild );
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } }).programPath;
+      let testAppChildPath = a.program( testAppChild ).programPath;
 
       let o =
       {
@@ -12885,8 +12886,8 @@ function startMinimalDetachingChildExitsAfterParent( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, parent disconnects detached child process and exits, child contiues to work`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } });
-      let testAppChildPath = a.program( testAppChild );
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } }).programPath;
+      let testAppChildPath = a.program( testAppChild ).programPath;
       let testFilePath = a.abs( a.routinePath, 'testFile' );
 
       let o =
@@ -13062,8 +13063,8 @@ function startMinimalDetachingChildExitsBeforeParent( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, parent disconnects detached child process and exits, child contiues to work`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } });
-      let testAppChildPath = a.program( testAppChild );
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } }).programPath;
+      let testAppChildPath = a.program( testAppChild ).programPath;
       let testFilePath = a.abs( a.routinePath, 'testFile' );
 
       let o =
@@ -13252,7 +13253,7 @@ function startMinimalDetachingDisconnectedEarly( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   // let modes = [ 'fork', 'spawn', 'shell' ];
   let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -13372,7 +13373,7 @@ function startMinimalDetachingDisconnectedLate( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -13566,7 +13567,7 @@ function startMinimalDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.program( testAppChild ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -13666,7 +13667,7 @@ function startMinimalDetachingEndCompetitorIsExecuted( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.program( testAppChild ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -14392,7 +14393,7 @@ function startMinimalEventClose( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program({ routine : program1 });
+  let testAppPath = a.program({ routine : program1 }).programPath;
   let data = [];
 
   let modes = [ 'spawn', 'fork', 'shell' ];
@@ -14525,7 +14526,7 @@ function startMinimalEventExit( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program({ routine : program1 });
+  let testAppPath = a.program({ routine : program1 }).programPath;
   let data = [];
   let modes = [ 'spawn', 'fork', 'shell' ];
   let stdio = [ 'inherit', 'pipe', 'ignore' ];
@@ -14690,7 +14691,7 @@ function startMinimalDetachingThrowing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.program( testAppChild ).programPath;
 
   /* */
 
@@ -14779,7 +14780,7 @@ function startNjsDetachingChildThrowing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.program( testAppChild ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -14883,7 +14884,7 @@ function startMinimalOnStart( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.program( testAppChild ).programPath;
   let track = [];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -15199,7 +15200,7 @@ function startMinimalOnTerminate( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.program( testAppChild ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) =>
@@ -15550,7 +15551,7 @@ function startMinimalNoEndBug1( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.program( testAppChild ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -15662,7 +15663,7 @@ function startMinimalWithDelayOnReady( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let time1 = _.time.now();
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -15765,7 +15766,7 @@ function startMinimalOnIsNotConsequence( test )
   let context = this;
   let track;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   // let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
@@ -15968,7 +15969,7 @@ function startMultipleConcurrent( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
+  let testAppPath = a.program( program1 ).programPath;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -16896,7 +16897,7 @@ function startMultipleConcurrentConsequences( test )
   let track;
   let track2;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let t0 = _.time.now();
   let o3 =
   {
@@ -17758,7 +17759,7 @@ function starterConcurrentMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
+  let testAppPath = a.program( program1 ).programPath;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -18295,8 +18296,8 @@ function starterConcurrentMultipleOnWindowsExperiment( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath1 = a.path.nativize( a.path.normalize( a.program( program1 ) ) );
-  let programPath2 = a.path.nativize( a.path.normalize( a.program( program2 ) ) );
+  let programPath1 = a.path.nativize( a.program( program1 ).programPath );
+  let programPath2 = a.path.nativize( a.program( program2 ).programPath );
 
   /* */
 
@@ -18382,8 +18383,8 @@ function startNjs( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  var testAppPath = a.program( testApp );
-  var testAppPath2 = a.program( testApp2 );
+  var testAppPath = a.program( testApp ).programPath;
+  var testAppPath2 = a.program( testApp2 ).programPath;
 
   /* */
 
@@ -18518,7 +18519,7 @@ function startNjsWithReadyDelayStructural( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -18777,7 +18778,7 @@ function startNjsOptionInterpreterArgs( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let totalMem = require( 'os' ).totalmem();
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -19474,7 +19475,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, dry : 0, detaching : 0, mode }) ) );
@@ -19746,7 +19747,7 @@ function starter( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -20136,7 +20137,7 @@ function starterArgs( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -20409,9 +20410,9 @@ function starterOptionsPollution( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( first );
-  let testAppPath2 = a.program( second );
-  let testAppPath3 = a.program( program );
+  let testAppPath = a.program( first ).programPath;
+  let testAppPath2 = a.program( second ).programPath;
+  let testAppPath3 = a.program( program ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -20611,6 +20612,51 @@ function starterOptionsPollution( test )
   }
 }
 
+//
+
+function starterDefaults( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+    let logger = new _.Logger;
+
+    let starterOptions =
+    {
+      execPath : mode === 'fork' ? 'program1' : 'node program1',
+      currentPath : __dirname,
+      args : [ 'arg1', 'arg2' ],
+      mode,
+      outputColoring : { out : 0, err : 0 },
+      env : { 'key1' : 'val', 'PATH' : process.env.PATH },
+      outputCollecting : 1,
+      outputPiping : 1,
+      inputMirroring : 1,
+      throwingExitCode : 0,
+      logger,
+    }
+    let starterOptions2 = _.props.extend( null, starterOptions );
+    let start = _.process.starter( starterOptions )
+
+    for( let k in starterOptions2 )
+    {
+      test.true( starterOptions2[ k ] === start.predefined[ k ] );
+      if( _.primitive.is( starterOptions2[ k ] ) )
+      test.true( starterOptions2[ k ] === start.defaults[ k ] );
+    }
+
+    return ready;
+  }
+
+}
 
 // --
 // output
@@ -20620,7 +20666,7 @@ function startMinimalOptionOutputCollecting( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => single( mode ) ) );
   return a.ready;
@@ -20860,9 +20906,9 @@ function startMinimalOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 0, normal output, inputMirroring : 0`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
       let locals = { programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -20889,9 +20935,9 @@ function startMinimalOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 0`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
       let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -20918,9 +20964,9 @@ function startMinimalOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 1`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
       let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -20949,9 +20995,9 @@ function startMinimalOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 0, error output, inputMirroring : 0`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
       let locals = { programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -20978,9 +21024,9 @@ function startMinimalOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, error output, inputMirroring : 0`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
       let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21007,9 +21053,9 @@ function startMinimalOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, error output, inputMirroring : 1`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
       let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21093,7 +21139,7 @@ function startMinimalOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 0, outputColloring : { err : 0, out : 1 }, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
       let locals =
       {
         programPath : testAppPath2,
@@ -21102,7 +21148,7 @@ function startMinimalOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode,
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21129,7 +21175,7 @@ function startMinimalOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 0, outputColoring : { err : 1, out : 1 }, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
       let locals =
       {
         programPath : testAppPath2,
@@ -21138,7 +21184,7 @@ function startMinimalOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21165,7 +21211,7 @@ function startMinimalOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, outputColoring : { err : 1, out : 1 }, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
       let locals =
       {
         programPath : testAppPath2,
@@ -21174,7 +21220,7 @@ function startMinimalOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21202,7 +21248,7 @@ function startMinimalOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, outputColoring : { err : 1, out : 0 }, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
       let locals =
       {
         programPath : testAppPath2,
@@ -21211,7 +21257,7 @@ function startMinimalOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21239,7 +21285,7 @@ function startMinimalOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 0, outputColoring : { err : 1, out : 0 }, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
       let locals =
       {
         programPath : testAppPath2,
@@ -21247,7 +21293,7 @@ function startMinimalOptionOutputColoringStderr( test )
         outputColoring : { err : 1, out : 0 },
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21329,7 +21375,7 @@ function startMinimalOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 0, outputColloring : { out : 0, err : 1 }, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
       let locals =
       {
         programPath : testAppPath2,
@@ -21337,7 +21383,7 @@ function startMinimalOptionOutputColoringStdout( test )
         outputColoring : { out : 0, err : 1 },
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21364,7 +21410,7 @@ function startMinimalOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 0, outputColoring : { out : 1, err : 0 }, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
       let locals =
       {
         programPath : testAppPath2,
@@ -21372,7 +21418,7 @@ function startMinimalOptionOutputColoringStdout( test )
         outputColoring : { out : 1, err : 0 },
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21399,7 +21445,7 @@ function startMinimalOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 0, outputColoring : { out : 1, err : 1 }, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
       let locals =
       {
         programPath : testAppPath2,
@@ -21407,7 +21453,7 @@ function startMinimalOptionOutputColoringStdout( test )
         outputColoring : { out : 1, err : 1 },
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21434,7 +21480,7 @@ function startMinimalOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, outputColoring : { out : 1, err : 0 }, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
       let locals =
       {
         programPath : testAppPath2,
@@ -21442,7 +21488,7 @@ function startMinimalOptionOutputColoringStdout( test )
         outputColoring : { out : 1, err : 0 },
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21471,7 +21517,7 @@ function startMinimalOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 0, outputColoring : { out : 1, err : 0 }, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
       let locals =
       {
         programPath : testAppPath2,
@@ -21479,7 +21525,7 @@ function startMinimalOptionOutputColoringStdout( test )
         outputColoring : { out : 1, err : 0 },
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21507,7 +21553,7 @@ function startMinimalOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, outputColoring : { out : 0, err : 1 }, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
       let locals =
       {
         programPath : testAppPath2,
@@ -21515,7 +21561,7 @@ function startMinimalOptionOutputColoringStdout( test )
         outputColoring : { out : 0, err : 1 },
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -21583,7 +21629,7 @@ function startMinimalOptionOutputGraying( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
 
   /* */
 
@@ -21669,7 +21715,7 @@ function startMinimalOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 0, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
 
       let locals =
       {
@@ -21679,7 +21725,7 @@ function startMinimalOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -21705,7 +21751,7 @@ function startMinimalOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 0, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
 
       let locals =
       {
@@ -21715,7 +21761,7 @@ function startMinimalOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -21741,7 +21787,7 @@ function startMinimalOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 0, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
 
       let locals =
       {
@@ -21751,7 +21797,7 @@ function startMinimalOptionOutputPrefixing( test )
         mode,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -21778,7 +21824,7 @@ function startMinimalOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 0, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
 
       let locals =
       {
@@ -21788,7 +21834,7 @@ function startMinimalOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -21815,7 +21861,7 @@ function startMinimalOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 1, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
 
       let locals =
       {
@@ -21825,7 +21871,7 @@ function startMinimalOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -21850,7 +21896,7 @@ function startMinimalOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 1, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
 
       let locals =
       {
@@ -21860,7 +21906,7 @@ function startMinimalOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -21886,7 +21932,7 @@ function startMinimalOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 1, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
 
       let locals =
       {
@@ -21896,7 +21942,7 @@ function startMinimalOptionOutputPrefixing( test )
         mode,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -21924,7 +21970,7 @@ function startMinimalOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 1, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
 
       let locals =
       {
@@ -21934,7 +21980,7 @@ function startMinimalOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22016,7 +22062,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode } outputPiping : 1, normal output`
-      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log' } }).programPath;
 
       let locals =
       {
@@ -22027,7 +22073,7 @@ function startMinimalOptionOutputPiping( test )
         prefixing : 0
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22053,7 +22099,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 0, normal output`
-      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log' } }).programPath;
 
       let locals =
       {
@@ -22064,7 +22110,7 @@ function startMinimalOptionOutputPiping( test )
         prefixing : 0
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22090,7 +22136,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 0, normal output`
-      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '' } });
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '' } }).programPath;
 
       let locals =
       {
@@ -22101,7 +22147,7 @@ function startMinimalOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22127,7 +22173,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 1, normal output`
-      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '' } });
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '' } }).programPath;
 
       let locals =
       {
@@ -22138,7 +22184,7 @@ function startMinimalOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22164,7 +22210,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, single line, outputPiping : 1, outputPrefixing : 1, normal output`
-      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log' } });
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log' } }).programPath;
 
       let locals =
       {
@@ -22175,7 +22221,7 @@ function startMinimalOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22202,7 +22248,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 2 line output ( 1 with text ), outputPiping : 1, outputPrefixing : 1, normal output`
-      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '\nLog' } });
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '\nLog' } }).programPath;
 
       let locals =
       {
@@ -22213,7 +22259,7 @@ function startMinimalOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22240,7 +22286,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 4 line output ( 2 with text ), outputPiping : 1, outputPrefixing : 1, normal output`
-      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '\nLog\nLog2\n' } });
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '\nLog\nLog2\n' } }).programPath;
 
       let locals =
       {
@@ -22251,7 +22297,7 @@ function startMinimalOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22277,7 +22323,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 1, normal output`
-      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } }).programPath;
 
       let locals =
       {
@@ -22288,7 +22334,7 @@ function startMinimalOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22318,7 +22364,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 0, normal output`
-      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } }).programPath;
 
       let locals =
       {
@@ -22329,7 +22375,7 @@ function startMinimalOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22359,7 +22405,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 0, outputPrefixing : 1, normal output`
-      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } }).programPath;
 
       let locals =
       {
@@ -22370,7 +22416,7 @@ function startMinimalOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22400,7 +22446,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : null, outputPrefixing : 1, verbosity : 1, normal output`
-      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } }).programPath;
 
       let locals =
       {
@@ -22411,7 +22457,7 @@ function startMinimalOptionOutputPiping( test )
         verbosity : 1,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22441,7 +22487,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : null, outputPrefixing : 1, verbosity : 1, normal output`
-      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log' } }).programPath;
 
       let locals =
       {
@@ -22452,7 +22498,7 @@ function startMinimalOptionOutputPiping( test )
         mode,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22478,7 +22524,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1, verbosity : 1, normal output`
-      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log' } }).programPath;
 
       let locals =
       {
@@ -22489,7 +22535,7 @@ function startMinimalOptionOutputPiping( test )
         mode,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22515,7 +22561,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1 , normal output`
-      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log' } }).programPath;
 
       let locals =
       {
@@ -22526,7 +22572,7 @@ function startMinimalOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22553,7 +22599,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 1, error output`
-      let testAppPath2 = a.program( testApp2Error2 );
+      let testAppPath2 = a.program( testApp2Error2 ).programPath;
 
       let locals =
       {
@@ -22564,7 +22610,7 @@ function startMinimalOptionOutputPiping( test )
         prefixing : 0
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22590,7 +22636,7 @@ function startMinimalOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 1, verbosity : 1, error output`
-      let testAppPath2 = a.program( testApp2Error2 );
+      let testAppPath2 = a.program( testApp2Error2 ).programPath;
 
       let locals =
       {
@@ -22601,7 +22647,7 @@ function startMinimalOptionOutputPiping( test )
         prefixing : 0
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22744,7 +22790,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 0, error output`
-      let testAppPath2 = a.program( testApp2Error2 );
+      let testAppPath2 = a.program( testApp2Error2 ).programPath;
 
       let locals =
       {
@@ -22755,7 +22801,7 @@ zzz <-
         prefixing : 0
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22782,7 +22828,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1 , error output`
-      let testAppPath2 = a.program( testApp2Error2 );
+      let testAppPath2 = a.program( testApp2Error2 ).programPath;
 
       let locals =
       {
@@ -22793,7 +22839,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22818,7 +22864,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1 , error output`
-      let testAppPath2 = a.program( testApp2Error2 );
+      let testAppPath2 = a.program( testApp2Error2 ).programPath;
 
       let locals =
       {
@@ -22829,7 +22875,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22856,7 +22902,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 0, error output`
-      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '' } });
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '' } }).programPath;
 
       let locals =
       {
@@ -22867,7 +22913,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22893,7 +22939,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 1, error output`
-      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '' } });
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '' } }).programPath;
 
       let locals =
       {
@@ -22904,7 +22950,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22930,7 +22976,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, single line, outputPiping : 1, outputPrefixing : 1, error output`
-      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log' } });
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log' } }).programPath;
 
       let locals =
       {
@@ -22941,7 +22987,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -22968,7 +23014,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 2 line output ( 1 with text ), outputPiping : 1, outputPrefixing : 1, error output`
-      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '\nLog' } });
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '\nLog' } }).programPath;
 
       let locals =
       {
@@ -22979,7 +23025,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23006,7 +23052,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 4 line output ( 2 with text ), outputPiping : 1, outputPrefixing : 1, error output`
-      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '\nLog\nLog2\n' } });
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '\nLog\nLog2\n' } }).programPath;
 
       let locals =
       {
@@ -23017,7 +23063,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23043,7 +23089,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 1, error output`
-      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } }).programPath;
 
       let locals =
       {
@@ -23054,7 +23100,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23084,7 +23130,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 0, error output`
-      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } }).programPath;
 
       let locals =
       {
@@ -23095,7 +23141,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23125,7 +23171,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 0, outputPrefixing : 1, error output`
-      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } }).programPath;
 
       let locals =
       {
@@ -23136,7 +23182,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23166,7 +23212,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : null, outputPrefixing : 1, verbosity : 1, error output`
-      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } }).programPath;
 
       let locals =
       {
@@ -23177,7 +23223,7 @@ zzz <-
         verbosity : 1,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23207,7 +23253,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1, thrown error output`
-      let testAppPath2 = a.program( testApp2Error2 );
+      let testAppPath2 = a.program( testApp2Error2 ).programPath;
 
       let locals =
       {
@@ -23218,7 +23264,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23245,7 +23291,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1, thrown error output`
-      let testAppPath2 = a.program( testApp2Error2 );
+      let testAppPath2 = a.program( testApp2Error2 ).programPath;
 
       let locals =
       {
@@ -23256,7 +23302,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23283,7 +23329,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1, error and normal output`
-      let testAppPath2 = a.program({ routine : testAppNormalAndError, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      let testAppPath2 = a.program({ routine : testAppNormalAndError, locals : { string : 'Log1\nLog2\nLog3\nLog4' } }).programPath;
 
       let locals =
       {
@@ -23294,7 +23340,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23324,7 +23370,7 @@ zzz <-
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1, error and normal output`
-      let testAppPath2 = a.program({ routine : testAppNormalAndError, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      let testAppPath2 = a.program({ routine : testAppNormalAndError, locals : { string : 'Log1\nLog2\nLog3\nLog4' } }).programPath;
 
       let locals =
       {
@@ -23335,7 +23381,7 @@ zzz <-
         verbosity : 2,
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23440,7 +23486,7 @@ function startMinimalOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 0`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
 
       let locals =
       {
@@ -23450,7 +23496,7 @@ function startMinimalOptionInputMirroring( test )
         verbosity : 2
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23476,7 +23522,7 @@ function startMinimalOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
 
       let locals =
       {
@@ -23487,7 +23533,7 @@ function startMinimalOptionInputMirroring( test )
         verbosity : 2
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23513,7 +23559,7 @@ function startMinimalOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 0`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
 
       let locals =
       {
@@ -23523,7 +23569,7 @@ function startMinimalOptionInputMirroring( test )
         verbosity : 0
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23549,7 +23595,7 @@ function startMinimalOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 1`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
 
       let locals =
       {
@@ -23559,7 +23605,7 @@ function startMinimalOptionInputMirroring( test )
         verbosity : 1
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23586,7 +23632,7 @@ function startMinimalOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 5`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
 
       let locals =
       {
@@ -23597,7 +23643,7 @@ function startMinimalOptionInputMirroring( test )
         verbosity : 5
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23624,7 +23670,7 @@ function startMinimalOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
 
       let locals =
       {
@@ -23634,7 +23680,7 @@ function startMinimalOptionInputMirroring( test )
         verbosity : 2
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23661,7 +23707,7 @@ function startMinimalOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 1, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
 
       let locals =
       {
@@ -23671,7 +23717,7 @@ function startMinimalOptionInputMirroring( test )
         verbosity : 1
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23698,7 +23744,7 @@ function startMinimalOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 5, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
 
       let locals =
       {
@@ -23709,7 +23755,7 @@ function startMinimalOptionInputMirroring( test )
         outputColoring : 0
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23794,7 +23840,7 @@ function startMinimalOptionInputMirroringFail( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, outputColoring : 1, error output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2Error ).programPath;
 
       let locals =
       {
@@ -23804,7 +23850,7 @@ function startMinimalOptionInputMirroringFail( test )
         verbosity : 2
       }
 
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       return _.process.startMinimal
       ({
@@ -23958,7 +24004,7 @@ function startMinimalOptionLogger( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   /* */
@@ -24022,7 +24068,7 @@ function startMinimalOptionLoggerTransofrmation( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
 
   /* */
 
@@ -24111,8 +24157,8 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPathParent = a.program( testAppParent );
+  let testAppPath = a.program( testApp ).programPath;
+  let testAppPathParent = a.program( testAppParent ).programPath;
 
   if( !Config.debug )
   {
@@ -25102,9 +25148,9 @@ function startMinimalOptionVerbosityLogging( test )
     ready.then( () =>
     {
       test.case = `logging without error; mode : ${mode}; verbosity : 4`;
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
       let locals = { programPath : testAppPath2, verbosity : 4 };
-      let testAppPath = a.program( { routine : testApp, locals } );
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -25141,9 +25187,9 @@ function startMinimalOptionVerbosityLogging( test )
     ready.then( () =>
     {
       test.case = `logging with error; mode : ${mode}; verbosity : 4`;
-      let testAppPathError = a.program( testAppError );
+      let testAppPathError = a.program( testAppError ).programPath;
       let locals = { programPath : testAppPathError, verbosity : 4 };
-      let testAppPath = a.program( { routine : testApp, locals } );
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -25185,9 +25231,9 @@ function startMinimalOptionVerbosityLogging( test )
     ready.then( () =>
     {
       test.case = `logging without error; mode : ${mode}; verbosity : 5`;
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2 ).programPath;
       let locals = { programPath : testAppPath2, verbosity : 5 };
-      let testAppPath = a.program( { routine : testApp, locals } );
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -25224,9 +25270,9 @@ function startMinimalOptionVerbosityLogging( test )
     ready.then( () =>
     {
       test.case = `logging with error; mode : ${mode}; verbosity : 5`;
-      let testAppPathError = a.program( testAppError );
+      let testAppPathError = a.program( testAppError ).programPath;
       let locals = { programPath : testAppPathError, verbosity : 5 };
-      let testAppPath = a.program( { routine : testApp, locals } );
+      let testAppPath = a.program({ routine : testApp, locals }).programPath;
 
       let options =
       {
@@ -25314,7 +25360,7 @@ function startMultipleOutput( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let track = [];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -25863,7 +25909,7 @@ function startMultipleOptionStdioIgnore( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let track = [];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -26002,7 +26048,7 @@ function startSingleOptionOutputAdditive( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -26050,8 +26096,8 @@ function startMultipleOptionOutputAdditive( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath = a.program( testApp ).programPath;
+  let testAppPath2 = a.program( testApp2 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 0 }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 0 }) ) );
@@ -26078,7 +26124,7 @@ function startMultipleOptionOutputAdditive( test )
         concurrent : env.concurrent,
       }
 
-      let testAppPathParent = a.program({ routine : testAppParent, locals });
+      let testAppPathParent = a.program({ routine : testAppParent, locals }).programPath;
 
       let o =
       {
@@ -26216,8 +26262,8 @@ startMultipleOptionOutputAdditive.rapidity = -1;
 // {
 //   let context = this;
 //   let a = context.assetFor( test, false );
-//   let testAppPath = a.program( testApp );
-//   let testAppPath2 = a.program( testApp2 );
+//   let testAppPath = a.program( testApp ).programPath;
+//   let testAppPath2 = a.program( testApp2 ).programPath;
 //   let modes = [ 'fork', 'spawn', 'shell' ];
 //   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 0 }) ) );
 //   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 0 }) ) );
@@ -26244,7 +26290,7 @@ startMultipleOptionOutputAdditive.rapidity = -1;
 //         concurrent : tops.concurrent,
 //       }
 //
-//       let testAppPathParent = a.program({ routine : testAppParent, locals });
+//       let testAppPathParent = a.program({ routine : testAppParent, locals }).programPath;
 //
 //       let o =
 //       {
@@ -26387,10 +26433,10 @@ function outputLog( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
-  let testAppPath3 = a.program( testApp3 );
-  let testAppPath4 = a.program( testApp4 );
+  let testAppPath = a.program( testApp ).programPath;
+  let testAppPath2 = a.program( testApp2 ).programPath;
+  let testAppPath3 = a.program( testApp3 ).programPath;
+  let testAppPath4 = a.program( testApp4 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -26404,7 +26450,7 @@ function outputLog( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, without new line`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } }).programPath;
 
       let options =
       {
@@ -26429,7 +26475,7 @@ function outputLog( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, new line ath the end`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath2 } });
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath2 } }).programPath;
 
       let options =
       {
@@ -26454,7 +26500,7 @@ function outputLog( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, new line at the middle`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath3 } });
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath3 } }).programPath;
 
       let options =
       {
@@ -26479,7 +26525,7 @@ function outputLog( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, new line at the middle & end`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath4 } });
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath4 } }).programPath;
 
       let options =
       {
@@ -26555,11 +26601,11 @@ function outputLogStreams( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
-  let testAppPath3 = a.program( testApp3 );
-  let testAppPath4 = a.program( testApp4 );
-  let testAppPath5 = a.program( testApp5 );
+  let testAppPath = a.program( testApp ).programPath;
+  let testAppPath2 = a.program( testApp2 ).programPath;
+  let testAppPath3 = a.program( testApp3 ).programPath;
+  let testAppPath4 = a.program( testApp4 ).programPath;
+  let testAppPath5 = a.program( testApp5 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -26942,7 +26988,7 @@ function startMinimalOptionStreamSizeLimit( test )
     {
       test.case = `data is less than streamSizeLimit ( default )`;
 
-      let testAppPath = a.program( testApp );
+      let testAppPath = a.program( testApp ).programPath;
 
       let options =
       {
@@ -26967,7 +27013,7 @@ function startMinimalOptionStreamSizeLimit( test )
     {
       test.case = `data is less than streamSizeLimit ( 20 )`;
 
-      let testAppPath = a.program( testApp );
+      let testAppPath = a.program( testApp ).programPath;
 
       let options =
       {
@@ -26993,7 +27039,7 @@ function startMinimalOptionStreamSizeLimit( test )
     {
       test.case = `data is equal to the streamSizeLimit`;
 
-      let testAppPath = a.program( testApp );
+      let testAppPath = a.program( testApp ).programPath;
 
       let options =
       {
@@ -27018,7 +27064,7 @@ function startMinimalOptionStreamSizeLimit( test )
     {
       test.case = `data is bigger than streamSizeLimit`;
 
-      let testAppPath = a.program( testApp );
+      let testAppPath = a.program( testApp ).programPath;
 
       let options =
       {
@@ -27064,7 +27110,7 @@ function startMinimalOptionStreamSizeLimitThrowing( test )
   {
     test.case = `mode : 'fork', deasync : 1, limit : 100`;
 
-    let testAppPath = a.program( testApp );
+    let testAppPath = a.program( testApp ).programPath;
 
     let options =
     {
@@ -27110,7 +27156,7 @@ function startMinimalOptionStreamSizeLimitThrowing( test )
     {
       test.case = `sync : 1, limit : '100'`;
 
-      let testAppPath = a.program( testApp );
+      let testAppPath = a.program( testApp ).programPath;
 
       let options =
       {
@@ -27139,7 +27185,7 @@ function startMinimalOptionStreamSizeLimitThrowing( test )
     {
       test.case = `sync : 1, limit : -1`;
 
-      let testAppPath = a.program( testApp );
+      let testAppPath = a.program( testApp ).programPath;
 
       let options =
       {
@@ -27168,7 +27214,7 @@ function startMinimalOptionStreamSizeLimitThrowing( test )
     {
       test.case = `sync : 0, limit : 100`;
 
-      let testAppPath = a.program( testApp );
+      let testAppPath = a.program( testApp ).programPath;
 
       let options =
       {
@@ -27197,7 +27243,7 @@ function startMinimalOptionStreamSizeLimitThrowing( test )
     {
       test.case = `sync : 0, deasync : 1, limit : 100`;
 
-      let testAppPath = a.program( testApp );
+      let testAppPath = a.program( testApp ).programPath;
 
       let options =
       {
@@ -27238,7 +27284,7 @@ function timeBeginBugExperiment( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+  let programPath = a.program( testApp ).programPath;
   // xxx
   let modes = [ 'fork' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 0 }) ) );
@@ -27300,7 +27346,7 @@ function startSingleOptionDry( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+  let programPath = a.program( testApp ).programPath;
   // xxx
   let modes = [ 'fork' ];
   // let modes = [ 'fork', 'spawn', 'shell' ];
@@ -27805,7 +27851,7 @@ function startMultipleOptionDry( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+  let programPath = a.program( testApp ).programPath;
   let track = [];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -28067,7 +28113,7 @@ function startSingleOptionCurrentPath( test )
   let a = context.assetFor( test, false );
   let testFilePath = a.path.join( a.routinePath, 'program1TestFile' );
   let locals = { testFilePath };
-  let programPath = a.program({ routine : program1, locals });
+  let programPath = a.program({ routine : program1, locals }).programPath;
   let modes = [ 'shell', 'spawn', 'fork' ]
 
   modes.forEach( ( mode ) =>
@@ -28237,7 +28283,7 @@ function startMultipleOptionCurrentPath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+  let programPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -28415,7 +28461,7 @@ function startMultipleWithEmptySessions( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+  let programPath = a.program( testApp ).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -28504,8 +28550,8 @@ function startPassingThrough( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath1 = a.program( program1 );
-  let testAppPath2 = a.program( program2 );
+  let testAppPath1 = a.program( program1 ).programPath;
+  let testAppPath2 = a.program( program2 ).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -29013,7 +29059,7 @@ function startMinimalOptionUid( test ) /* Runs only through `sudo` ( i.e. with s
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -29072,7 +29118,7 @@ function startMinimalOptionGid( test ) /* Runs only through `sudo` ( i.e. with s
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -29129,7 +29175,7 @@ function startSingleOptionProcedure( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
@@ -29412,7 +29458,7 @@ function startMultipleOptionProcedure( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
@@ -29747,7 +29793,7 @@ function startMinimalOptionThrowingExitCode( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   let nodeVersion = parseInt( process.versions.node ); /* with node version 10 and below stack is logged even if it's null */
 
@@ -29905,7 +29951,7 @@ Launched at ${_.strQuote( options.currentPath )} \n
     ready.then( () =>
     {
       test.case = `mode : ${mode}, with subprocess, throwingExitCode : brief`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath, throwingExitCode : 'brief' } });
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath, throwingExitCode : 'brief' } }).programPath;
 
       let options =
       {
@@ -29940,7 +29986,7 @@ Launched at ${_.strQuote( options.currentPath )} \n
     ready.then( () =>
     {
       test.case = `mode : ${mode}, with subprocess, throwingExitCode : 'full'`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath, throwingExitCode : 'full' } });
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath, throwingExitCode : 'full' } }).programPath;
 
       let options =
       {
@@ -30339,7 +30385,7 @@ function exitReason( test )
     {
       test.case = `mode : ${ mode }, initial value`;
 
-      let testAppPath = a.program({ routine : testApp, locals : { reasons : null, reset : 0 } });
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : null, reset : 0 } }).programPath;
 
       let options =
       {
@@ -30365,7 +30411,7 @@ function exitReason( test )
     {
       test.case = `mode : ${ mode }, reason : 'reason'`;
 
-      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason' ], reset : 0 } });
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason' ], reset : 0 } }).programPath;
 
       let options =
       {
@@ -30389,7 +30435,7 @@ function exitReason( test )
     {
       test.case = `mode : ${ mode }, initial, set, update reason`;
 
-      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 0 } });
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 0 } }).programPath;
 
       let options =
       {
@@ -30413,7 +30459,7 @@ function exitReason( test )
     {
       test.case = `mode : ${ mode }, initial, set, update, reset reason`;
 
-      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 1 } });
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 1 } }).programPath;
 
       let options =
       {
@@ -30498,7 +30544,7 @@ function exitCode( test )
       {
         code : null
       }
-      let programPath = a.program({ routine : testAppExitCode, locals });
+      let programPath = a.program({ routine : testAppExitCode, locals }).programPath;
       let options =
       {
         execPath : mode === 'fork' ? programPath : 'node ' + programPath,
@@ -30525,7 +30571,7 @@ function exitCode( test )
       {
         code : 1
       }
-      let programPath = a.program({ routine : testAppExitCode, locals});
+      let programPath = a.program({ routine : testAppExitCode, locals}).programPath;
       let options =
       {
         execPath : mode === 'fork' ? programPath : 'node ' + programPath,
@@ -30552,7 +30598,7 @@ function exitCode( test )
       {
         code : 2
       }
-      let programPath = a.program({ routine : testAppExitCode, locals});
+      let programPath = a.program({ routine : testAppExitCode, locals}).programPath;
       let options =
       {
         execPath : mode === 'fork' ? programPath : 'node ' + programPath,
@@ -30593,7 +30639,7 @@ function exitCode( test )
     ready.then( () =>
     {
       test.case = 'throw error in app';
-      let programPath = a.program( testAppError );
+      let programPath = a.program( testAppError ).programPath;
       let options =
       {
         execPath : mode === 'fork' ? programPath : 'node ' + programPath,
@@ -30646,7 +30692,7 @@ function exitCode( test )
       {
         options : { execPath : 'echo' }
       }
-      let programPath = a.program({ routine : testApp, locals });
+      let programPath = a.program({ routine : testApp, locals }).programPath;
       let options =
       {
         execPath : mode === 'fork' ? programPath : 'node ' + programPath,
@@ -30673,7 +30719,7 @@ function exitCode( test )
       {
         code : 100
       }
-      let programPath = a.program({ routine : testAppExit, locals});
+      let programPath = a.program({ routine : testAppExit, locals}).programPath;
       let options =
       {
         execPath : mode === 'fork' ? programPath : 'node ' + programPath,
@@ -30749,7 +30795,7 @@ function kill( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   var expectedOutput = testAppPath + '\n';
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -30927,7 +30973,7 @@ function killSync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -31294,7 +31340,7 @@ function killOptionWithChildren( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath2 = a.program( testApp2 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -31308,7 +31354,7 @@ function killOptionWithChildren( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, child -> child, kill first child`;
-      let testAppPath = a.program({ routine : testApp, locals : { mode } });
+      let testAppPath = a.program({ routine : testApp, locals : { mode } }).programPath;
       var o =
       {
         execPath :  'node ' + testAppPath,
@@ -31360,7 +31406,7 @@ function killOptionWithChildren( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, child -> child, kill last child`;
-      let testAppPath = a.program({ routine : testApp, locals : { mode } });
+      let testAppPath = a.program({ routine : testApp, locals : { mode } }).programPath;
       var o =
       {
         execPath :  'node ' + testAppPath,
@@ -31403,7 +31449,7 @@ function killOptionWithChildren( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, parent -> child*`;
-      let testAppPath3 = a.program({ routine : testApp3, locals : { mode } });
+      let testAppPath3 = a.program({ routine : testApp3, locals : { mode } }).programPath;
       var o =
       {
         execPath : 'node ' + testAppPath3,
@@ -31456,7 +31502,7 @@ function killOptionWithChildren( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, parent -> detached`;
-      let testAppPath3 = a.program({ routine : testApp3, locals : { mode } });
+      let testAppPath3 = a.program({ routine : testApp3, locals : { mode } }).programPath;
       var o =
       {
         execPath : 'node ' + testAppPath3 + ' detached',
@@ -31815,7 +31861,7 @@ function startMinimalErrorAfterTerminationWithSend( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let track;
 
   let modes = [ 'fork', 'spawn' ];
@@ -32044,7 +32090,7 @@ function startMinimalTerminateHangedWithExitHandler( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
 
   /* signal handler of njs on Windows is defective */
   if( process.platform === 'win32' )
@@ -32213,7 +32259,7 @@ function startMinimalTerminateAfterLoopRelease( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -32404,7 +32450,7 @@ function endSignalsBasic( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let o3 =
   {
     outputPiping : 1,
@@ -34471,7 +34517,7 @@ function endSignalsOnExit( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let o3 =
   {
     outputPiping : 1,
@@ -35041,7 +35087,7 @@ function endSignalsOnExitExitAgain( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.program( program1 ).programPath;
   let o3 =
   {
     outputPiping : 1,
@@ -35280,7 +35326,7 @@ function terminate( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
 
   a.ready.then( () => terminateCommon( 'spawn' ) )
   a.ready.then( () => terminateCommon( 'fork' ) )
@@ -35944,7 +35990,7 @@ function terminateSync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -36134,8 +36180,8 @@ function terminateFirstChild( test )
     {
       test.case = `mode : ${mode}`;
 
-      let testAppPath = a.program({ routine : program1, locals : { mode } });
-      let testAppPath2 = a.program( program2 );
+      let testAppPath = a.program({ routine : program1, locals : { mode } }).programPath;
+      let testAppPath2 = a.program( program2 ).programPath;
 
       let o =
       {
@@ -36372,8 +36418,8 @@ function terminateSecondChild( test )
     {
       test.case = `mode : ${mode}`;
 
-      let testAppPath = a.program({ routine : program1, locals : { mode } });
-      let testAppPath2 = a.program( program2 );
+      let testAppPath = a.program({ routine : program1, locals : { mode } }).programPath;
+      let testAppPath2 = a.program( program2 ).programPath;
 
       let o =
       {
@@ -36572,8 +36618,8 @@ function terminateDetachedFirstChild( test )
     {
       test.case = `mode : ${mode}`;
 
-      let testAppPath = a.program({ routine : program1, locals : { mode } });
-      let testAppPath2 = a.program( program2 );
+      let testAppPath = a.program({ routine : program1, locals : { mode } }).programPath;
+      let testAppPath2 = a.program( program2 ).programPath;
 
       let o =
       {
@@ -36951,8 +36997,8 @@ function terminateWithDetachedChild( test )
       2020-11-30T18:29:54.5528198Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 7 ) ... failed, throwing error
       */
 
-      let testAppPath = a.program({ routine : program1, locals : { mode } });
-      let testAppPath2 = a.program( program2 );
+      let testAppPath = a.program({ routine : program1, locals : { mode } }).programPath;
+      let testAppPath2 = a.program( program2 ).programPath;
 
       let o =
       {
@@ -37167,9 +37213,9 @@ function terminateSeveralChildren( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}`;
-      let testAppPath = a.program( program1 );
-      let testAppPath2 = a.program( program2 );
-      let testAppPath3 = a.program( program3 );
+      let testAppPath = a.program( program1 ).programPath;
+      let testAppPath2 = a.program( program2 ).programPath;
+      let testAppPath3 = a.program( program3 ).programPath;
 
       let o =
       {
@@ -37497,9 +37543,9 @@ function terminateSeveralDetachedChildren( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}`;
-      let testAppPath = a.program( program1 );
-      let testAppPath2 = a.program( program2 );
-      let testAppPath3 = a.program( program3 );
+      let testAppPath = a.program( program1 ).programPath;
+      let testAppPath2 = a.program( program2 ).programPath;
+      let testAppPath3 = a.program( program3 ).programPath;
 
       let o =
       {
@@ -37692,7 +37738,7 @@ function terminateDeadProcess( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
+  let testAppPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -37790,7 +37836,7 @@ function terminateTimeOutNoHandler( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
+  let testAppPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -37906,7 +37952,7 @@ function terminateTimeOutIgnoreSignal( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
+  let testAppPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -38093,7 +38139,7 @@ function terminateZeroTimeOut( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
+  let testAppPath = a.program( program1 ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -38214,7 +38260,7 @@ function terminateZeroTimeOutWithoutChildrenShell( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
+  let testAppPath = a.program( program1 ).programPath;
 
   /* - */
 
@@ -38316,7 +38362,7 @@ function terminateZeroTimeOutWithChildrenShell( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
+  let testAppPath = a.program( program1 ).programPath;
 
   /* - */
 
@@ -38412,7 +38458,7 @@ function terminateDifferentStdio( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -38643,7 +38689,7 @@ function killComplex( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -38653,7 +38699,7 @@ function killComplex( test )
   function run( mode )
   {
     let ready = _.Consequence().take( null );
-    let testAppPath2 = a.program({ routine : testApp2, locals : { mode } });
+    let testAppPath2 = a.program({ routine : testApp2, locals : { mode } }).programPath;
 
     ready
 
@@ -38808,7 +38854,7 @@ function execPathOf( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
 
   /* zzz : implement for linux and osx */
   if( process.platform !== 'win32' )
@@ -38854,7 +38900,7 @@ function execPathOfOptionSync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
 
   a.ready.then( () =>
   {
@@ -39033,7 +39079,7 @@ function waitForDeath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
 
   a.ready
 
@@ -39186,8 +39232,8 @@ function children( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath = a.program( testApp ).programPath;
+  let testAppPath2 = a.program( testApp2 ).programPath;
 
   /* */
 
@@ -39449,8 +39495,8 @@ function childrenOptionFormatList( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath = a.program( testApp ).programPath;
+  let testAppPath2 = a.program( testApp2 ).programPath;
 
   /* */
 
@@ -39619,7 +39665,7 @@ function spawnTimeOf( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program );
+  let testAppPath = a.program( program ).programPath;
 
   if( process.platform !== 'win32' )
   {
@@ -39883,8 +39929,8 @@ function experiment( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath = a.program( testApp ).programPath;
+  let testAppPath2 = a.program( testApp2 ).programPath;
   let o3 =
   {
     outputPiping : 1,
@@ -39960,7 +40006,7 @@ function experiment2( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( testApp ).programPath;
   let track;
 
   var o =
@@ -40154,6 +40200,7 @@ const Proto =
     starterArgs,
     starterFields,
     starterOptionsPollution,
+    starterDefaults,
 
     // output
 

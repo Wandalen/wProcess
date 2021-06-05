@@ -171,15 +171,15 @@ on.defaults =
 
 function _eventAvailableHandle()
 {
-  if( !_.process._ehandler.events.available.length )
+  if( !_.process._edispatcher.events.available.length )
   return;
 
-  let callbacks = _.process._ehandler.events.available.slice();
+  let callbacks = _.process._edispatcher.events.available.slice();
   callbacks.forEach( ( callback ) =>
   {
     try
     {
-      _.arrayRemoveOnceStrictly( _.process._ehandler.events.available, callback );
+      _.arrayRemoveOnceStrictly( _.process._edispatcher.events.available, callback );
       callback.call( _.process );
     }
     catch( err )
@@ -302,7 +302,7 @@ function _eventExitHandle()
   process.removeListener( 'exit', _.process._registeredExitHandler );
   _.process._registeredExitHandler = null;
   _.process.eventGive({ event : 'exit', args });
-  _.process._ehandler.events.exit.splice( 0, _.process._ehandler.events.exit.length );
+  _.process._edispatcher.events.exit.splice( 0, _.process._edispatcher.events.exit.length );
 }
 
 //
@@ -785,7 +785,7 @@ let Extension =
 }
 
 /* _.props.extend */Object.assign( _.process, Extension );
-_.props.supplement( _.process._ehandler.events, Events );
+_.props.supplement( _.process._edispatcher.events, Events );
 _.assert( !_.process.start );
 _.process._Setup1();
 

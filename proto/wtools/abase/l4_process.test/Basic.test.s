@@ -48,9 +48,9 @@ function onWithArguments( test )
   var result = [];
   var onEvent = () => result.push( result.length );
   var onEvent2 = () => result.push( -1 * result.length );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [] );
-  _.event.eventGive( _.process._ehandler, 'available' );
+  _.event.eventGive( _.process._edispatcher, 'available' );
   test.identical( result, [] );
 
   /* */
@@ -60,12 +60,12 @@ function onWithArguments( test )
   var onEvent = () => result.push( result.length );
   var onEvent2 = () => result.push( -1 * result.length );
   var got = _.process.on( 'uncaughtError', onEvent );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ 0 ] );
-  _.event.eventGive( _.process._ehandler, 'available' );
+  _.event.eventGive( _.process._edispatcher, 'available' );
   test.identical( result, [ 0 ] );
-  test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'available', eventHandler : onEvent2 } ) );
+  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent2 } ) );
   got.uncaughtError.off();
 
   /* */
@@ -75,14 +75,14 @@ function onWithArguments( test )
   var onEvent = () => result.push( result.length );
   var onEvent2 = () => result.push( -1 * result.length );
   var got = _.process.on( 'uncaughtError', onEvent );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ 0 ] );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ 0, 1 ] );
-  _.event.eventGive( _.process._ehandler, 'available' );
+  _.event.eventGive( _.process._edispatcher, 'available' );
   test.identical( result, [ 0, 1 ] );
-  test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'available', eventHandler : onEvent2 } ) );
+  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent2 } ) );
   got.uncaughtError.off();
 
   /* */
@@ -91,18 +91,18 @@ function onWithArguments( test )
   var result = [];
   var onEvent = () => result.push( result.length );
   var onEvent2 = () => result.push( -1 * result.length );
-  _.process._ehandler.events.event2 = [];
+  _.process._edispatcher.events.event2 = [];
   var got = _.process.on( 'uncaughtError', onEvent );
   var got2 = _.process.on( 'event2', onEvent2 );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ 0 ] );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ 0, 1 ] );
-  _.event.eventGive( _.process._ehandler, 'event2' );
-  _.event.eventGive( _.process._ehandler, 'event2' );
-  delete   _.process._ehandler.events.event2;
+  _.event.eventGive( _.process._edispatcher, 'event2' );
+  _.event.eventGive( _.process._edispatcher, 'event2' );
+  delete   _.process._edispatcher.events.event2;
   test.identical( result, [ 0, 1, -2, -3 ] );
-  test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
   got.uncaughtError.off();
 }
 
@@ -120,9 +120,9 @@ function onWithOptionsMap( test )
   var result = [];
   var onEvent = () => result.push( result.length );
   var onEvent2 = () => result.push( -1 * result.length );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [] );
-  _.event.eventGive( _.process._ehandler, 'available' );
+  _.event.eventGive( _.process._edispatcher, 'available' );
   test.identical( result, [] );
 
   /* */
@@ -132,12 +132,12 @@ function onWithOptionsMap( test )
   var onEvent = () => result.push( result.length );
   var onEvent2 = () => result.push( -1 * result.length );
   var got = _.process.on({ 'callbackMap' : { 'uncaughtError' : onEvent } });
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ 0 ] );
-  _.event.eventGive( _.process._ehandler, 'available' );
+  _.event.eventGive( _.process._edispatcher, 'available' );
   test.identical( result, [ 0 ] );
-  test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'available', eventHandler : onEvent2 } ) );
+  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent2 } ) );
   got.uncaughtError.off();
 
   /* */
@@ -147,14 +147,14 @@ function onWithOptionsMap( test )
   var onEvent = () => result.push( result.length );
   var onEvent2 = () => result.push( -1 * result.length );
   var got = _.process.on({ 'callbackMap' : { 'uncaughtError' : onEvent }} );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ 0 ] );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ 0, 1 ] );
-  _.event.eventGive( _.process._ehandler, 'available' );
+  _.event.eventGive( _.process._edispatcher, 'available' );
   test.identical( result, [ 0, 1 ] );
-  test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'available', eventHandler : onEvent2 } ) );
+  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent2 } ) );
   got.uncaughtError.off();
 
   /* */
@@ -163,17 +163,17 @@ function onWithOptionsMap( test )
   var result = [];
   var onEvent = () => result.push( result.length );
   var onEvent2 = () => result.push( -1 * result.length );
-  _.process._ehandler.events.event2 = [];
+  _.process._edispatcher.events.event2 = [];
   var got = _.process.on({ 'callbackMap' : { 'uncaughtError' : onEvent, 'event2' : onEvent2 } });
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ 0 ] );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ 0, 1 ] );
-  _.event.eventGive( _.process._ehandler, 'event2' );
-  _.event.eventGive( _.process._ehandler, 'event2' );
-  delete _.process._ehandler.events.event2;
+  _.event.eventGive( _.process._edispatcher, 'event2' );
+  _.event.eventGive( _.process._edispatcher, 'event2' );
+  delete _.process._edispatcher.events.event2;
   test.identical( result, [ 0, 1, -2, -3 ] );
-  test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
   got.uncaughtError.off();
 
   test.close( 'option first - 0' );
@@ -188,9 +188,9 @@ function onWithOptionsMap( test )
   var onEvent2 = () => result.push( -1 * result.length );
   var got = _.process.on({ 'callbackMap' : { 'uncaughtError' : onEvent } });
   var got2 = _.process.on({ 'callbackMap' : { 'uncaughtError' : onEvent2 }, 'first' : 1 });
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ -0, 1 ] );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ -0, 1, -2, 3 ] );
   got.uncaughtError.off();
   got2.uncaughtError.off();
@@ -204,9 +204,9 @@ function onWithOptionsMap( test )
   var onEvent2 = () => result.push( -1 * result.length );
   var got = _.process.on({ 'callbackMap' : { 'uncaughtError' : onEvent2 }, 'first' : 1 });
   var got2 = _.process.on({ 'callbackMap' : { 'uncaughtError' : onEvent } });
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ -0, 1 ] );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [ -0, 1, -2, 3 ] );
 
   test.close( 'option first - 1' );
@@ -247,15 +247,15 @@ function onWithChain( test )
   var result = [];
   var onEvent = () => result.push( result.length );
   var got = _.process.on( _.event.Chain( 'uncaughtError', 'available' ), onEvent );
-  test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'available', eventHandler : onEvent } ) );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [] );
-  _.event.eventGive( _.process._ehandler, 'available' );
+  _.event.eventGive( _.process._edispatcher, 'available' );
   test.identical( result, [ 0 ] );
-  test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'available', eventHandler : onEvent } ) );
-  _.event.off( _.process._ehandler, { callbackMap : { available : null } } );
+  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
+  _.event.off( _.process._edispatcher, { callbackMap : { available : null } } );
 
   /* */
 
@@ -263,15 +263,15 @@ function onWithChain( test )
   var result = [];
   var onEvent = () => result.push( result.length );
   var got = _.process.on({ callbackMap : { uncaughtError : [ _.event.Name( 'available' ), onEvent ] } });
-  test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'available', eventHandler : onEvent } ) );
-  _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
+  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
   test.identical( result, [] );
-  _.event.eventGive( _.process._ehandler, 'available' );
+  _.event.eventGive( _.process._edispatcher, 'available' );
   test.identical( result, [ 0 ] );
-  test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'available', eventHandler : onEvent } ) );
-  _.event.off( _.process._ehandler, { callbackMap : { available : null } } );
+  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
+  _.event.off( _.process._edispatcher, { callbackMap : { available : null } } );
 }
 
 //
@@ -291,7 +291,7 @@ function onCheckDescriptor( test )
   test.identical( descriptor.uncaughtError.enabled, true );
   test.identical( descriptor.uncaughtError.first, 0 );
   test.equivalent( descriptor.uncaughtError.callbackMap, { uncaughtError : onEvent } );
-  test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
   descriptor.uncaughtError.off();
 
   /* */
@@ -305,7 +305,7 @@ function onCheckDescriptor( test )
   test.identical( descriptor.uncaughtError.enabled, true );
   test.identical( descriptor.uncaughtError.first, 0 );
   test.equivalent( descriptor.uncaughtError.callbackMap, { uncaughtError : onEvent } );
-  test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
   descriptor.uncaughtError.off();
 }
 
