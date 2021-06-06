@@ -30664,7 +30664,7 @@ function exitCode( test )
     ready.then( () =>
     {
       test.case = 'error in subprocess';
-      let programPath = a.program({ routine : testApp, locals : { options : null } })
+      let programPath = a.program({ routine : testApp, locals : { options : null } }).programPath;
       let options =
       {
         execPath : mode === 'fork' ? programPath : 'node ' + programPath,
