@@ -39773,6 +39773,79 @@ _startTree.routineTimeOut = 120000;
 
 //
 
+function outputCollectingOfDebugged( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 ).programPath;
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+    let o2;
+    let o3 =
+    {
+      outputPiping : 1,
+      outputCollecting : 1,
+      applyingExitCode : 0,
+      throwingExitCode : 1
+    }
+
+    let expectedOutput =
+`${programPath}:begin
+${programPath}:end
+`
+    ready
+
+    /* */
+
+    .then( function( arg )
+    {
+      test.case = `mode:${mode} only execPath`;
+
+      o2 =
+      {
+        execPath : mode === `fork` ? `${programPath}` : `node --inspect=3456 ${programPath}`,
+        mode,
+      }
+
+      if( mode === `fork` )
+      o2.args = [ '--inspect=3456' ];
+
+      var options = _.props.supplement( null, o2, o3 );
+
+      return _.process.startMinimal( options )
+      .then( function()
+      {
+        test.identical( options.exitCode, 0 );
+        debugger
+        test.identical( options.output, expectedOutput );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* */
+
+  function program1()
+  {
+    console.log( `${__filename}:begin` );
+    process.stderr.write( 'Waiting for the debugger' + '\n' )
+    process.stderr.write( 'Debugger attached' + '\n' )
+    console.log( `${__filename}:end` );
+  }
+}
+
+//
+
 // --
 // experiment
 // --
@@ -40308,6 +40381,8 @@ const Proto =
     spawnTimeOf,
 
     // _startTree, /* xxx : qqq : for junior : restore */
+
+    outputCollectingOfDebugged,
 
     // experiments
 

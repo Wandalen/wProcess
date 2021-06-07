@@ -33,6 +33,15 @@ _.assert( !!_realGlobal_ );
   | sync:1 deasync:0 | -                        | +                  | -           |
 */
 
+const DebuggerOutput =
+[
+  'Debugger listening',
+  'Waiting for the debugger',
+  'Debugger attached',
+  'For help, see:',
+  'https://nodejs.org/en/docs/inspector'
+];
+
 //
 
 function startMinimalHeadCommon( routine, args )
@@ -1187,6 +1196,8 @@ function startMinimal_body( o )
     if( !_.strIs( data ) )
     data = String( data );
 
+
+
     if( o.outputGraying )
     data = _.ct.stripAnsi( data );
     // data = StripAnsi( data );
@@ -1197,7 +1208,22 @@ function startMinimal_body( o )
     if( Object.isFrozen( o ) ) /* xxx */
     debugger;
     if( o.outputCollecting )
-    o.output += data;
+    if( !o.outputCollectingOfDebugger && channel === 'err' )
+    {
+      let add = true;
+      for( let i = 0; i < DebuggerOutput.length; i++ )
+      if( _.strBegins( data, DebuggerOutput[ i ] ) )
+      {
+        add = false;
+        break;
+      }
+      if( add )
+      o.output += data;
+    }
+    else
+    {
+      o.output += data;
+    }
 
     if( !o.outputPiping )
     return;
@@ -1364,6 +1390,7 @@ startMinimal_body.defaults =
   outputPrefixing : 0,
   outputPiping : null,
   outputCollecting : 0,
+  outputCollectingOfDebugger : 0,
   outputAdditive : null, /* qqq for junior : cover the option | aaa : Done. */
   outputColoring : 1,
   outputGraying : 0,
