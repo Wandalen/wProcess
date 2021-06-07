@@ -1196,8 +1196,6 @@ function startMinimal_body( o )
     if( !_.strIs( data ) )
     data = String( data );
 
-
-
     if( o.outputGraying )
     data = _.ct.stripAnsi( data );
     // data = StripAnsi( data );
