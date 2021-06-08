@@ -764,40 +764,111 @@ function onWithOptionsMap( test )
 
 function onWithChain( test )
 {
-  var self = this;
+  const self = this;
+  const a = test.assetFor( false );
+  a.fileProvider.dirMake( a.abs( '.' ) );
+
+  /* - */
+
+  a.ready.then( () =>
+  {
+    test.case = 'chain in args';
+    return null;
+  });
+  var program = a.program( chainInArgs );
+  program.start();
+  a.ready.then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, '[ [ \'exit\', \'arg\' ] ]' ), 1 );
+    return null;
+  });
+
+  a.ready.then( () =>
+  {
+    test.case = 'chain in map';
+    return null;
+  });
+  var program = a.program( chainInMap );
+  program.start();
+  a.ready.then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, '[ [ \'exit\', \'arg\' ] ]' ), 1 );
+    return null;
+  });
+
+  /* - */
+
+  return a.ready
 
   /* */
 
-  test.case = 'call with arguments';
-  var result = [];
-  var onEvent = () => result.push( result.length );
-  var got = _.process.on( _.event.Chain( 'uncaughtError', 'available' ), onEvent );
-  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
-  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
-  test.identical( result, [] );
-  _.event.eventGive( _.process._edispatcher, 'available' );
-  test.identical( result, [ 0 ] );
-  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
-  _.event.off( _.process._edispatcher, { callbackMap : { available : null } } );
+  function chainInArgs()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+    const result = [];
+    _.process.on( _.event.Chain( 'exitBefore', 'exit' ), ( ... args ) => result.push( args ) );
+    _.process.eventGive( 'exit', 'arg' );
+    _.process.eventGive( 'exitBefore', 'arg' );
+    _.process.eventGive( 'exit', 'arg' );
+    console.log( result );
+  }
 
   /* */
 
-  test.case = 'call with options map';
-  var result = [];
-  var onEvent = () => result.push( result.length );
-  var got = _.process.on({ callbackMap : { uncaughtError : [ _.event.Name( 'available' ), onEvent ] } });
-  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
-  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
-  test.identical( result, [] );
-  _.event.eventGive( _.process._edispatcher, 'available' );
-  test.identical( result, [ 0 ] );
-  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
-  _.event.off( _.process._edispatcher, { callbackMap : { available : null } } );
+  function chainInMap()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+    const result = [];
+    _.process.on({ callbackMap : { 'exitBefore' : [ _.event.Name( 'exit' ), ( ... args ) => result.push( args ) ] } });
+    _.process.eventGive( 'exit', 'arg' );
+    _.process.eventGive( 'exitBefore', 'arg' );
+    _.process.eventGive( 'exit', 'arg' );
+    console.log( result );
+  }
 }
+
+// //
+//
+// function onWithChain( test )
+// {
+//   var self = this;
+//
+//   /* */
+//
+//   test.case = 'call with arguments';
+//   var result = [];
+//   var onEvent = () => result.push( result.length );
+//   var got = _.process.on( _.event.Chain( 'uncaughtError', 'available' ), onEvent );
+//   test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+//   test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
+//   _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
+//   test.identical( result, [] );
+//   _.event.eventGive( _.process._edispatcher, 'available' );
+//   test.identical( result, [ 0 ] );
+//   test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+//   test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
+//   _.event.off( _.process._edispatcher, { callbackMap : { available : null } } );
+//
+//   /* */
+//
+//   test.case = 'call with options map';
+//   var result = [];
+//   var onEvent = () => result.push( result.length );
+//   var got = _.process.on({ callbackMap : { uncaughtError : [ _.event.Name( 'available' ), onEvent ] } });
+//   test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+//   test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
+//   _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
+//   test.identical( result, [] );
+//   _.event.eventGive( _.process._edispatcher, 'available' );
+//   test.identical( result, [ 0 ] );
+//   test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+//   test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
+//   _.event.off( _.process._edispatcher, { callbackMap : { available : null } } );
+// }
 
 //
 
