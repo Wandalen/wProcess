@@ -40,71 +40,259 @@ function suiteEnd()
 
 function onWithArguments( test )
 {
-  var self = this;
+  const self = this;
+  const a = test.assetFor( false );
+  a.fileProvider.dirMake( a.abs( '.' ) );
+
+  /* - */
+
+  a.ready.then( () =>
+  {
+    test.case = 'no callbacks for events';
+    return null;
+  });
+  var program = a.program( withoutCallbacks );
+  program.start();
+  a.ready.then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, '[]' ), 1 );
+    return null;
+  });
 
   /* */
 
-  test.case = 'no callback for events';
-  var result = [];
-  var onEvent = () => result.push( result.length );
-  var onEvent2 = () => result.push( -1 * result.length );
-  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
-  test.identical( result, [] );
-  _.event.eventGive( _.process._edispatcher, 'available' );
-  test.identical( result, [] );
+  a.ready.then( () =>
+  {
+    test.case = 'single callback for single event, single event is given';
+    return null;
+  });
+  var program = a.program( callbackForAvailable );
+  program.start();
+  a.ready.then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, '[ [] ]' ), 1 );
+    return null;
+  });
 
   /* */
 
-  test.case = 'single callback for single event, single event is given';
-  var result = [];
-  var onEvent = () => result.push( result.length );
-  var onEvent2 = () => result.push( -1 * result.length );
-  var got = _.process.on( 'uncaughtError', onEvent );
-  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
-  test.identical( result, [ 0 ] );
-  _.event.eventGive( _.process._edispatcher, 'available' );
-  test.identical( result, [ 0 ] );
-  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent2 } ) );
-  got.uncaughtError.off();
+  a.ready.then( () =>
+  {
+    test.case = 'single callback for single event, a few events are given';
+    return null;
+  });
+  var program = a.program( callbackForAvailableDouble );
+  program.start();
+  a.ready.then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, '[ [] ]' ), 1 );
+    return null;
+  });
 
   /* */
 
-  test.case = 'single callback for single event, a few events are given';
-  var result = [];
-  var onEvent = () => result.push( result.length );
-  var onEvent2 = () => result.push( -1 * result.length );
-  var got = _.process.on( 'uncaughtError', onEvent );
-  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
-  test.identical( result, [ 0 ] );
-  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
-  test.identical( result, [ 0, 1 ] );
-  _.event.eventGive( _.process._edispatcher, 'available' );
-  test.identical( result, [ 0, 1 ] );
-  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent2 } ) );
-  got.uncaughtError.off();
+  a.ready.then( () =>
+  {
+    test.case = 'single callback for single event, a few events are given';
+    return null;
+  });
+  var program = a.program( callbacksForEvents );
+  program.start();
+  a.ready.then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    var exp = `[ [], 'uncaughtError1', 'uncaughtError2' ]`;
+    test.identical( _.strCount( op.output, exp ), 1 );
+    return null;
+  });
 
   /* */
 
-  test.case = 'single callback for each events in event handler, a few events are given';
-  var result = [];
-  var onEvent = () => result.push( result.length );
-  var onEvent2 = () => result.push( -1 * result.length );
-  _.process._edispatcher.events.event2 = [];
-  var got = _.process.on( 'uncaughtError', onEvent );
-  var got2 = _.process.on( 'event2', onEvent2 );
-  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
-  test.identical( result, [ 0 ] );
-  _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
-  test.identical( result, [ 0, 1 ] );
-  _.event.eventGive( _.process._edispatcher, 'event2' );
-  _.event.eventGive( _.process._edispatcher, 'event2' );
-  delete   _.process._edispatcher.events.event2;
-  test.identical( result, [ 0, 1, -2, -3 ] );
-  test.true( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
-  got.uncaughtError.off();
+  a.ready.then( () =>
+  {
+    test.case = 'throw uncaught error';
+    return null;
+  });
+  var program = a.program( uncaughtError );
+  program.start();
+  a.ready.then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    var exp = 'exit';
+    test.identical( _.strCount( op.output, exp ), 0 );
+    return null;
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'events exitBefore and exit';
+    return null;
+  });
+  var program = a.program( callbackOnExit );
+  program.start();
+  a.ready.then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, '[object Object] arg' ), 1 );
+    test.identical( _.strCount( op.output, 'event: \'exit\'' ), 1 );
+    test.identical( _.strCount( op.output, 'onError: [Function: onError]' ), 1 );
+    return null;
+  });
+
+  /* - */
+
+  return a.ready;
+
+  /* */
+
+  function withoutCallbacks()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+    const result = [];
+    _.process.eventGive( 'available', 'arg' );
+    _.process.eventGive( 'uncaughtError', 'arg' );
+    console.log( result );
+  }
+
+  /* */
+
+  function callbackForAvailable()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+    const result = [];
+    _.process.on( 'available', ( ... args ) => result.push( args ) );
+    _.process.eventGive( 'available', 'arg' );
+    _.process.eventGive( 'uncaughtError', 'arg' );
+    console.log( result );
+  }
+
+  /* */
+
+  function callbackForAvailableDouble()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+    const result = [];
+    _.process.on( 'available', ( ... args ) => result.push( args ) );
+    _.process.eventGive( 'available', 'arg' );
+    _.process.eventGive( 'uncaughtError', 'arg' );
+    _.process.eventGive( 'available', 'arg' );
+    _.process.eventGive( 'uncaughtError', 'arg' );
+    console.log( result );
+  }
+
+  /* */
+
+  function callbacksForEvents()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+    const result = [];
+    _.process.on( 'available', ( ... args ) => result.push( args ) );
+    _.process.on( 'uncaughtError', ( e ) => result.push( e + result.length ) );
+    _.process.eventGive( 'available', 'arg' );
+    _.process.eventGive( 'uncaughtError', 'arg' );
+    _.process.eventGive( 'available', 'arg' );
+    _.process.eventGive( 'uncaughtError', 'arg' );
+    console.log( result );
+  }
+
+  /* */
+
+  function uncaughtError()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.process.on( 'uncaughtError', ( o ) => _.errAttend( o.err ) );
+    throw _.err( 'Error' );
+    console.log( 'exit' );
+  }
+
+  /* */
+
+  function callbackOnExit()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.process.on( 'exit', ( ... args ) => { console.log( args ); return true } );
+    _.process.on( 'exitBefore', ( e ) => { console.log( e + ' arg' ); return true } );
+  }
 }
+
+// function onWithArguments( test )
+// {
+//   var self = this;
+//
+//   /* */
+//
+//   test.case = 'no callback for events';
+//   var result = [];
+//   var onEvent = () => result.push( result.length );
+//   var onEvent2 = () => result.push( -1 * result.length );
+//   _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+//   test.identical( result, [] );
+//   _.event.eventGive( _.process._ehandler, 'available' );
+//   test.identical( result, [] );
+//
+//   /* */
+//
+//   test.case = 'single callback for single event, single event is given';
+//   var result = [];
+//   var onEvent = () => result.push( result.length );
+//   var onEvent2 = () => result.push( -1 * result.length );
+//   var got = _.process.on( 'uncaughtError', onEvent );
+//   _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+//   test.identical( result, [ 0 ] );
+//   _.event.eventGive( _.process._ehandler, 'available' );
+//   test.identical( result, [ 0 ] );
+//   test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+//   test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'available', eventHandler : onEvent2 } ) );
+//   got.uncaughtError.off();
+//
+//   /* */
+//
+//   test.case = 'single callback for single event, a few events are given';
+//   var result = [];
+//   var onEvent = () => result.push( result.length );
+//   var onEvent2 = () => result.push( -1 * result.length );
+//   var got = _.process.on( 'uncaughtError', onEvent );
+//   _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+//   test.identical( result, [ 0 ] );
+//   _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+//   test.identical( result, [ 0, 1 ] );
+//   _.event.eventGive( _.process._ehandler, 'available' );
+//   test.identical( result, [ 0, 1 ] );
+//   test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+//   test.false( _.event.eventHasHandler( _.process._ehandler, { eventName : 'available', eventHandler : onEvent2 } ) );
+//   got.uncaughtError.off();
+//
+//   /* */
+//
+//   test.case = 'single callback for each events in event handler, a few events are given';
+//   var result = [];
+//   var onEvent = () => result.push( result.length );
+//   var onEvent2 = () => result.push( -1 * result.length );
+//   _.process._ehandler.events.event2 = [];
+//   var got = _.process.on( 'uncaughtError', onEvent );
+//   var got2 = _.process.on( 'event2', onEvent2 );
+//   _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+//   test.identical( result, [ 0 ] );
+//   _.event.eventGive( _.process._ehandler, 'uncaughtError' );
+//   test.identical( result, [ 0, 1 ] );
+//   _.event.eventGive( _.process._ehandler, 'event2' );
+//   _.event.eventGive( _.process._ehandler, 'event2' );
+//   delete   _.process._ehandler.events.event2;
+//   test.identical( result, [ 0, 1, -2, -3 ] );
+//   test.true( _.event.eventHasHandler( _.process._ehandler, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
+//   got.uncaughtError.off();
+// }
 
 //
 
