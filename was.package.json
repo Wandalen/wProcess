@@ -11,7 +11,7 @@
     { "name" : "Volodymyr M.", "email" : "volodymyr.migdal@gmail.com" }
   ],
   "main" : "proto/node_modules/wprocess",
-  "files" : [ "proto/wtools/abase/l4_process", "out", "proto/node_modules" ],
+  "files" : [ "proto/wtools/abase/l4_process", "out", "proto/node_modules", "proto/node_modules/Tools", "proto/node_modules/wprocess" ],
   "scripts" :
   {
     "test" : "wtest .run 'proto/**' rapidity:-1 verbosity:5 fails:5 s:0",
