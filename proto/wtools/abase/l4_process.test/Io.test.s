@@ -1210,7 +1210,7 @@ function inputReadToWithArguments( test )
       namesMap,
       toolsPath : _.module.resolve( 'wTools' ),
     };
-    return a.program({ routine : testApp, locals });
+    return a.program({ routine : testApp, locals }).programPath;
   }
 
   /* */
