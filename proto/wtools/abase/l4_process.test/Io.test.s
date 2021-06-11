@@ -1782,10 +1782,10 @@ function inputReadToCheckInputInfluence( test )
 
 function processOnExitEvent( test )
 {
-  let context = this;
-  let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );  /* zzz : a.path.nativize? */
-  // let programPath = a.program( testApp ).programPath;
+  const context = this;
+  const a = test.assetFor( false );
+  // let programPath = a.path.nativize( a.program( testApp ).programPath );  /* zzz : a.path.nativize? */
+  const programPath = a.program( testApp ).programPath;
 
   /* */
 
@@ -1799,49 +1799,50 @@ function processOnExitEvent( test )
       sync : 0,
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
     {
       test.true( op.exitCode === 0 );
       test.identical( op.ended, true );
-      test.true( _.strHas( op.output, 'timeOut handler executed' ) )
-      test.true( _.strHas( op.output, 'processOnExit: 0' ) );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 1 )
+      test.identical( _.strCount( op.output, 'processOnExit: ' ), 1 );
       return null;
-    })
-
-  })
+    });
+  });
 
   /* */
 
-  .then( () =>
+  a.ready.then( () =>
   {
     var o =
     {
-      execPath :  'node ' + programPath + ' terminate : 1',
+      execPath :  'node ' + programPath + ' terminate:1',
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
     {
       test.true( op.exitCode === 0 );
       test.identical( op.ended, true );
-      test.true( !_.strHas( op.output, 'timeOut handler executed' ) )
-      test.true( !_.strHas( op.output, 'processOnExit: 0' ) );
-      test.true( _.strHas( op.output, 'processOnExit: SIGINT' ) );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 0 )
+      test.identical( _.strCount( op.output, 'processOnExit: ' ), 1 );
+      test.false( _.strHas( op.output, 'processOnExit: SIGINT' ) );
       return null;
     });
-  })
+  });
+
+  /* - */
 
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
@@ -1850,7 +1851,7 @@ function processOnExitEvent( test )
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
-    var args = _.process.input();
+    const args = _.process.input();
 
     _.process.on( 'exit', ( arg ) =>
     {
@@ -1861,11 +1862,10 @@ function processOnExitEvent( test )
     {
       console.log( 'timeOut handler executed' );
       return 1;
-    })
+    });
 
     if( args.map.terminate )
     process.exit( 'SIGINT' );
-
   }
 }
 
