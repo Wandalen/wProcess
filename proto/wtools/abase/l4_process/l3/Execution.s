@@ -430,7 +430,9 @@ function startMinimal_body( o )
     if( o.outputColoring.err || o.outputColoring.out && typeof module !== 'undefined' )
     try
     {
+      // debugger;
       _.include( 'wColor' );
+      // debugger;
     }
     catch( err )
     {
