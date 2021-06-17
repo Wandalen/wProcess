@@ -1806,8 +1806,8 @@ function processOnExitEvent( test )
     {
       test.true( op.exitCode === 0 );
       test.identical( op.ended, true );
-      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 1 )
-      test.identical( _.strCount( op.output, 'processOnExit: ' ), 1 );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit: 0' ), 1 );
       return null;
     });
   });
@@ -1832,8 +1832,8 @@ function processOnExitEvent( test )
       test.true( op.exitCode === 0 );
       test.identical( op.ended, true );
       test.identical( _.strCount( op.output, 'timeOut handler executed' ), 0 )
-      test.identical( _.strCount( op.output, 'processOnExit: ' ), 1 );
-      test.false( _.strHas( op.output, 'processOnExit: SIGINT' ) );
+      test.identical( _.strCount( op.output, 'processOnExit: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit: SIGINT' ), 1 );
       return null;
     });
   });
@@ -1897,9 +1897,9 @@ function processOffExitEvent( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( op.output, 'processOnExit1: ' ), 1 );
-      test.identical( _.strCount( op.output, 'processOnExit2: ' ), 1 );
-      test.identical( _.strCount( op.output, 'processOnExit3: ' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
     });
   });
@@ -1925,9 +1925,9 @@ function processOffExitEvent( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( op.output, 'processOnExit1: ' ), 0 );
-      test.identical( _.strCount( op.output, 'processOnExit2: ' ), 1 );
-      test.identical( _.strCount( op.output, 'processOnExit3: ' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
     });
   });
@@ -1953,9 +1953,9 @@ function processOffExitEvent( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( op.output, 'processOnExit1: ' ), 0 );
-      test.identical( _.strCount( op.output, 'processOnExit2: ' ), 0 );
-      test.identical( _.strCount( op.output, 'processOnExit3: ' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
     });
   });
@@ -1982,9 +1982,9 @@ function processOffExitEvent( test )
       test.notIdentical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( _.strCount( op.output, 'uncaught error' ), 2 );
-      test.identical( _.strCount( op.output, 'processOnExit1: ' ), 1 );
-      test.identical( _.strCount( op.output, 'processOnExit2: ' ), 1 );
-      test.identical( _.strCount( op.output, 'processOnExit3: ' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit1: -1' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit2: -1' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit3: -1' ), 0 );
       return null;
     });
   });
