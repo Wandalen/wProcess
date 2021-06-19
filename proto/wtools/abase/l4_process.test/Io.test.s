@@ -1210,7 +1210,7 @@ function inputReadToWithArguments( test )
       namesMap,
       toolsPath : _.module.resolve( 'wTools' ),
     };
-    return a.program({ entry : testApp, locals });
+    return a.program({ entry : testApp, locals }).programPath;
   }
 
   /* */
@@ -1637,7 +1637,7 @@ function inputReadToWithOptionsMap( test )
       namesMap,
       toolsPath : _.module.resolve( 'wTools' ),
     };
-    return a.program({ entry : testApp, locals });
+    return a.program({ entry : testApp, locals }).programPath;
   }
 
   /* */
@@ -1782,10 +1782,10 @@ function inputReadToCheckInputInfluence( test )
 
 function processOnExitEvent( test )
 {
-  let context = this;
-  let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );  /* zzz : a.path.nativize? */
-  // let programPath = a.program( testApp ).programPath;
+  const context = this;
+  const a = test.assetFor( false );
+  // let programPath = a.path.nativize( a.program( testApp ).programPath );  /* zzz : a.path.nativize? */
+  const programPath = a.program( testApp ).programPath;
 
   /* */
 
@@ -1799,49 +1799,50 @@ function processOnExitEvent( test )
       sync : 0,
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
     {
       test.true( op.exitCode === 0 );
       test.identical( op.ended, true );
-      test.true( _.strHas( op.output, 'timeOut handler executed' ) )
-      test.true( _.strHas( op.output, 'processOnExit: 0' ) );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit: 0' ), 1 );
       return null;
-    })
-
-  })
+    });
+  });
 
   /* */
 
-  .then( () =>
+  a.ready.then( () =>
   {
     var o =
     {
-      execPath :  'node ' + programPath + ' terminate : 1',
+      execPath :  'node ' + programPath + ' terminate:1',
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
     {
       test.true( op.exitCode === 0 );
       test.identical( op.ended, true );
-      test.true( !_.strHas( op.output, 'timeOut handler executed' ) )
-      test.true( !_.strHas( op.output, 'processOnExit: 0' ) );
-      test.true( _.strHas( op.output, 'processOnExit: SIGINT' ) );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 0 )
+      test.identical( _.strCount( op.output, 'processOnExit: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit: SIGINT' ), 1 );
       return null;
     });
-  })
+  });
+
+  /* - */
 
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
@@ -1850,7 +1851,7 @@ function processOnExitEvent( test )
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
-    var args = _.process.input();
+    const args = _.process.input();
 
     _.process.on( 'exit', ( arg ) =>
     {
@@ -1861,11 +1862,10 @@ function processOnExitEvent( test )
     {
       console.log( 'timeOut handler executed' );
       return 1;
-    })
+    });
 
     if( args.map.terminate )
     process.exit( 'SIGINT' );
-
   }
 }
 
@@ -1873,9 +1873,9 @@ function processOnExitEvent( test )
 
 function processOffExitEvent( test )
 {
-  let context = this;
-  let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  const context = this;
+  const a = test.assetFor( false );
+  const programPath = a.path.nativize( a.program( testApp ).programPath );
 
   /* */
 
@@ -1889,7 +1889,7 @@ function processOffExitEvent( test )
       stdio : 'pipe',
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
@@ -1901,13 +1901,12 @@ function processOffExitEvent( test )
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
-    })
-
-  })
+    });
+  });
 
   /* */
 
-  .then( () =>
+  a.ready.then( () =>
   {
     test.case = 'off single handler'
     var o =
@@ -1918,7 +1917,7 @@ function processOffExitEvent( test )
       stdio : 'pipe',
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
@@ -1930,12 +1929,12 @@ function processOffExitEvent( test )
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
-    })
-  })
+    });
+  });
 
   /* */
 
-  .then( () =>
+  a.ready.then( () =>
   {
     test.case = 'off all handlers'
     var o =
@@ -1946,7 +1945,7 @@ function processOffExitEvent( test )
       stdio : 'pipe',
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
@@ -1958,12 +1957,12 @@ function processOffExitEvent( test )
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 0 );
       test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
-    })
-  })
+    });
+  });
 
   /* */
 
-  .then( () =>
+  a.ready.then( () =>
   {
     test.case = 'off unregistered handler'
     var o =
@@ -1975,7 +1974,7 @@ function processOffExitEvent( test )
       outputPiping : 1,
       outputCollecting : 1,
       throwingExitCode : 0
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
@@ -1987,22 +1986,24 @@ function processOffExitEvent( test )
       test.identical( _.strCount( op.output, 'processOnExit2: -1' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit3: -1' ), 0 );
       return null;
-    })
-  })
+    });
+  });
+
+  /* - */
 
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
     const _ = require( toolsPath );
 
     _.include( 'wProcess' );
-    _.include( 'wStringsExtra' )
+    _.include( 'wStringsExtra' );
 
-    var handlersMap = {};
-    var args = _.process.input();
+    const handlersMap = {};
+    const args = _.process.input();
 
     handlersMap[ 'handler1' ] = handler1;
     handlersMap[ 'handler2' ] = handler2;
@@ -2018,14 +2019,14 @@ function processOffExitEvent( test )
       {
         _.assert( !!handlersMap[ name ] );
         _.process.off( 'exit', handlersMap[ name ] );
-      })
+      });
     }
 
     _.time.out( 1000, () =>
     {
       console.log( 'timeOut handler executed' );
       return 1;
-    })
+    });
 
     function handler1( arg )
     {
