@@ -334,7 +334,7 @@ function onWithOptionsMap( test )
       callbackMap : { 'available' : ( ... args ) => result.push( args ) },
       first : false,
     };
-    var program = a.program({ routine : callbackForAvailable, locals : { o, result : [] } });
+    var program = a.program({ entry : callbackForAvailable, locals : { o, result : [] } });
     return program.start()
     .then( ( op ) =>
     {
@@ -354,7 +354,7 @@ function onWithOptionsMap( test )
       callbackMap : { 'available' : ( ... args ) => result.push( args ) },
       first : false,
     };
-    var program = a.program({ routine : callbackForAvailableDouble, locals : { o, result : [] } });
+    var program = a.program({ entry : callbackForAvailableDouble, locals : { o, result : [] } });
     return program.start()
     .then( ( op ) =>
     {
@@ -374,7 +374,7 @@ function onWithOptionsMap( test )
       callbackMap : { 'available' : ( ... args ) => result.push( args ) },
       first : false,
     };
-    var program = a.program({ routine : callbacksForEvents, locals : { o, result : [] } });
+    var program = a.program({ entry : callbacksForEvents, locals : { o, result : [] } });
     return program.start()
     .then( ( op ) =>
     {
@@ -394,7 +394,7 @@ function onWithOptionsMap( test )
       callbackMap : { 'available' : ( ... args ) => result.push( args ) },
       first : false,
     };
-    var program = a.program({ routine : uncaughtError, locals : { o, result : [] } });
+    var program = a.program({ entry : uncaughtError, locals : { o, result : [] } });
     return program.start()
     .then( ( op ) =>
     {
@@ -432,7 +432,7 @@ function onWithOptionsMap( test )
       callbackMap : { 'exitBefore' : ( ... args ) => result.push( result.length ) },
       first : false,
     };
-    var program = a.program({ routine : severalCallbacks, locals : { o1, o2, result : [] } });
+    var program = a.program({ entry : severalCallbacks, locals : { o1, o2, result : [] } });
     return program.start()
     .then( ( op ) =>
     {
@@ -457,7 +457,7 @@ function onWithOptionsMap( test )
       callbackMap : { 'exitBefore' : ( ... args ) => result.push( result.length ) },
       first : false,
     };
-    var program = a.program({ routine : severalCallbacks, locals : { o1, o2, result : [] } });
+    var program = a.program({ entry : severalCallbacks, locals : { o1, o2, result : [] } });
     return program.start()
     .then( ( op ) =>
     {
@@ -482,7 +482,7 @@ function onWithOptionsMap( test )
       callbackMap : { 'exitBefore' : ( ... args ) => result.push( result.length ) },
       first : true,
     };
-    var program = a.program({ routine : severalCallbacks, locals : { o1, o2, result : [] } });
+    var program = a.program({ entry : severalCallbacks, locals : { o1, o2, result : [] } });
     return program.start()
     .then( ( op ) =>
     {
@@ -507,7 +507,7 @@ function onWithOptionsMap( test )
       callbackMap : { 'exitBefore' : ( ... args ) => result.push( result.length ) },
       first : true,
     };
-    var program = a.program({ routine : severalCallbacks, locals : { o1, o2, result : [] } });
+    var program = a.program({ entry : severalCallbacks, locals : { o1, o2, result : [] } });
     return program.start()
     .then( ( op ) =>
     {

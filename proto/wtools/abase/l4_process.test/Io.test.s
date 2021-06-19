@@ -1210,7 +1210,7 @@ function inputReadToWithArguments( test )
       namesMap,
       toolsPath : _.module.resolve( 'wTools' ),
     };
-    return a.program({ routine : testApp, locals });
+    return a.program({ entry : testApp, locals });
   }
 
   /* */
@@ -1637,7 +1637,7 @@ function inputReadToWithOptionsMap( test )
       namesMap,
       toolsPath : _.module.resolve( 'wTools' ),
     };
-    return a.program({ routine : testApp, locals });
+    return a.program({ entry : testApp, locals });
   }
 
   /* */
@@ -1718,7 +1718,7 @@ function inputReadToCheckInputInfluence( test )
     context : { t0 : context.t0 },
     toolsPath : _.module.resolve( 'wTools' ),
   };
-  let programPath = a.program({ routine : testApp, locals }).programPath;
+  let programPath = a.program({ entry : testApp, locals }).programPath;
 
   let o =
   {

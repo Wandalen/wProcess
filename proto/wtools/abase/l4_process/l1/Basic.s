@@ -64,12 +64,13 @@ function pidFrom( src )
 
 let _tempFiles = [];
 
+/* qqq : for Vova : reuse _.program.* */
 function tempOpen_head( routine, args )
 {
   let o;
 
   if( _.strIs( args[ 0 ] ) || _.bufferRawIs( args[ 0 ] ) )
-  o = { sourceCode : args[ 0 ] };
+  o = { routineCode : args[ 0 ] };
   else
   o = args[ 0 ];
 
