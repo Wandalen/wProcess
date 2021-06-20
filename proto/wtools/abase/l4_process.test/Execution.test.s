@@ -26897,7 +26897,7 @@ function appTempApplication( test )
   /* */
 
   test.case = 'string';
-  var returned = _.process.tempOpen({ routineCode : testAppCode });
+  var returned = _.process.tempOpen({ sourceCode : testAppCode });
   var read = _.fileProvider.fileRead( returned );
   test.identical( read, testAppCode );
   _.process.tempClose( returned );
@@ -26915,7 +26915,7 @@ function appTempApplication( test )
   /* */
 
   test.case = 'raw buffer';
-  var returned = _.process.tempOpen({ routineCode : _.bufferRawFrom( testAppCode ) });
+  var returned = _.process.tempOpen({ sourceCode : _.bufferRawFrom( testAppCode ) });
   var read = _.fileProvider.fileRead( returned );
   test.identical( read, testAppCode );
   _.process.tempClose( returned );
