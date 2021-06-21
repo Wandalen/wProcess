@@ -4750,7 +4750,6 @@ function startMinimalExecPathQuotesClosing( test )
     const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' );
-    debugger;
     var args = _.process.input();
     console.log( JSON.stringify( args ) );
   }
@@ -9144,9 +9143,7 @@ function starterProcedureStack( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  debugger;
   let programPath = a.program( program1 ).programPath;
-  debugger;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -17733,7 +17730,6 @@ ${options.sessions[ 1 ].procedure.id}.end
 
     let sessionDelay = context.t1 * 0.5*args.map.sessionId;
 
-    debugger;
     if( args.map.concurrent )
     setTimeout( () => { console.log( `${args.map.id}.begin` ) }, sessionDelay );
     else

@@ -361,7 +361,6 @@ function startMinimal_body( o )
     // let o3 = _.ProcessMinimal.Retype( o );
     // _.assert( o3 === o );
     // _.assert( !Object.isExtensible( o ) );
-    // debugger;
 
     /* */
 
@@ -394,8 +393,6 @@ function startMinimal_body( o )
       o.procedure = _.Procedure({ _stack : o.stack });
     }
 
-    // if( _.routineIs( o.args ) )
-    // debugger;
     if( _.routineIs( o.args ) )
     o.args = o.args( o );
     if( o.args === null )
@@ -430,9 +427,7 @@ function startMinimal_body( o )
     if( o.outputColoring.err || o.outputColoring.out && typeof module !== 'undefined' )
     try
     {
-      // debugger;
       _.include( 'wColor' );
-      // debugger;
     }
     catch( err )
     {
@@ -540,7 +535,6 @@ function startMinimal_body( o )
     }
     catch( err )
     {
-      debugger;
       handleError( err );
     }
 
@@ -748,7 +742,6 @@ function startMinimal_body( o )
 
     if( !o.outputAdditive )
     {
-      debugger;
       if( _decoratedOutOutput )
       o.logger.log( _decoratedOutOutput );
       if( _decoratedErrOutput )
@@ -789,12 +782,11 @@ function startMinimal_body( o )
   function handleClose( exitCode, exitSignal )
   {
     // /*
-    // console.log( 'handleClose', _.process.realMainFile(), o.ended, ... arguments ); debugger;
+    // console.log( 'handleClose', _.process.realMainFile(), o.ended, ... arguments );
     // */
 
     if( o.outputAdditive && _outAdditive )
     {
-      debugger;
       o.logger.log( _outAdditive );
       _outAdditive = '';
     }
@@ -856,7 +848,7 @@ function startMinimal_body( o )
   {
     /* xxx : use handleExit */
     // /*
-    // console.log( 'handleExit', _.process.realMainFile(), o.ended, ... arguments ); debugger;
+    // console.log( 'handleExit', _.process.realMainFile(), o.ended, ... arguments );
     // */
     // handleClose( exitCode, exitSignal );
   }
@@ -881,7 +873,6 @@ function startMinimal_body( o )
 
     if( o.ended )
     {
-      debugger;
       throw err;
     }
 
@@ -900,7 +891,7 @@ function startMinimal_body( o )
   function handleDisconnect( arg )
   {
     /*
-    console.log( 'handleDisconnect', _.process.realMainFile(), o.ended ); debugger;
+    console.log( 'handleDisconnect', _.process.realMainFile(), o.ended );
     */
 
     /*
@@ -914,7 +905,6 @@ function startMinimal_body( o )
     {
       if( !o.ended )
       {
-        debugger;
         o.state = 'disconnected';
         o.conDisconnect.take( this );
         end2( undefined );
@@ -937,7 +927,7 @@ function startMinimal_body( o )
   function disconnect()
   {
     /*
-    console.log( 'disconnect', _.process.realMainFile(), this.ended ); debugger;
+    console.log( 'disconnect', _.process.realMainFile(), this.ended );
     */
 
     _.assert( !!this.pnd, 'Process is not started. Cant disconnect.' );
@@ -994,7 +984,6 @@ function startMinimal_body( o )
 
   function pipe()
   {
-    // debugger
     if( o.dry )
     return;
 
@@ -1073,7 +1062,6 @@ function startMinimal_body( o )
     }
     catch( err )
     {
-      debugger;
       log( _.errOnce( err ), 'err' );
     }
   }
@@ -1182,7 +1170,6 @@ function startMinimal_body( o )
 
   function handleStreamOutput( data, channel )
   {
-    // debugger
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
 
@@ -1569,7 +1556,6 @@ function startSingle_body( o )
         if( _.process.isAlive( parentPid ) )
         return true;
         ready.take( true )
-        debugger
         terminated = true;
       })
     }
@@ -1858,7 +1844,6 @@ function startMultiple_body( o )
     // let o3 = _.ProcessMultiple.Retype( o );
     // _.assert( o3 === o );
     // _.assert( !Object.isExtensible( o ) );
-    // debugger;
 
     o.sessions = [];
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
@@ -2121,7 +2106,6 @@ function startMultiple_body( o )
       }
       catch( err2 )
       {
-        debugger;
         o.logger.error( _.err( err2 ) );
       }
     });
@@ -2192,7 +2176,6 @@ function startMultiple_body( o )
 
     if( _.longHas( dst._pipes, src ) )
     {
-      debugger;
       return;
     }
 
