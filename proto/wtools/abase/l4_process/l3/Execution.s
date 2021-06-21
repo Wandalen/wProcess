@@ -1504,7 +1504,7 @@ function startSingle_body( o )
     }
     let locals = { toolsPath, o : _.mapBut_( null, o, excludeOptions ), parentPid : process.pid };
     let secondaryProcessRoutine = _.program.preform({ entry : afterDeathSecondaryProcess, locals })
-    let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.entry.routineCode });
+    let secondaryFilePath = _.process.tempOpen({ routineCode : secondaryProcessRoutine.entry.routineCode });
 
     o.execPath = _.path.nativize( secondaryFilePath );
     o.mode = 'fork';
@@ -3354,10 +3354,10 @@ function _startTree( o )
 
   /* qqq : for Vova : reuse _.program.* */
   let preformedChild = _.program.preform({ entry : child, locals });
-  let preformedChildPath = _.process.tempOpen({ sourceCode : preformedChild.entry.entry.routineCode });
+  let preformedChildPath = _.process.tempOpen({ routineCode : preformedChild.entry.entry.routineCode });
   locals.childPath = preformedChildPath;
   let preformed = _.program.preform({ entry : program, locals });
-  let preformedFilePath = _.process.tempOpen({ sourceCode : preformed.entry.routineCode });
+  let preformedFilePath = _.process.tempOpen({ routineCode : preformed.entry.routineCode });
 
   o.list = [];
 
