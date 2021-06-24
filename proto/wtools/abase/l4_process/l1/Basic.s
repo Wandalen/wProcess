@@ -88,17 +88,21 @@ function tempOpen_body( o )
 {
   _.routine.assertOptions( tempOpen, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
-  _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.entity.strType( o.sourceCode ) );
+  _.assert
+  (
+    _.strIs( o.routineCode ) || _.bufferRawIs( o.routineCode ),
+    'Expects string or buffer raw {-o.routineCode-}, but got', _.entity.strType( o.routineCode )
+  );
 
   let tempDirPath = _.path.tempOpen( _.path.realMainDir(), 'ProcessTempOpen' );
   let filePath = _.path.join( tempDirPath, _.idWithDateAndTime() + '.ss' );
   _tempFiles.push( filePath );
-  _.fileProvider.fileWrite( filePath, o.sourceCode );
+  _.fileProvider.fileWrite( filePath, o.routineCode );
   return filePath;
 }
 
 var defaults = tempOpen_body.defaults = Object.create( null );
-defaults.sourceCode = null;
+defaults.routineCode = null;
 
 let tempOpen = _.routine.uniteCloning_replaceByUnite( tempOpen_head, tempOpen_body );
 

@@ -138,9 +138,8 @@ function onWithArguments( test )
   a.ready.then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
-    test.identical( _.strCount( op.output, '[object Object] arg' ), 1 );
-    test.identical( _.strCount( op.output, 'event: \'exit\'' ), 1 );
-    test.identical( _.strCount( op.output, 'onError: [Function: onError]' ), 1 );
+    test.identical( _.strCount( op.output, '0 arg' ), 1 );
+    test.identical( _.strCount( op.output, '[ 0 ]' ), 1 );
     return null;
   });
 

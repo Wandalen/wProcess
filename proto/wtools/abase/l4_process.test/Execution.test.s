@@ -4750,7 +4750,6 @@ function startMinimalExecPathQuotesClosing( test )
     const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' );
-    debugger;
     var args = _.process.input();
     console.log( JSON.stringify( args ) );
   }
@@ -9144,9 +9143,7 @@ function starterProcedureStack( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  debugger;
   let programPath = a.program( program1 ).programPath;
-  debugger;
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -17733,7 +17730,6 @@ ${options.sessions[ 1 ].procedure.id}.end
 
     let sessionDelay = context.t1 * 0.5*args.map.sessionId;
 
-    debugger;
     if( args.map.concurrent )
     setTimeout( () => { console.log( `${args.map.id}.begin` ) }, sessionDelay );
     else
@@ -26897,7 +26893,7 @@ function appTempApplication( test )
   /* */
 
   test.case = 'string';
-  var returned = _.process.tempOpen({ sourceCode : testAppCode });
+  var returned = _.process.tempOpen({ routineCode : testAppCode });
   var read = _.fileProvider.fileRead( returned );
   test.identical( read, testAppCode );
   _.process.tempClose( returned );
@@ -26915,7 +26911,7 @@ function appTempApplication( test )
   /* */
 
   test.case = 'raw buffer';
-  var returned = _.process.tempOpen({ sourceCode : _.bufferRawFrom( testAppCode ) });
+  var returned = _.process.tempOpen({ routineCode : _.bufferRawFrom( testAppCode ) });
   var read = _.fileProvider.fileRead( returned );
   test.identical( read, testAppCode );
   _.process.tempClose( returned );
@@ -26936,7 +26932,7 @@ function appTempApplication( test )
   if( !Config.debug )
   return;
 
-  test.case = 'unexpected type of sourceCode option';
+  test.case = 'unexpected type of routineCode option';
   test.shouldThrowErrorSync( () =>
   {
     _.process.tempOpen( [] );
