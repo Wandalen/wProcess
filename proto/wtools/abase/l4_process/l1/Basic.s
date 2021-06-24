@@ -82,6 +82,8 @@ function tempOpen_head( routine, args )
   return o;
 }
 
+//
+
 function tempOpen_body( o )
 {
   _.routine.assertOptions( tempOpen, arguments );
@@ -781,11 +783,11 @@ let Extension =
   _tempFiles,
   _registeredExitHandler : null,
   _registeredExitBeforeHandler : null,
-  _initialCurrentPath : null
+  _initialCurrentPath : null,
 
 }
 
-/* _.props.extend */Object.assign( _.process, Extension );
+Object.assign( _.process, Extension );
 _.props.supplement( _.process._edispatcher.events, Events );
 _.assert( !_.process.start );
 _.process._Setup1();
