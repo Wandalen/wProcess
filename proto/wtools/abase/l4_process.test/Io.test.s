@@ -45,7 +45,7 @@ function input( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   /* */
 
@@ -451,10 +451,10 @@ function input( test )
   a.ready.then( () =>
   {
     test.case = 'two calls of routine, should return cached result';
-    let programPath = a.path.nativize( a.program( testApp2 ).programPath );
+    let filePath/*programPath*/ = a.path.nativize( a.program( testApp2 ).filePath/*programPath*/ );
     let o =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + filePath/*programPath*/,
       args : [ '.will.yml' ],
       mode : 'spawn',
       throwingExitCode : 1,
@@ -528,7 +528,7 @@ function input( test )
   {
     let o =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + filePath/*programPath*/,
       mode : 'spawn',
       throwingExitCode : 1,
       outputCollecting : 1,
@@ -544,7 +544,7 @@ function inputWithNotDefaultDelimeters( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   /* */
 
@@ -635,10 +635,10 @@ function inputWithNotDefaultDelimeters( test )
   a.ready.then( () =>
   {
     test.case = 'two calls of routine';
-    let programPath = a.path.nativize( a.program( testApp2 ).programPath );
+    let filePath/*programPath*/ = a.path.nativize( a.program( testApp2 ).filePath/*programPath*/ );
     let o =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + filePath/*programPath*/,
       args : [ '.will.yml' ],
       mode : 'spawn',
       throwingExitCode : 1,
@@ -731,7 +731,7 @@ function inputWithNotDefaultDelimeters( test )
   {
     let o =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + filePath/*programPath*/,
       mode : 'spawn',
       throwingExitCode : 1,
       outputCollecting : 1,
@@ -747,7 +747,7 @@ function inputWithVectorizedProperties( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   /* - */
 
@@ -902,7 +902,7 @@ function inputWithVectorizedProperties( test )
   {
     let o =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + filePath/*programPath*/,
       mode : 'spawn',
       throwingExitCode : 1,
       outputCollecting : 1,
@@ -924,8 +924,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - empty map';
-    let programPath = programMake( {}, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( {}, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -939,7 +939,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -949,8 +949,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - empty map, namesMap - not empty';
-    let programPath = programMake( {}, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( {}, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -964,7 +964,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -974,8 +974,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with boolean';
-    let programPath = programMake( { r : true }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : true }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -989,7 +989,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -999,8 +999,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with number';
-    let programPath = programMake( { r : 0 }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : 0 }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1014,7 +1014,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1024,8 +1024,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1039,7 +1039,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1049,8 +1049,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with boolean';
-    let programPath = programMake( { r : true }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : true }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1064,7 +1064,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1074,8 +1074,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with number';
-    let programPath = programMake( { r : 0 }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : 0 }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1089,7 +1089,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1099,8 +1099,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1114,7 +1114,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1124,8 +1124,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, { r : 'a' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, { r : 'a' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1139,7 +1139,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1210,7 +1210,7 @@ function inputReadToWithArguments( test )
       namesMap,
       toolsPath : _.module.resolve( 'wTools' ),
     };
-    return a.program({ entry : testApp, locals }).programPath;
+    return a.program({ entry : testApp, locals }).filePath/*programPath*/;
   }
 
   /* */
@@ -1241,8 +1241,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - empty map';
-    let programPath = programMake( {}, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( {}, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1256,7 +1256,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1266,8 +1266,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - empty map, namesMap - not empty';
-    let programPath = programMake( {}, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( {}, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1281,7 +1281,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1291,8 +1291,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with boolean';
-    let programPath = programMake( { r : true }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : true }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1306,7 +1306,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1316,8 +1316,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with number';
-    let programPath = programMake( { r : 0 }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : 0 }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1331,7 +1331,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1341,8 +1341,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1356,7 +1356,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1366,8 +1366,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with boolean';
-    let programPath = programMake( { r : true }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : true }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1381,7 +1381,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1391,8 +1391,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with number';
-    let programPath = programMake( { r : 0 }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : 0 }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1406,7 +1406,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1416,8 +1416,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1431,7 +1431,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1441,8 +1441,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, { r : 'a' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, { r : 'a' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1456,7 +1456,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1637,7 +1637,7 @@ function inputReadToWithOptionsMap( test )
       namesMap,
       toolsPath : _.module.resolve( 'wTools' ),
     };
-    return a.program({ entry : testApp, locals }).programPath;
+    return a.program({ entry : testApp, locals }).filePath/*programPath*/;
   }
 
   /* */
@@ -1718,11 +1718,11 @@ function inputReadToCheckInputInfluence( test )
     context : { t0 : context.t0 },
     toolsPath : _.module.resolve( 'wTools' ),
   };
-  let programPath = a.program({ entry : testApp, locals }).programPath;
+  let filePath/*programPath*/ = a.program({ entry : testApp, locals }).filePath/*programPath*/;
 
   let o =
   {
-    execPath : programPath,
+    execPath : filePath/*programPath*/,
     mode : 'fork',
     args : [ 'r:routine' ],
     throwingExitCode : 0,
@@ -1784,8 +1784,8 @@ function processOnExitEvent( test )
 {
   const context = this;
   const a = test.assetFor( false );
-  // let programPath = a.path.nativize( a.program( testApp ).programPath );  /* zzz : a.path.nativize? */
-  const programPath = a.program( testApp ).programPath;
+  // let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );  /* zzz : a.path.nativize? */
+  const filePath/*programPath*/ = a.program( testApp ).filePath/*programPath*/;
 
   /* */
 
@@ -1793,7 +1793,7 @@ function processOnExitEvent( test )
   {
     var o =
     {
-      execPath :  'node ' + programPath,
+      execPath :  'node ' + filePath/*programPath*/,
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
@@ -1818,7 +1818,7 @@ function processOnExitEvent( test )
   {
     var o =
     {
-      execPath :  'node ' + programPath + ' terminate:1',
+      execPath :  'node ' + filePath/*programPath*/ + ' terminate:1',
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
@@ -1875,7 +1875,7 @@ function processOffExitEvent( test )
 {
   const context = this;
   const a = test.assetFor( false );
-  const programPath = a.path.nativize( a.program( testApp ).programPath );
+  const filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   /* */
 
@@ -1884,7 +1884,7 @@ function processOffExitEvent( test )
     test.case = 'nothing to off'
     var o =
     {
-      execPath :  'node ' + programPath,
+      execPath :  'node ' + filePath/*programPath*/,
       mode : 'spawn',
       stdio : 'pipe',
       outputPiping : 1,
@@ -1911,7 +1911,7 @@ function processOffExitEvent( test )
     test.case = 'off single handler'
     var o =
     {
-      execPath :  'node ' + programPath,
+      execPath :  'node ' + filePath/*programPath*/,
       args : 'off:handler1',
       mode : 'spawn',
       stdio : 'pipe',
@@ -1939,7 +1939,7 @@ function processOffExitEvent( test )
     test.case = 'off all handlers'
     var o =
     {
-      execPath :  'node ' + programPath,
+      execPath :  'node ' + filePath/*programPath*/,
       args : 'off:[handler1,handler2]',
       mode : 'spawn',
       stdio : 'pipe',
@@ -1967,7 +1967,7 @@ function processOffExitEvent( test )
     test.case = 'off unregistered handler'
     var o =
     {
-      execPath :  'node ' + programPath,
+      execPath :  'node ' + filePath/*programPath*/,
       args : 'off:handler3',
       mode : 'spawn',
       stdio : 'pipe',
@@ -2051,11 +2051,11 @@ function processArgsBase( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   let shell = _.process.starter
   ({
-    execPath : 'node ' + programPath,
+    execPath : 'node ' + filePath/*programPath*/,
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
@@ -2063,7 +2063,7 @@ function processArgsBase( test )
 
   let filePath = a.abs( 'got' );
   let interpreterPath = a.path.normalize( process.argv[ 0 ] );
-  let scriptPath = a.path.normalize( programPath );
+  let scriptPath = a.path.normalize( filePath/*programPath*/ );
 
   /* */
 
@@ -2140,18 +2140,18 @@ function processArgsPropertiesBase( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   let shell = _.process.starter
   ({
-    execPath : 'node ' + programPath,
+    execPath : 'node ' + filePath/*programPath*/,
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
   })
   let filePath = a.abs( 'got' );
   let interpreterPath = a.path.normalize( process.argv[ 0 ] );
-  let scriptPath = a.path.normalize( programPath );
+  let scriptPath = a.path.normalize( filePath/*programPath*/ );
 
   /* */
 
@@ -2388,11 +2388,11 @@ function processArgsMultipleCommands( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   let shell = _.process.starter
   ({
-    execPath : 'node ' + programPath,
+    execPath : 'node ' + filePath/*programPath*/,
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
@@ -2484,11 +2484,11 @@ function processArgsPaths( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   let shell = _.process.starter
   ({
-    execPath : 'node ' + programPath,
+    execPath : 'node ' + filePath/*programPath*/,
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
@@ -2582,11 +2582,11 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   let shell = _.process.starter
   ({
-    execPath : 'node ' + programPath,
+    execPath : 'node ' + filePath/*programPath*/,
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
@@ -3045,7 +3045,7 @@ function realMainFile( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp ).programPath;
+  let testAppPath = a.program( testApp ).filePath/*programPath*/;
   let testAppPathNative = a.path.nativize( testAppPath );
 
   a.ready.then( () =>
