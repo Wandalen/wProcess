@@ -674,7 +674,7 @@ function startMinimal( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let filePath/*programPath*/ = a.program( program1 ).filePath/*programPath*/;
+  let filePath/*programPath*/ = a.path.nativize( a.program( program1 ).filePath )/*programPath*/;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -950,7 +950,7 @@ function startMinimal( test )
         }, context.t1 * 5 ) /* 5000 */
       }
 
-      let filePath/*programPath*/ = a.program( testApp5 ).filePath/*programPath*/;
+      let filePath/*programPath*/ = a.path.nativize( a.program( testApp5 ).filePath )/*programPath*/;
 
       let o =
       {
@@ -990,7 +990,7 @@ function startMinimal( test )
         }, context.t1 * 5 ) /* 5000 */
       }
 
-      let filePath/*programPath*/ = a.program( testApp6 ).filePath/*programPath*/;
+      let filePath/*programPath*/ = a.path.nativize( a.program( testApp6 ).filePath )/*programPath*/;
 
       let o =
       {
