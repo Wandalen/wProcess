@@ -1785,7 +1785,7 @@ function processOnExitEvent( test )
   const context = this;
   const a = test.assetFor( false );
   // let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );  /* zzz : a.path.nativize? */
-  const filePath/*programPath*/ = a.program( testApp ).filePath/*programPath*/;
+  const filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath );/*programPath*/;
 
   /* */
 
