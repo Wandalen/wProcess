@@ -598,7 +598,7 @@ ${filePath/*programPath*/}:end
 
       o2 =
       {
-        execPath : mode === 'fork' ? program2 :  'node ' + program2,
+        execPath : mode === 'fork' ? program2 : 'node ' + program2,
         args : [ 'staging' ],
         mode,
         stdio : 'pipe'
@@ -1203,7 +1203,7 @@ function startMinimalErrorHandling( test )
 
   //   let o =
   //   {
-  //     execPath :   'node ' + testAppPath,
+  //     execPath :  'node ' + testAppPath,
   //     mode : 'spawn',
   //     stdio : 'pipe',
   //     verbosity : 0,
@@ -1234,7 +1234,7 @@ function startMinimalErrorHandling( test )
 
   //   let o =
   //   {
-  //     execPath :   'node ' + testAppPath,
+  //     execPath :  'node ' + testAppPath,
   //     mode : 'shell',
   //     stdio : 'pipe',
   //     verbosity : 0,
@@ -1296,7 +1296,7 @@ function startMinimalErrorHandling( test )
 
   //   let o =
   //   {
-  //     execPath :   'node ' + testAppPath,
+  //     execPath :  'node ' + testAppPath,
   //     mode : 'spawn',
   //     stdio : 'pipe',
   //     sync : 1,
@@ -1327,7 +1327,7 @@ function startMinimalErrorHandling( test )
 
   //   let o =
   //   {
-  //     execPath :   'node ' + testAppPath,
+  //     execPath :  'node ' + testAppPath,
   //     mode : 'shell',
   //     stdio : 'pipe',
   //     sync : 1,
@@ -2230,7 +2230,7 @@ function startMinimalWithoutExecPath( test )
   let filePath/*programPath*/ = a.program( testApp ).filePath/*programPath*/;
   let counter = 0;
   let time = 0;
-  let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
+  let txtPath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -2265,15 +2265,14 @@ function startMinimalWithoutExecPath( test )
         test.true( singleOption === arg );
         test.true( _.strHas( arg.output, 'begin 1000' ) );
         test.true( _.strHas( arg.output, 'end 1000' ) );
-        test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
-        a.fileProvider.fileDelete( filePath );
+        test.identical( a.fileProvider.fileRead( txtPath ), 'written by 1000' );
+        a.fileProvider.fileDelete( txtPath );
         counter += 1;
         return null;
       });
-    })
+    });
 
     return ready;
-
   }
 
   /* ORIGINAL */
@@ -5791,7 +5790,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
     let options =
     {
-      execPath :  'node ' + filePath/*programPath*/,
+      execPath : 'node ' + filePath/*programPath*/,
       outputCollecting : 1,
     }
 
@@ -5824,7 +5823,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
     let options =
     {
-      execPath :  'node ' + filePath/*programPath*/,
+      execPath : 'node ' + filePath/*programPath*/,
       outputCollecting : 1,
     }
 
@@ -5857,7 +5856,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
     let options =
     {
-      execPath :  'node ' + filePath/*programPath*/,
+      execPath : 'node ' + filePath/*programPath*/,
       outputCollecting : 1,
     }
 
@@ -5917,7 +5916,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
     let options =
     {
-      execPath :  'node ' + filePath/*programPath*/,
+      execPath : 'node ' + filePath/*programPath*/,
       outputCollecting : 1,
       args : 'argFromParent',
     }
@@ -5964,7 +5963,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
     let options =
     {
-      execPath :  'node ' + filePath/*programPath*/,
+      execPath : 'node ' + filePath/*programPath*/,
       outputCollecting : 1,
       args : 'argFromParent',
     }
@@ -6018,7 +6017,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
     let options =
     {
-      execPath :  'node ' + filePath/*programPath*/,
+      execPath : 'node ' + filePath/*programPath*/,
       outputCollecting : 1,
       args : 'argFromParent',
     }
@@ -6064,7 +6063,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
     let options =
     {
-      execPath :  'node ' + filePath/*programPath*/,
+      execPath : 'node ' + filePath/*programPath*/,
       outputCollecting : 1,
       args : [ 'argFromParent1', 'argFromParent2' ],
     }
@@ -6098,7 +6097,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
     let options =
     {
-      execPath :  'node ' + filePath/*programPath*/,
+      execPath : 'node ' + filePath/*programPath*/,
       outputCollecting : 1,
       args : [ 'argFromParent1', 'argFromParent2' ],
     }
@@ -6132,7 +6131,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
     let options =
     {
-      execPath :  'node ' + filePath/*programPath*/,
+      execPath : 'node ' + filePath/*programPath*/,
       outputCollecting : 1,
       args : [ 'argFromParent1', 'argFromParent2' ],
     }
@@ -22682,7 +22681,7 @@ function startMinimalOptionOutputPiping( test )
 2020-12-05T17:31:19.5139083Z  6 :
 2020-12-05T17:31:19.5139568Z  7 :     let options =
 2020-12-05T17:31:19.5140179Z  8 :     {
-2020-12-05T17:31:19.5140924Z  9 :       execPath : mode === 'fork' ? filePath/*programPath*/ : 'node ' + filePath/*programPath*/,
+2020-12-05T17:31:19.5140924Z  9 :       execPath : mode === 'fork' ? filePath : 'node ' + filePath,
 2020-12-05T17:31:19.5141643Z 10 :       mode,
 2020-12-05T17:31:19.5142223Z 11 :       inputMirroring : 0,
 2020-12-05T17:31:19.5142900Z 12 :       outputPiping : piping,
@@ -22702,7 +22701,7 @@ function startMinimalOptionOutputPiping( test )
 2020-12-05T17:31:19.5151415Z 26 :   }
 2020-12-05T17:31:19.5151845Z 27 :
 2020-12-05T17:31:19.5152320Z 28 : var piping = 1;
-2020-12-05T17:31:19.5153899Z 29 : var filePath/*programPath*/ = `D:\\Temp\\ProcessBasic-2020-12-5-16-36-43-976-8109.tmp\\startMinimalOptionOutputPiping\\testApp2Error2.js`;
+2020-12-05T17:31:19.5153899Z 29 : var filePath = `D:\\Temp\\ProcessBasic-2020-12-5-16-36-43-976-8109.tmp\\startMinimalOptionOutputPiping\\testApp2Error2.js`;
 2020-12-05T17:31:19.5155258Z 30 : var mode = `fork`;
 2020-12-05T17:31:19.5155829Z 31 : var verbosity = 1;
 2020-12-05T17:31:19.5156408Z 32 : var prefixing = 0;
@@ -23883,7 +23882,7 @@ function startMinimalOptionInputMirroringFail( test )
         2020-12-22T10:55:54.9594228Z  6 :
         2020-12-22T10:55:54.9594535Z  7 :     let options =
         2020-12-22T10:55:54.9595042Z  8 :     {
-        2020-12-22T10:55:54.9595786Z  9 :       execPath : mode === 'fork' ? filePath/*programPath*/ : 'node ' + filePath/*programPath*/,
+        2020-12-22T10:55:54.9595786Z  9 :       execPath : mode === 'fork' ? filePath : 'node ' + filePath,
         2020-12-22T10:55:54.9596339Z 10 :       mode,
         2020-12-22T10:55:54.9596975Z 11 :       inputMirroring,
         2020-12-22T10:55:54.9597585Z 12 :       verbosity,
@@ -23895,7 +23894,7 @@ function startMinimalOptionInputMirroringFail( test )
         2020-12-22T10:55:54.9601154Z 18 :
         2020-12-22T10:55:54.9601664Z 19 :   }
         2020-12-22T10:55:54.9601917Z 20 :
-        2020-12-22T10:55:54.9603102Z 21 : var filePath/*programPath*/ = `D:\\Temp\\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\\startMinimalOptionInputMirroring\\testApp2Error.js`;
+        2020-12-22T10:55:54.9603102Z 21 : var filePath = `D:\\Temp\\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\\startMinimalOptionInputMirroring\\testApp2Error.js`;
         2020-12-22T10:55:54.9604147Z 22 : var mode = `shell`;
         2020-12-22T10:55:54.9604578Z 23 : var inputMirroring = 1;
         2020-12-22T10:55:54.9604986Z 24 : var verbosity = 2;
@@ -31083,7 +31082,7 @@ function killSync( test )
   //   test.case = `mode:spawn, kill child process using process descriptor`
   //   var o =
   //   {
-  //     execPath :  'node ' + testAppPath,
+  //     execPath : 'node ' + testAppPath,
   //     mode : 'spawn',
   //     outputCollecting : 1,
   //     throwingExitCode : 0
@@ -31118,7 +31117,7 @@ function killSync( test )
   //   test.case = `mode:spawn, kill child process using process id`
   //   var o =
   //   {
-  //     execPath :  'node ' + testAppPath,
+  //     execPath : 'node ' + testAppPath,
   //     mode : 'spawn',
   //     outputCollecting : 1,
   //     throwingExitCode : 0
@@ -31243,7 +31242,7 @@ function killSync( test )
 
   //   var o =
   //   {
-  //     execPath :  'node ' + testAppPath,
+  //     execPath : 'node ' + testAppPath,
   //     mode : 'shell',
   //     outputCollecting : 1,
   //     throwingExitCode : 0
@@ -31280,7 +31279,7 @@ function killSync( test )
 
   //   var o =
   //   {
-  //     execPath :  'node ' + testAppPath,
+  //     execPath : 'node ' + testAppPath,
   //     mode : 'shell',
   //     outputCollecting : 1,
   //     throwingExitCode : 0
@@ -31355,7 +31354,7 @@ function killOptionWithChildren( test )
       let testAppPath = a.program({ entry : testApp, locals : { mode } }).filePath/*programPath*/;
       var o =
       {
-        execPath :  'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
         mode : 'spawn',
         ipc : 1,
         outputCollecting : 1,
@@ -31407,7 +31406,7 @@ function killOptionWithChildren( test )
       let testAppPath = a.program({ entry : testApp, locals : { mode } }).filePath/*programPath*/;
       var o =
       {
-        execPath :  'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
         mode : 'spawn',
         ipc : 1,
         outputCollecting : 1,
@@ -31582,7 +31581,7 @@ function killOptionWithChildren( test )
   //   test.case = 'child -> child, kill first child'
   //   var o =
   //   {
-  //     execPath :  'node ' + testAppPath,
+  //     execPath : 'node ' + testAppPath,
   //     mode : 'spawn',
   //     ipc : 1,
   //     outputCollecting : 1,
@@ -31631,7 +31630,7 @@ function killOptionWithChildren( test )
   //   test.case = 'child -> child, kill last child'
   //   var o =
   //   {
-  //     execPath :  'node ' + testAppPath,
+  //     execPath : 'node ' + testAppPath,
   //     mode : 'spawn',
   //     ipc : 1,
   //     outputCollecting : 1,
@@ -35247,7 +35246,7 @@ exit:${exitCode}
           test.identical( options.pnd.exitCode, exitCode );
         }
 
-        test.identical( _.strCount( options.output, 'exit:' ),  process.platform === 'win32' ? 0 : 1 );
+        test.identical( _.strCount( options.output, 'exit:' ), process.platform === 'win32' ? 0 : 1 );
         test.identical( options.ended, true );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
@@ -35687,7 +35686,7 @@ function terminate( test )
     {
       var o =
       {
-        execPath :  'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
         mode : 'shell',
         outputCollecting : 1,
         throwingExitCode : 0
@@ -35733,7 +35732,7 @@ function terminate( test )
     {
       var o =
       {
-        execPath :  'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
         mode : 'shell',
         outputCollecting : 1,
         throwingExitCode : 0
@@ -35779,7 +35778,7 @@ function terminate( test )
     {
       var o =
       {
-        execPath :  'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
         mode : 'shell',
         outputCollecting : 1,
         throwingExitCode : 0
@@ -35825,7 +35824,7 @@ function terminate( test )
     {
       var o =
       {
-        execPath :  'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
         mode : 'shell',
         outputCollecting : 1,
         throwingExitCode : 0
@@ -35868,7 +35867,7 @@ function terminate( test )
     {
       var o =
       {
-        execPath :  'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
         mode : 'shell',
         outputCollecting : 1,
         throwingExitCode : 0
@@ -35914,7 +35913,7 @@ function terminate( test )
     {
       var o =
       {
-        execPath :  'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
         mode : 'shell',
         outputCollecting : 1,
         throwingExitCode : 0
@@ -36634,8 +36633,7 @@ function terminateDetachedFirstChild( test )
       let program2Pid = null;
       let terminate = _.Consequence();
       /* For mode::shell */
-      let timerIsRunning;
-      let timer;
+      let timerIsRunning, timer;
 
       if( mode === 'shell' )
       {
@@ -37013,8 +37011,7 @@ function terminateWithDetachedChild( test )
       let program2Pid = null;
       let terminate = _.Consequence();
       /* For mode::shell */
-      let timerIsRunning;
-      let timer;
+      let timerIsRunning, timer;
 
       if( mode === 'shell' )
       {
@@ -38048,7 +38045,7 @@ function terminateTimeOutIgnoreSignal( test )
   /* ORIGINAL */
   // var o =
   // {
-  //   execPath :  'node ' + testAppPath,
+  //   execPath : 'node ' + testAppPath,
   //   mode : 'spawn',
   //   outputPiping : 1,
   //   outputCollecting : 1,
@@ -38474,7 +38471,7 @@ function terminateDifferentStdio( test )
       test.case = `mode : ${mode}, inherit`;
       var o =
       {
-        execPath : mode === 'fork' ? testAppPath :  'node ' + testAppPath,
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
         stdio : 'inherit',
         ipc : 1,
@@ -38560,7 +38557,7 @@ function terminateDifferentStdio( test )
 
       var o =
       {
-        execPath : mode === 'fork' ? testAppPath :  'node ' + testAppPath,
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
         stdio : 'ignore',
         ipc : 1,
@@ -38612,7 +38609,7 @@ function terminateDifferentStdio( test )
       test.case = `mode : ${mode}, pipe`;
       var o =
       {
-        execPath : mode === 'fork' ? testAppPath :  'node ' + testAppPath,
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
         stdio : 'pipe',
         ipc : 1,
@@ -38719,14 +38716,14 @@ function killComplex( test )
       let childOfChild = null;
       o.pnd.on( 'message', ( e ) =>
       {
-        if( !pid )
+        if( pid )
         {
-          pid = _.numberFrom( e )
-          _.process.kill( pid );
+          childOfChild = e;
         }
         else
         {
-          childOfChild = e;
+          pid = _.numberFrom( e );
+          _.process.kill( pid );
         }
       })
 
@@ -38766,7 +38763,7 @@ function killComplex( test )
   //   test.case = 'Kill child of child process'
   //   var o =
   //   {
-  //     execPath :  'node ' + testAppPath2,
+  //     execPath : 'node ' + testAppPath2,
   //     mode : 'spawn',
   //     ipc : 1,
   //     outputCollecting : 1,
@@ -38856,10 +38853,7 @@ function execPathOf( test )
 
   /* zzz : implement for linux and osx */
   if( process.platform !== 'win32' )
-  {
-    test.identical( 1,1 );
-    return;
-  }
+  return test.identical( 1, 1 );
 
   a.ready
 
@@ -39242,7 +39236,7 @@ function children( test )
     test.case = 'parent -> child -> child'
     var o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath : 'node ' + testAppPath,
       mode : 'spawn',
       ipc : 1,
       outputCollecting : 1,
@@ -39289,7 +39283,7 @@ function children( test )
     test.case = 'parent -> child -> child, search from fist child'
     var o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath : 'node ' + testAppPath,
       mode : 'spawn',
       ipc : 1,
       outputCollecting : 1,
@@ -39333,7 +39327,7 @@ function children( test )
     test.case = 'parent -> child -> child, start from last child'
     var o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath : 'node ' + testAppPath,
       mode : 'spawn',
       ipc : 1,
       outputCollecting : 1,
@@ -39570,7 +39564,7 @@ function childrenOptionFormatList( test )
     test.case = 'parent -> child -> child'
     var o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath : 'node ' + testAppPath,
       mode : 'spawn',
       ipc : 1,
       outputCollecting : 1,
@@ -39861,7 +39855,9 @@ function experimentIpcDeasync( test )
   //   },
   // }).enable();
 
-  require( 'net' ).createServer( () => {} ).listen( 8080, () =>
+  require( 'net' )
+  .createServer( () => {} )
+  .listen( 8080, () =>
   {
     // Let's wait 10ms before logging the server started.
     setTimeout( () =>
