@@ -1785,7 +1785,7 @@ function processOnExitEvent( test )
   const context = this;
   const a = test.assetFor( false );
   // let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );  /* zzz : a.path.nativize? */
-  const filePath/*programPath*/ = a.program( testApp ).filePath/*programPath*/;
+  const filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath );/*programPath*/;
 
   /* */
 
@@ -1896,7 +1896,7 @@ function processOffExitEvent( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
@@ -1924,7 +1924,7 @@ function processOffExitEvent( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
@@ -1952,7 +1952,7 @@ function processOffExitEvent( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 0 );
       test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
@@ -2059,19 +2059,19 @@ function processArgsBase( test )
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
-  })
+  });
 
-  let filePath = a.abs( 'got' );
+  let txtPath = a.abs( 'got' );
   let interpreterPath = a.path.normalize( process.argv[ 0 ] );
   let scriptPath = a.path.normalize( filePath/*programPath*/ );
 
-  /* */
+  /* - */
 
   shell({ args : [] })
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got =   a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : txtPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2095,7 +2095,7 @@ function processArgsBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : txtPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2111,12 +2111,13 @@ function processArgsBase( test )
     }
     test.contains( got, expected );
     return null;
-  })
+  });
 
+  /* - */
 
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
@@ -2149,17 +2150,17 @@ function processArgsPropertiesBase( test )
     throwingExitCode : 0,
     ready : a.ready
   })
-  let filePath = a.abs( 'got' );
+  let jsonPath = a.abs( 'got' );
   let interpreterPath = a.path.normalize( process.argv[ 0 ] );
   let scriptPath = a.path.normalize( filePath/*programPath*/ );
 
-  /* */
+  /* - */
 
   shell({ args : [ 'x', ':', 'aa', 'bbb', ':', 'x' ] })
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2180,7 +2181,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2193,7 +2194,7 @@ function processArgsPropertiesBase( test )
     }
     test.contains( got, expected );
     return null;
-  })
+  });
 
   /* */
 
@@ -2201,7 +2202,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2214,15 +2215,15 @@ function processArgsPropertiesBase( test )
     }
     test.contains( got, expected );
     return null;
-  })
+  });
 
   /* */
 
-  shell({ args : [ 'abcd', 'x', ':', 'y', 'xyz', 'y', ':', 1  ] })
+  shell({ args : [ 'abcd', 'x', ':', 'y', 'xyz', 'y', ':', 1 ] })
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2235,7 +2236,7 @@ function processArgsPropertiesBase( test )
     }
     test.contains( got, expected );
     return null;
-  })
+  });
 
   /* */
 
@@ -2254,7 +2255,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2281,7 +2282,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2310,7 +2311,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2343,7 +2344,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2360,11 +2361,13 @@ function processArgsPropertiesBase( test )
     }
     test.contains( got, expected );
     return null;
-  })
+  });
+
+  /* - */
 
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
@@ -2398,7 +2401,7 @@ function processArgsMultipleCommands( test )
     ready : a.ready
   })
 
-  let filePath = a.abs( 'got' );
+  let jsonPath = a.abs( 'got' );
 
   /* */
 
@@ -2410,7 +2413,7 @@ function processArgsMultipleCommands( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2439,7 +2442,7 @@ function processArgsMultipleCommands( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2458,9 +2461,11 @@ function processArgsMultipleCommands( test )
     return null;
   })
 
+  /* - */
+
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
@@ -2494,7 +2499,7 @@ function processArgsPaths( test )
     ready : a.ready
   })
 
-  let filePath = a.abs( 'got' );
+  let jsonPath = a.abs( 'got' );
 
   /* */
 
@@ -2506,7 +2511,7 @@ function processArgsPaths( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2535,7 +2540,7 @@ function processArgsPaths( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2554,11 +2559,11 @@ function processArgsPaths( test )
     return null;
   })
 
-  /* */
+  /* - */
 
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
@@ -2592,7 +2597,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
     ready : a.ready
   })
 
-  let filePath = a.abs( 'got' );
+  let jsonPath = a.abs( 'got' );
 
   /* */
 
@@ -2606,7 +2611,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:"value with space"' ],
@@ -2634,7 +2639,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', `option:'value with space'` ],
@@ -2662,7 +2667,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:`value with space`' ],
@@ -2690,7 +2695,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', 'value with space' ],
@@ -2718,7 +2723,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', 'value with space' ],
@@ -2746,7 +2751,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', '"value with space"' ],
@@ -2774,7 +2779,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:value', 'with', 'space' ],
@@ -2802,7 +2807,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:value', 'with', 'space' ],
@@ -2830,7 +2835,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', 'value', 'with', 'space' ],
@@ -2858,7 +2863,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option:"value with space"' ],
@@ -2886,7 +2891,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option', ':', '"value with space"' ],
@@ -2914,7 +2919,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option', ':', 'value with space' ],
@@ -2942,7 +2947,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option:value', 'with', 'space' ],
@@ -2970,7 +2975,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option', ':', 'value', 'with', 'space' ],
