@@ -312,8 +312,8 @@ submodule:
   wgdf:
     path: 'npm:///wgdf'
     enabled: 0
-  wFiles:
-    path: 'npm:///wFiles'
+  wFilesBasic:
+    path: 'npm:///wfilesbasic'
     enabled: 0
   wConsequence:
     path: 'npm:///wConsequence'

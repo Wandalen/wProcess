@@ -11,7 +11,7 @@ if( typeof module !== 'undefined' )
   _.include( 'wGdf' );
   _.include( 'wBlueprint' );
   _.include( 'wConsequence' );
-  _.include( 'wFiles' );
+  _.include( 'wFilesBasic' );
 
   module[ 'exports' ] = _global_.wTools;
 }

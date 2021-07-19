@@ -1,6 +1,6 @@
 if( typeof module !== 'undefined' )
 require( '../..' );
-require( 'wFiles' );
+require( 'wFilesBasic' );
 let _ = wTools;
 
 let o =

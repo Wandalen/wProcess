@@ -7,7 +7,7 @@ if( typeof module !== 'undefined' )
 {
   const _ = require( './../../../node_modules/Tools' );
   _.include( 'wTesting' );
-  _.include( 'wFiles' );
+  _.include( 'wFilesBasic' );
   _.include( 'wProcessWatcher' );
 
   require( '../l4_process/module/Process.s' );
@@ -2124,7 +2124,7 @@ function processArgsBase( test )
     const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
+    _.include( 'wFilesBasic' )
 
     if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
@@ -2375,7 +2375,7 @@ function processArgsPropertiesBase( test )
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
+    _.include( 'wFilesBasic' )
 
     if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
@@ -2473,7 +2473,7 @@ function processArgsMultipleCommands( test )
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
+    _.include( 'wFilesBasic' )
 
     if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
@@ -2571,7 +2571,7 @@ function processArgsPaths( test )
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
+    _.include( 'wFilesBasic' )
 
     if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
@@ -3032,7 +3032,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
+    _.include( 'wFilesBasic' )
 
     if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
