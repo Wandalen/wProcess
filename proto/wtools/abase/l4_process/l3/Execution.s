@@ -1525,7 +1525,7 @@ function startSingle_body( o )
   {
     const _ = require( toolsPath );
     _.include( 'wProcess' );
-    _.include( 'wFiles' );
+    _.include( 'wFilesBasic' );
     // let ipc = require( ipcPath );
 
     let ready = _.Consequence();
@@ -3404,7 +3404,7 @@ function _startTree( o )
   {
     const _ = require( toolsPath );
     _.include( 'wProcess' );
-    _.include( 'wFiles' );
+    _.include( 'wFilesBasic' );
 
     process.send({ pid : process.pid, ppid : process.ppid });
 
@@ -3443,7 +3443,7 @@ function _startTree( o )
   {
     const _ = require( toolsPath );
     _.include( 'wProcess' );
-    _.include( 'wFiles' );
+    _.include( 'wFilesBasic' );
 
     let timeOut = _.numberRandom( executionTime );
     setTimeout( () =>

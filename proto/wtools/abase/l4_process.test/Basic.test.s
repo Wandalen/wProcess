@@ -7,7 +7,7 @@ if( typeof module !== 'undefined' )
 {
   const _ = require( './../../../node_modules/Tools' );
   _.include( 'wTesting' );
-  _.include( 'wFiles' );
+  _.include( 'wFilesBasic' );
   _.include( 'wProcessWatcher' );
   require( '../l4_process/module/Process.s' );
 }
