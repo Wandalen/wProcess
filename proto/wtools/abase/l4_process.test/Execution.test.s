@@ -225,7 +225,7 @@ function assetFor( test, name )
     let locals =
     {
       context : { t0 : context.t0, t1 : context.t1, t2 : context.t2, t3 : context.t3 },
-      toolsPath : _.module.resolve( 'wTools' ),
+      toolsPath : a.path.nativize( _.module.resolve( 'wTools' ) ),
     };
     o.locals = o.locals || locals;
     _.props.supplement( o.locals, locals );
