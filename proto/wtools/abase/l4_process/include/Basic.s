@@ -12,6 +12,9 @@ if( typeof module !== 'undefined' )
   _.include( 'wBlueprint' );
   _.include( 'wConsequence' );
   _.include( 'wFilesBasic' );
+  
+  if( Config.interpreter === 'browser' )
+  _.include( 'wFilesHttp' )
 
   module[ 'exports' ] = _global_.wTools;
 }
