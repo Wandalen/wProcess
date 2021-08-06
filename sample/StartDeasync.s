@@ -1,5 +1,5 @@
 let _ = require( '..' );
-_.include( 'wFiles' );
+_.include( 'wFilesBasic' );
 
 /* How to execute command synchronously in mode that doesn't have sync method in `ChildProcess` module */
 

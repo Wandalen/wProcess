@@ -7,7 +7,7 @@ if( typeof module !== 'undefined' )
 {
   const _ = require( './../../../node_modules/Tools' );
   _.include( 'wTesting' );
-  _.include( 'wFiles' );
+  _.include( 'wFilesBasic' );
   _.include( 'wProcessWatcher' );
 
   require( '../l4_process/module/Process.s' );
@@ -45,7 +45,7 @@ function input( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   /* */
 
@@ -451,10 +451,10 @@ function input( test )
   a.ready.then( () =>
   {
     test.case = 'two calls of routine, should return cached result';
-    let programPath = a.path.nativize( a.program( testApp2 ).programPath );
+    let filePath/*programPath*/ = a.path.nativize( a.program( testApp2 ).filePath/*programPath*/ );
     let o =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + filePath/*programPath*/,
       args : [ '.will.yml' ],
       mode : 'spawn',
       throwingExitCode : 1,
@@ -528,7 +528,7 @@ function input( test )
   {
     let o =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + filePath/*programPath*/,
       mode : 'spawn',
       throwingExitCode : 1,
       outputCollecting : 1,
@@ -544,7 +544,7 @@ function inputWithNotDefaultDelimeters( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   /* */
 
@@ -635,10 +635,10 @@ function inputWithNotDefaultDelimeters( test )
   a.ready.then( () =>
   {
     test.case = 'two calls of routine';
-    let programPath = a.path.nativize( a.program( testApp2 ).programPath );
+    let filePath/*programPath*/ = a.path.nativize( a.program( testApp2 ).filePath/*programPath*/ );
     let o =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + filePath/*programPath*/,
       args : [ '.will.yml' ],
       mode : 'spawn',
       throwingExitCode : 1,
@@ -731,7 +731,7 @@ function inputWithNotDefaultDelimeters( test )
   {
     let o =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + filePath/*programPath*/,
       mode : 'spawn',
       throwingExitCode : 1,
       outputCollecting : 1,
@@ -747,7 +747,7 @@ function inputWithVectorizedProperties( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   /* - */
 
@@ -902,7 +902,7 @@ function inputWithVectorizedProperties( test )
   {
     let o =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + filePath/*programPath*/,
       mode : 'spawn',
       throwingExitCode : 1,
       outputCollecting : 1,
@@ -924,8 +924,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - empty map';
-    let programPath = programMake( {}, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( {}, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -939,7 +939,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -949,8 +949,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - empty map, namesMap - not empty';
-    let programPath = programMake( {}, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( {}, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -964,7 +964,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -974,8 +974,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with boolean';
-    let programPath = programMake( { r : true }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : true }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -989,7 +989,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -999,8 +999,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with number';
-    let programPath = programMake( { r : 0 }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : 0 }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1014,7 +1014,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1024,8 +1024,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1039,7 +1039,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1049,8 +1049,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with boolean';
-    let programPath = programMake( { r : true }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : true }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1064,7 +1064,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1074,8 +1074,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with number';
-    let programPath = programMake( { r : 0 }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : 0 }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1089,7 +1089,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1099,8 +1099,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1114,7 +1114,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1124,8 +1124,8 @@ function inputReadToWithArguments( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, { r : 'a' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, { r : 'a' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1139,7 +1139,7 @@ function inputReadToWithArguments( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1210,7 +1210,7 @@ function inputReadToWithArguments( test )
       namesMap,
       toolsPath : _.module.resolve( 'wTools' ),
     };
-    return a.program({ routine : testApp, locals });
+    return a.program({ entry : testApp, locals }).filePath/*programPath*/;
   }
 
   /* */
@@ -1241,8 +1241,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - empty map';
-    let programPath = programMake( {}, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( {}, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1256,7 +1256,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1266,8 +1266,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - empty map, namesMap - not empty';
-    let programPath = programMake( {}, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( {}, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1281,7 +1281,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1291,8 +1291,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with boolean';
-    let programPath = programMake( { r : true }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : true }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1306,7 +1306,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1316,8 +1316,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with number';
-    let programPath = programMake( { r : 0 }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : 0 }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1331,7 +1331,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1341,8 +1341,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, {} );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, {} );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1356,7 +1356,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1366,8 +1366,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with boolean';
-    let programPath = programMake( { r : true }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : true }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1381,7 +1381,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1391,8 +1391,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - map with number';
-    let programPath = programMake( { r : 0 }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : 0 }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1406,7 +1406,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1416,8 +1416,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, { routine : 'r' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, { routine : 'r' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1431,7 +1431,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1441,8 +1441,8 @@ function inputReadToWithOptionsMap( test )
   a.ready.then( () =>
   {
     test.case = 'dst - null';
-    let programPath = programMake( { r : null }, { r : 'a' } );
-    let o = optionsMake( programPath );
+    let filePath/*programPath*/ = programMake( { r : null }, { r : 'a' } );
+    let o = optionsMake( filePath/*programPath*/ );
     let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
@@ -1456,7 +1456,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
 
-      a.fileProvider.fileDelete( programPath );
+      a.fileProvider.fileDelete( filePath/*programPath*/ );
       return null;
     });
   });
@@ -1637,7 +1637,7 @@ function inputReadToWithOptionsMap( test )
       namesMap,
       toolsPath : _.module.resolve( 'wTools' ),
     };
-    return a.program({ routine : testApp, locals });
+    return a.program({ entry : testApp, locals }).filePath/*programPath*/;
   }
 
   /* */
@@ -1718,11 +1718,11 @@ function inputReadToCheckInputInfluence( test )
     context : { t0 : context.t0 },
     toolsPath : _.module.resolve( 'wTools' ),
   };
-  let programPath = a.program({ routine : testApp, locals }).programPath;
+  let filePath/*programPath*/ = a.program({ entry : testApp, locals }).filePath/*programPath*/;
 
   let o =
   {
-    execPath : programPath,
+    execPath : filePath/*programPath*/,
     mode : 'fork',
     args : [ 'r:routine' ],
     throwingExitCode : 0,
@@ -1782,10 +1782,10 @@ function inputReadToCheckInputInfluence( test )
 
 function processOnExitEvent( test )
 {
-  let context = this;
-  let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );  /* zzz : a.path.nativize? */
-  // let programPath = a.program( testApp ).programPath;
+  const context = this;
+  const a = test.assetFor( false );
+  // let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );  /* zzz : a.path.nativize? */
+  const filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath );/*programPath*/;
 
   /* */
 
@@ -1793,55 +1793,56 @@ function processOnExitEvent( test )
   {
     var o =
     {
-      execPath :  'node ' + programPath,
+      execPath :  'node ' + filePath/*programPath*/,
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
     {
       test.true( op.exitCode === 0 );
       test.identical( op.ended, true );
-      test.true( _.strHas( op.output, 'timeOut handler executed' ) )
-      test.true( _.strHas( op.output, 'processOnExit: 0' ) );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit: 0' ), 1 );
       return null;
-    })
-
-  })
+    });
+  });
 
   /* */
 
-  .then( () =>
+  a.ready.then( () =>
   {
     var o =
     {
-      execPath :  'node ' + programPath + ' terminate : 1',
+      execPath :  'node ' + filePath/*programPath*/ + ' terminate:1',
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
     {
       test.true( op.exitCode === 0 );
       test.identical( op.ended, true );
-      test.true( !_.strHas( op.output, 'timeOut handler executed' ) )
-      test.true( !_.strHas( op.output, 'processOnExit: 0' ) );
-      test.true( _.strHas( op.output, 'processOnExit: SIGINT' ) );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 0 )
+      test.identical( _.strCount( op.output, 'processOnExit: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit: SIGINT' ), 1 );
       return null;
     });
-  })
+  });
+
+  /* - */
 
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
@@ -1850,7 +1851,7 @@ function processOnExitEvent( test )
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
-    var args = _.process.input();
+    const args = _.process.input();
 
     _.process.on( 'exit', ( arg ) =>
     {
@@ -1861,11 +1862,10 @@ function processOnExitEvent( test )
     {
       console.log( 'timeOut handler executed' );
       return 1;
-    })
+    });
 
     if( args.map.terminate )
     process.exit( 'SIGINT' );
-
   }
 }
 
@@ -1873,9 +1873,9 @@ function processOnExitEvent( test )
 
 function processOffExitEvent( test )
 {
-  let context = this;
-  let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  const context = this;
+  const a = test.assetFor( false );
+  const filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   /* */
 
@@ -1884,98 +1884,97 @@ function processOffExitEvent( test )
     test.case = 'nothing to off'
     var o =
     {
-      execPath :  'node ' + programPath,
+      execPath :  'node ' + filePath/*programPath*/,
       mode : 'spawn',
       stdio : 'pipe',
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
-    })
-
-  })
+    });
+  });
 
   /* */
 
-  .then( () =>
+  a.ready.then( () =>
   {
     test.case = 'off single handler'
     var o =
     {
-      execPath :  'node ' + programPath,
+      execPath :  'node ' + filePath/*programPath*/,
       args : 'off:handler1',
       mode : 'spawn',
       stdio : 'pipe',
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
-    })
-  })
+    });
+  });
 
   /* */
 
-  .then( () =>
+  a.ready.then( () =>
   {
     test.case = 'off all handlers'
     var o =
     {
-      execPath :  'node ' + programPath,
+      execPath :  'node ' + filePath/*programPath*/,
       args : 'off:[handler1,handler2]',
       mode : 'spawn',
       stdio : 'pipe',
       outputPiping : 1,
       outputCollecting : 1,
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'timeOut handler executed' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 0 );
       test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
-    })
-  })
+    });
+  });
 
   /* */
 
-  .then( () =>
+  a.ready.then( () =>
   {
     test.case = 'off unregistered handler'
     var o =
     {
-      execPath :  'node ' + programPath,
+      execPath :  'node ' + filePath/*programPath*/,
       args : 'off:handler3',
       mode : 'spawn',
       stdio : 'pipe',
       outputPiping : 1,
       outputCollecting : 1,
       throwingExitCode : 0
-    }
+    };
 
     return _.process.start( o )
     .then( ( op ) =>
@@ -1987,22 +1986,24 @@ function processOffExitEvent( test )
       test.identical( _.strCount( op.output, 'processOnExit2: -1' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit3: -1' ), 0 );
       return null;
-    })
-  })
+    });
+  });
+
+  /* - */
 
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
     const _ = require( toolsPath );
 
     _.include( 'wProcess' );
-    _.include( 'wStringsExtra' )
+    _.include( 'wStringsExtra' );
 
-    var handlersMap = {};
-    var args = _.process.input();
+    const handlersMap = {};
+    const args = _.process.input();
 
     handlersMap[ 'handler1' ] = handler1;
     handlersMap[ 'handler2' ] = handler2;
@@ -2018,14 +2019,14 @@ function processOffExitEvent( test )
       {
         _.assert( !!handlersMap[ name ] );
         _.process.off( 'exit', handlersMap[ name ] );
-      })
+      });
     }
 
     _.time.out( 1000, () =>
     {
       console.log( 'timeOut handler executed' );
       return 1;
-    })
+    });
 
     function handler1( arg )
     {
@@ -2050,27 +2051,27 @@ function processArgsBase( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   let shell = _.process.starter
   ({
-    execPath : 'node ' + programPath,
+    execPath : 'node ' + filePath/*programPath*/,
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
-  })
+  });
 
-  let filePath = a.abs( 'got' );
+  let txtPath = a.abs( 'got' );
   let interpreterPath = a.path.normalize( process.argv[ 0 ] );
-  let scriptPath = a.path.normalize( programPath );
+  let scriptPath = a.path.normalize( filePath/*programPath*/ );
 
-  /* */
+  /* - */
 
   shell({ args : [] })
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got =   a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : txtPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2094,7 +2095,7 @@ function processArgsBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : txtPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2110,19 +2111,20 @@ function processArgsBase( test )
     }
     test.contains( got, expected );
     return null;
-  })
+  });
 
+  /* - */
 
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
     const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
+    _.include( 'wFilesBasic' )
 
     if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
@@ -2139,26 +2141,26 @@ function processArgsPropertiesBase( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   let shell = _.process.starter
   ({
-    execPath : 'node ' + programPath,
+    execPath : 'node ' + filePath/*programPath*/,
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
   })
-  let filePath = a.abs( 'got' );
+  let jsonPath = a.abs( 'got' );
   let interpreterPath = a.path.normalize( process.argv[ 0 ] );
-  let scriptPath = a.path.normalize( programPath );
+  let scriptPath = a.path.normalize( filePath/*programPath*/ );
 
-  /* */
+  /* - */
 
   shell({ args : [ 'x', ':', 'aa', 'bbb', ':', 'x' ] })
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2179,7 +2181,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2192,7 +2194,7 @@ function processArgsPropertiesBase( test )
     }
     test.contains( got, expected );
     return null;
-  })
+  });
 
   /* */
 
@@ -2200,7 +2202,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2213,15 +2215,15 @@ function processArgsPropertiesBase( test )
     }
     test.contains( got, expected );
     return null;
-  })
+  });
 
   /* */
 
-  shell({ args : [ 'abcd', 'x', ':', 'y', 'xyz', 'y', ':', 1  ] })
+  shell({ args : [ 'abcd', 'x', ':', 'y', 'xyz', 'y', ':', 1 ] })
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2234,7 +2236,7 @@ function processArgsPropertiesBase( test )
     }
     test.contains( got, expected );
     return null;
-  })
+  });
 
   /* */
 
@@ -2253,7 +2255,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2280,7 +2282,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -2309,7 +2311,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2342,7 +2344,7 @@ function processArgsPropertiesBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2359,11 +2361,13 @@ function processArgsPropertiesBase( test )
     }
     test.contains( got, expected );
     return null;
-  })
+  });
+
+  /* - */
 
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
@@ -2371,7 +2375,7 @@ function processArgsPropertiesBase( test )
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
+    _.include( 'wFilesBasic' )
 
     if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
@@ -2387,17 +2391,17 @@ function processArgsMultipleCommands( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   let shell = _.process.starter
   ({
-    execPath : 'node ' + programPath,
+    execPath : 'node ' + filePath/*programPath*/,
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
   })
 
-  let filePath = a.abs( 'got' );
+  let jsonPath = a.abs( 'got' );
 
   /* */
 
@@ -2409,7 +2413,7 @@ function processArgsMultipleCommands( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2438,7 +2442,7 @@ function processArgsMultipleCommands( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2457,9 +2461,11 @@ function processArgsMultipleCommands( test )
     return null;
   })
 
+  /* - */
+
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
@@ -2467,7 +2473,7 @@ function processArgsMultipleCommands( test )
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
+    _.include( 'wFilesBasic' )
 
     if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
@@ -2483,17 +2489,17 @@ function processArgsPaths( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   let shell = _.process.starter
   ({
-    execPath : 'node ' + programPath,
+    execPath : 'node ' + filePath/*programPath*/,
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
   })
 
-  let filePath = a.abs( 'got' );
+  let jsonPath = a.abs( 'got' );
 
   /* */
 
@@ -2505,7 +2511,7 @@ function processArgsPaths( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2534,7 +2540,7 @@ function processArgsPaths( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -2553,11 +2559,11 @@ function processArgsPaths( test )
     return null;
   })
 
-  /* */
+  /* - */
 
   return a.ready;
 
-  /* - */
+  /* */
 
   function testApp()
   {
@@ -2565,7 +2571,7 @@ function processArgsPaths( test )
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
+    _.include( 'wFilesBasic' )
 
     if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
@@ -2581,17 +2587,17 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ).programPath );
+  let filePath/*programPath*/ = a.path.nativize( a.program( testApp ).filePath/*programPath*/ );
 
   let shell = _.process.starter
   ({
-    execPath : 'node ' + programPath,
+    execPath : 'node ' + filePath/*programPath*/,
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
   })
 
-  let filePath = a.abs( 'got' );
+  let jsonPath = a.abs( 'got' );
 
   /* */
 
@@ -2605,7 +2611,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:"value with space"' ],
@@ -2633,7 +2639,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', `option:'value with space'` ],
@@ -2661,7 +2667,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:`value with space`' ],
@@ -2689,7 +2695,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', 'value with space' ],
@@ -2717,7 +2723,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', 'value with space' ],
@@ -2745,7 +2751,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', '"value with space"' ],
@@ -2773,7 +2779,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:value', 'with', 'space' ],
@@ -2801,7 +2807,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:value', 'with', 'space' ],
@@ -2829,7 +2835,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', 'value', 'with', 'space' ],
@@ -2857,7 +2863,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option:"value with space"' ],
@@ -2885,7 +2891,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option', ':', '"value with space"' ],
@@ -2913,7 +2919,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option', ':', 'value with space' ],
@@ -2941,7 +2947,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option:value', 'with', 'space' ],
@@ -2969,7 +2975,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath : jsonPath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option', ':', 'value', 'with', 'space' ],
@@ -3026,7 +3032,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
+    _.include( 'wFilesBasic' )
 
     if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
@@ -3044,7 +3050,7 @@ function realMainFile( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp ).programPath;
+  let testAppPath = a.program( testApp ).filePath/*programPath*/;
   let testAppPathNative = a.path.nativize( testAppPath );
 
   a.ready.then( () =>

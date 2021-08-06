@@ -64,12 +64,13 @@ function pidFrom( src )
 
 let _tempFiles = [];
 
+/* qqq : for Vova : reuse _.program.* */
 function tempOpen_head( routine, args )
 {
   let o;
 
   if( _.strIs( args[ 0 ] ) || _.bufferRawIs( args[ 0 ] ) )
-  o = { sourceCode : args[ 0 ] };
+  o = { routineCode : args[ 0 ] };
   else
   o = args[ 0 ];
 
@@ -81,21 +82,27 @@ function tempOpen_head( routine, args )
   return o;
 }
 
+//
+
 function tempOpen_body( o )
 {
   _.routine.assertOptions( tempOpen, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
-  _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.entity.strType( o.sourceCode ) );
+  _.assert
+  (
+    _.strIs( o.routineCode ) || _.bufferRawIs( o.routineCode ),
+    'Expects string or buffer raw {-o.routineCode-}, but got', _.entity.strType( o.routineCode )
+  );
 
   let tempDirPath = _.path.tempOpen( _.path.realMainDir(), 'ProcessTempOpen' );
   let filePath = _.path.join( tempDirPath, _.idWithDateAndTime() + '.ss' );
   _tempFiles.push( filePath );
-  _.fileProvider.fileWrite( filePath, o.sourceCode );
+  _.fileProvider.fileWrite( filePath, o.routineCode );
   return filePath;
 }
 
 var defaults = tempOpen_body.defaults = Object.create( null );
-defaults.sourceCode = null;
+defaults.routineCode = null;
 
 let tempOpen = _.routine.uniteCloning_replaceByUnite( tempOpen_head, tempOpen_body );
 
@@ -780,11 +787,11 @@ let Extension =
   _tempFiles,
   _registeredExitHandler : null,
   _registeredExitBeforeHandler : null,
-  _initialCurrentPath : null
+  _initialCurrentPath : null,
 
 }
 
-/* _.props.extend */Object.assign( _.process, Extension );
+Object.assign( _.process, Extension );
 _.props.supplement( _.process._edispatcher.events, Events );
 _.assert( !_.process.start );
 _.process._Setup1();

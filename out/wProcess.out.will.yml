@@ -3,8 +3,8 @@ root:
   - wProcess.out
 consistency:
   ../will.yml: &ref_0
-    hash: b4d5a6dac6460da1caec77d9dd5ac175
-    size: 7472
+    hash: fec98460f0e37023ee51f8eff2b349a8
+    size: 7482
 module:
   wProcess.out:
     about:
@@ -213,8 +213,8 @@ module:
         path: 'npm:///wgdf'
         autoExporting: 0
         enabled: 0
-      wFiles:
-        path: 'npm:///wFiles'
+      wFilesBasic:
+        path: 'npm:///wfilesbasic'
         autoExporting: 0
         enabled: 0
       wConsequence:
@@ -995,8 +995,8 @@ module:
         path: 'npm:///wgdf'
         autoExporting: 0
         enabled: 0
-      wFiles:
-        path: 'npm:///wFiles'
+      wFilesBasic:
+        path: 'npm:///wfilesbasic'
         autoExporting: 0
         enabled: 0
       wConsequence:
@@ -1563,5 +1563,5 @@ module:
           - 'build::npm'
     consistency:
       ../will.yml:
-        hash: b4d5a6dac6460da1caec77d9dd5ac175
-        size: 7472
+        hash: fec98460f0e37023ee51f8eff2b349a8
+        size: 7482
