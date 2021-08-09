@@ -424,17 +424,16 @@ function effectiveMainFile() /* qqq2 : move to process, review */
 
   if( process.argv[ 0 ] || process.argv[ 1 ] )
   {
-    _effectiveMainFilePath = _.path.join( this._initialCurrentPath, process.argv[ 1 ] || process.argv[ 0 ] );
+    _effectiveMainFilePath = _.path.join( this._initialCurrentPathGet(), process.argv[ 1 ] || process.argv[ 0 ] );
     _effectiveMainFilePath = _.path.resolve( _effectiveMainFilePath );
   }
 
   if( !_.fileProvider.fileExists( _effectiveMainFilePath ) )
   {
     //xxx : review
-    debugger;
     console.error( `process.argv : ${process.argv.join( ', ' )}` );
-    console.error( `currentAtBegin : ${this._initialCurrentPath}` );
-    console.error( `effectiveMainFile.raw : ${this.join( this._initialCurrentPath, process.argv[ 1 ] || process.argv[ 0 ] )}` );
+    console.error( `currentAtBegin : ${this._initialCurrentPathGet()}` );
+    console.error( `effectiveMainFile.raw : ${this.join( this._initialCurrentPathGet(), process.argv[ 1 ] || process.argv[ 0 ] )}` );
     console.error( `effectiveMainFile : ${_effectiveMainFilePath}` );
     _effectiveMainFilePath = this.realMainFile();
   }
@@ -511,10 +510,8 @@ function systemEntryAdd( o )
   );
 
   let appPath = o.appPath;
-  debugger;
   if( o.relative )
   appPath = _.path.relative( o.entryDirPath, o.appPath );
-  debugger;
 
   appPath = _.path.nativize( appPath );
 

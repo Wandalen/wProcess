@@ -707,12 +707,20 @@ function _argCmdEscape( prog, args )
 function _Setup1()
 {
   if( _.path && _.path.current )
-  this._initialCurrentPath = _.path.current();
+  this._initialCurrentPathGet = _initialCurrentPathGet_functor();
+  this._initialCurrentPathGet.functor = _initialCurrentPathGet_functor;
 
   _.process._eventAvailableHandle();
   _.process._exitHandlerRepair();
   _.process._eventsSetup();
 
+  /* */
+
+  function _initialCurrentPathGet_functor()
+  {
+    const currentPath = _.path.current();
+    return () => currentPath;
+  }
 }
 
 // --
@@ -787,7 +795,7 @@ let Extension =
   _tempFiles,
   _registeredExitHandler : null,
   _registeredExitBeforeHandler : null,
-  _initialCurrentPath : null,
+  _initialCurrentPathGet : null,
 
 }
 
