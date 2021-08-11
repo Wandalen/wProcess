@@ -1207,6 +1207,40 @@ function _argCmdEscape( test )
 
 //
 
+function _initialCurrentPathGet( test )
+{
+  const a = test.assetFor( false );
+  const program = a.program( testApp );
+
+  /* - */
+
+  a.shell( `node ${ a.path.nativize( program.filePath ) }` );
+  a.ready.then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, 'Before : undefined' ), 1 );
+    test.identical( _.strCount( op.output, `After : ${ a.abs( '.' ) }` ), 1 );
+    return null;
+  });
+
+  /* - */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    const _ = require( toolsPath );
+
+    console.log( `Before : ${ _.process._initialCurrentPathGet }` );
+    _.include( 'wProcess' );
+    console.log( `After : ${ _.process._initialCurrentPathGet() }` );
+  }
+}
+
+//
+
 const Proto =
 {
 
@@ -1234,7 +1268,9 @@ const Proto =
 
     _argEscape2,
     _argProgEscape,
-    _argCmdEscape
+    _argCmdEscape,
+
+    _initialCurrentPathGet,
 
   }
 
