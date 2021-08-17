@@ -1,7 +1,5 @@
-if( typeof module !== 'undefined' )
-require( '../..' );
-require( 'wfilesbasic' );
-let _ = wTools;
+
+let _ = require( 'wprocess' );
 
 let o =
 {
