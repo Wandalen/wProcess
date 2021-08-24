@@ -176,6 +176,7 @@ module:
           - ../proto/wtools/abase/l4_process/l3
           - ../proto/wtools/abase/l4_process/l3/Execution.s
           - ../proto/wtools/abase/l4_process/l3/Io.s
+          - ../proto/wtools/abase/l4_process/l3/Path.ss
           - ../proto/wtools/abase/l4_process/module
           - ../proto/wtools/abase/l4_process/module/Process.s
           - ../proto/wtools/abase/l4_process/module/ProcessBasic.s
@@ -183,6 +184,7 @@ module:
           - ../proto/wtools/abase/l4_process.test/Basic.test.s
           - ../proto/wtools/abase/l4_process.test/Execution.test.s
           - ../proto/wtools/abase/l4_process.test/Io.test.s
+          - ../proto/wtools/abase/l4_process.test/Path.test.ss
           - ../proto/wtools/abase/l4_process.test/_asset
           - ../proto/wtools/abase/l4_process.test/_asset/systemEntry
           - ../proto/wtools/abase/l4_process.test/_asset/systemEntry/dir
