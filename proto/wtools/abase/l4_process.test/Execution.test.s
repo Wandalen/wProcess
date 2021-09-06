@@ -1829,8 +1829,8 @@ function startSingleSyncDeasync( test )
         execPath : env.mode === 'fork' ? filePath/*programPath*/ + ' loop : 1' : 'node ' + filePath/*programPath*/ + ' loop : 1',
         mode : env.mode,
         stdio : 'pipe',
-        timeOut : 2*context.t1,
-      }
+        timeOut : 2 * context.t1,
+      };
 
       var options = _.props.supplement( {}, o2, o3 );
 
@@ -1947,10 +1947,10 @@ function startSingleSyncDeasync( test )
     var args = _.process.input();
 
     if( args.map.exitWithCode )
-    process.exit( args.map.exitWithCode )
+    process.exit( args.map.exitWithCode );
 
     if( args.map.loop )
-    _.time.out( context.t1 * 5 ) /* 5000 */
+    _.time.out( 5000 );
 
     console.log( __filename );
   }

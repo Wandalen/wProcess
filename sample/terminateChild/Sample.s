@@ -33,4 +33,4 @@ ready.then( ( got ) =>
   console.log( 'Child process exitCode:', got.exitCode );
   console.log( 'Child process exitSignal:', got.exitSignal );
   return null;
-})
+});
