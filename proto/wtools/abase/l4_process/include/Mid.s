@@ -11,6 +11,7 @@ if( typeof module !== 'undefined' )
   require( '../l2/Process.s' );
   require( '../l3/Execution.s' );
   require( '../l3/Io.s' );
+  if( Config.interpreter === 'njs' )
   require( '../l3/Path.ss' );
 
   module[ 'exports' ] = _global_.wTools;
