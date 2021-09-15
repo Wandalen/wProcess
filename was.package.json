@@ -36,12 +36,13 @@
   },
   "dependencies": {
     "wTools": "",
+    "wblueprint": "",
     "wpathbasic": "",
+    "wintrospectorextra": "",
+    "wConsequence": "",
+    "wdeasync": "",
     "wgdf": "",
     "wfilesbasic": "",
-    "wdeasync": "",
-    "wConsequence": "",
-    "wblueprint": "",
     "strip-ansi": "6.0.0"
   },
   "optionalDependencies": {

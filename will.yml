@@ -300,44 +300,42 @@ submodule:
   wTools:
     path: 'npm:///wTools'
     enabled: 0
+  wblueprint:
+    path: 'npm:///wblueprint'
+    enabled: 0
   wpathbasic:
     path: 'npm:///wpathbasic'
     enabled: 0
-  wdeasync:
-    path: 'npm:///wdeasync'
-    enabled: 0
-  strip-ansi:
-    path: 'npm:///strip-ansi#6.0.0'
-    enabled: 0
-  wgdf:
-    path: 'npm:///wgdf'
-    enabled: 0
-  wFilesBasic:
-    path: 'npm:///wfilesbasic'
+  wintrospectorextra:
+    path: 'npm:///wintrospectorextra'
     enabled: 0
   wConsequence:
     path: 'npm:///wConsequence'
     enabled: 0
-  wblueprint:
-    path: 'npm:///wblueprint'
+  wdeasync:
+    path: 'npm:///wdeasync'
+    enabled: 0
+  wgdf:
+    path: 'npm:///wgdf'
+    enabled: 0
+  wfilesbasic:
+    path: 'npm:///wfilesbasic'
+    enabled: 0
+  strip-ansi:
+    path: 'npm:///strip-ansi!6.0.0'
     enabled: 0
   w.process.tree.windows:
     path: 'npm:///w.process.tree.windows'
     enabled: 0
     criterion:
       optional: 1
-  wprocess:
-    path: 'hd://.'
-    enabled: 0
-    criterion:
-      development: 1
   wTesting:
     path: 'npm:///wTesting'
     enabled: 0
     criterion:
       development: 1
   eslint:
-    path: 'npm:///eslint#7.1.0'
+    path: 'npm:///eslint!7.1.0'
     enabled: 0
     criterion:
       development: 1
