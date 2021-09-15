@@ -3,8 +3,8 @@ root:
   - wProcess.out
 consistency:
   ../will.yml: &ref_0
-    hash: fec98460f0e37023ee51f8eff2b349a8
-    size: 7482
+    hash: 29073fcfece6db55e907fc89b939d695
+    size: 7475
 module:
   wProcess.out:
     about:
@@ -199,32 +199,36 @@ module:
         path: 'npm:///wTools'
         autoExporting: 0
         enabled: 0
+      wblueprint:
+        path: 'npm:///wblueprint'
+        autoExporting: 0
+        enabled: 0
       wpathbasic:
         path: 'npm:///wpathbasic'
         autoExporting: 0
         enabled: 0
-      wdeasync:
-        path: 'npm:///wdeasync'
-        autoExporting: 0
-        enabled: 0
-      strip-ansi:
-        path: 'npm:///strip-ansi#6.0.0'
-        autoExporting: 0
-        enabled: 0
-      wgdf:
-        path: 'npm:///wgdf'
-        autoExporting: 0
-        enabled: 0
-      wFilesBasic:
-        path: 'npm:///wfilesbasic'
+      wintrospectorextra:
+        path: 'npm:///wintrospectorextra'
         autoExporting: 0
         enabled: 0
       wConsequence:
         path: 'npm:///wConsequence'
         autoExporting: 0
         enabled: 0
-      wblueprint:
-        path: 'npm:///wblueprint'
+      wdeasync:
+        path: 'npm:///wdeasync'
+        autoExporting: 0
+        enabled: 0
+      wgdf:
+        path: 'npm:///wgdf'
+        autoExporting: 0
+        enabled: 0
+      wfilesbasic:
+        path: 'npm:///wfilesbasic'
+        autoExporting: 0
+        enabled: 0
+      strip-ansi:
+        path: 'npm:///strip-ansi!6.0.0'
         autoExporting: 0
         enabled: 0
       w.process.tree.windows:
@@ -233,12 +237,6 @@ module:
         enabled: 0
         criterion:
           optional: 1
-      wprocess:
-        path: 'hd://..'
-        autoExporting: 0
-        enabled: 0
-        criterion:
-          development: 1
       wTesting:
         path: 'npm:///wTesting'
         autoExporting: 0
@@ -246,7 +244,7 @@ module:
         criterion:
           development: 1
       eslint:
-        path: 'npm:///eslint#7.1.0'
+        path: 'npm:///eslint!7.1.0'
         autoExporting: 0
         enabled: 0
         criterion:
@@ -981,32 +979,36 @@ module:
         path: 'npm:///wTools'
         autoExporting: 0
         enabled: 0
+      wblueprint:
+        path: 'npm:///wblueprint'
+        autoExporting: 0
+        enabled: 0
       wpathbasic:
         path: 'npm:///wpathbasic'
         autoExporting: 0
         enabled: 0
-      wdeasync:
-        path: 'npm:///wdeasync'
-        autoExporting: 0
-        enabled: 0
-      strip-ansi:
-        path: 'npm:///strip-ansi#6.0.0'
-        autoExporting: 0
-        enabled: 0
-      wgdf:
-        path: 'npm:///wgdf'
-        autoExporting: 0
-        enabled: 0
-      wFilesBasic:
-        path: 'npm:///wfilesbasic'
+      wintrospectorextra:
+        path: 'npm:///wintrospectorextra'
         autoExporting: 0
         enabled: 0
       wConsequence:
         path: 'npm:///wConsequence'
         autoExporting: 0
         enabled: 0
-      wblueprint:
-        path: 'npm:///wblueprint'
+      wdeasync:
+        path: 'npm:///wdeasync'
+        autoExporting: 0
+        enabled: 0
+      wgdf:
+        path: 'npm:///wgdf'
+        autoExporting: 0
+        enabled: 0
+      wfilesbasic:
+        path: 'npm:///wfilesbasic'
+        autoExporting: 0
+        enabled: 0
+      strip-ansi:
+        path: 'npm:///strip-ansi!6.0.0'
         autoExporting: 0
         enabled: 0
       w.process.tree.windows:
@@ -1015,12 +1017,6 @@ module:
         enabled: 0
         criterion:
           optional: 1
-      wprocess:
-        path: 'hd://.'
-        autoExporting: 0
-        enabled: 0
-        criterion:
-          development: 1
       wTesting:
         path: 'npm:///wTesting'
         autoExporting: 0
@@ -1028,7 +1024,7 @@ module:
         criterion:
           development: 1
       eslint:
-        path: 'npm:///eslint#7.1.0'
+        path: 'npm:///eslint!7.1.0'
         autoExporting: 0
         enabled: 0
         criterion:
@@ -1565,5 +1561,5 @@ module:
           - 'build::npm'
     consistency:
       ../will.yml:
-        hash: fec98460f0e37023ee51f8eff2b349a8
-        size: 7482
+        hash: 29073fcfece6db55e907fc89b939d695
+        size: 7475
