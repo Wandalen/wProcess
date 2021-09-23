@@ -822,7 +822,7 @@ function onWithChain( test )
     const _ = require( toolsPath );
     _.include( 'wProcess' );
     const result = [];
-    _.process.on({ callbackMap : { 'exitBefore' : [ _.event.Name( 'exit' ), ( ... args ) => result.push( args ) ] } });
+    _.process.on({ callbackMap : { 'exitBefore' : [ 'exit', ( ... args ) => result.push( args ) ] } });
     _.process.eventGive( 'exit', 'arg' );
     _.process.eventGive( 'exitBefore', 'arg' );
     _.process.eventGive( 'exit', 'arg' );
@@ -857,7 +857,7 @@ function onWithChain( test )
 //   test.case = 'call with options map';
 //   var result = [];
 //   var onEvent = () => result.push( result.length );
-//   var got = _.process.on({ callbackMap : { uncaughtError : [ _.event.Name( 'available' ), onEvent ] } });
+//   var got = _.process.on({ callbackMap : { uncaughtError : [ 'available', onEvent ] } });
 //   test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'uncaughtError', eventHandler : onEvent } ) );
 //   test.false( _.event.eventHasHandler( _.process._edispatcher, { eventName : 'available', eventHandler : onEvent } ) );
 //   _.event.eventGive( _.process._edispatcher, 'uncaughtError' );
