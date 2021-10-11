@@ -10,6 +10,7 @@ function run()
     spawnPeriod : [ 25, 50 ],
   }
 
+  debugger;
   let additionalReady = runAdditionalTrees( 10 )
   let mainReady = _.process._startTree( mainTree );
   let snapshots = [];

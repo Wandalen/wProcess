@@ -3354,7 +3354,7 @@ function _startTree( o )
 
   /* qqq : for Vova : reuse _.program.* */
   let preformedChild = _.program.preform({ entry : child, locals });
-  let preformedChildPath = _.process.tempOpen({ routineCode : preformedChild.entry.entry.routineCode });
+  let preformedChildPath = _.process.tempOpen({ routineCode : preformedChild.entry.routineCode });
   locals.childPath = preformedChildPath;
   let preformed = _.program.preform({ entry : program, locals });
   let preformedFilePath = _.process.tempOpen({ routineCode : preformed.entry.routineCode });
