@@ -12,7 +12,8 @@ if( typeof module !== 'undefined' )
   _.include( 'wBlueprint' );
   _.include( 'wConsequence' );
   _.include( 'wFilesBasic' );
-  
+  _.include( 'wIntrospectorExtra' );
+
   if( Config.interpreter === 'browser' )
   _.include( 'wFilesHttp' )
 
