@@ -1822,6 +1822,8 @@ function startSingleSyncDeasync( test )
 
     ready.then( () =>
     {
+      if( env.sync && env.deasync && env.mode === 'shell' )
+      return null;
       test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, timeOut`;
 
       o2 =
@@ -1958,6 +1960,67 @@ function startSingleSyncDeasync( test )
 }
 
 startSingleSyncDeasync.timeOut = 57e4; /* Locally : 56.549s */
+
+//
+
+/* qqq2 : for Dmytro : resolve, njs v14, v15, v16 */
+function startSingleSyncDeasyncThrowingExperiment( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 ).filePath;
+
+  /* - */
+
+  a.ready.then( () =>
+  {
+    test.case = `mode : shell, sync : 1, deasync : 1, timeOut`;
+
+    let o =
+    {
+      execPath : `node ${ programPath } loop:1`,
+      mode : 'shell',
+      stdio : 'pipe',
+      timeOut : 2 * context.t1,
+      outputPiping : 1,
+      outputCollecting : 1,
+      applyingExitCode : 0,
+      throwingExitCode : 1,
+      sync : 1,
+      deasync : 1,
+    };
+
+    return test.shouldThrowErrorAsync( () => _.process.startSingle( o ) );
+  });
+
+  /* - */
+
+  function program1()
+  {
+    const _ = require( toolsPath );
+    let process = _global_.process;
+
+    _.include( 'wProcess' );
+
+    process.removeAllListeners( 'SIGHUP' );
+    process.removeAllListeners( 'SIGINT' );
+    process.removeAllListeners( 'SIGTERM' );
+    process.removeAllListeners( 'exit' );
+
+    var args = _.process.input();
+
+    if( args.map.exitWithCode )
+    process.exit( args.map.exitWithCode );
+
+    if( args.map.loop )
+    _.time.out( 5000 );
+
+    console.log( __filename );
+  }
+
+}
+
+startSingleSyncDeasyncThrowingExperiment.experimental = 1;
 
 //
 
@@ -40091,6 +40154,7 @@ const Proto =
 
     startMinimalSync,
     startSingleSyncDeasync,
+    startSingleSyncDeasyncThrowingExperiment,
     startMinimalSyncDeasyncTimeOut,
     startMinimalSyncDeasyncThrowing,
     startMultipleSyncDeasync,
