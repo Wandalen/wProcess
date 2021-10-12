@@ -132,7 +132,7 @@ function startMinimalHeadCommon( routine, args )
   _.assert( _.boolLike( o.outputAdditive ) );
 
   if( o.ipc === null )
-  o.ipc = o.mode === 'fork' ? true : false;
+  o.ipc = o.mode === 'fork';
   _.assert( _.boolLike( o.ipc ) );
 
   if( _.strIs( o.stdio ) )
@@ -1183,8 +1183,8 @@ function startMinimal_body( o )
     if( channel === 'err' )
     _errOutput += data;
 
-    if( Object.isFrozen( o ) ) /* xxx */
-    debugger;
+    // if( Object.isFrozen( o ) ) /* xxx */
+    // debugger;
     if( o.outputCollecting )
     o.output += data;
 
@@ -1262,15 +1262,7 @@ function startMinimal_body( o )
       else
       {
         /* xxx yyy qqq for junior : not implemeted yet | aaa : Implemented. */
-        if( !_.strHas( msg, '\n' ) )
-        {
-          if( channel === 'err' )
-          _errAdditive += msg;
-          else
-          _outAdditive += msg;
-          return;
-        }
-        else
+        if( _.strHas( msg, '\n' ) )
         {
           let lastBreak = msg.lastIndexOf( '\n' );
           let left = msg.slice( lastBreak + 1 );
@@ -1280,6 +1272,32 @@ function startMinimal_body( o )
           else
           _outAdditive += left;
         }
+        else
+        {
+          if( channel === 'err' )
+          _errAdditive += msg;
+          else
+          _outAdditive += msg;
+          return;
+        }
+        // if( !_.strHas( msg, '\n' ) )
+        // {
+        //   if( channel === 'err' )
+        //   _errAdditive += msg;
+        //   else
+        //   _outAdditive += msg;
+        //   return;
+        // }
+        // else
+        // {
+        //   let lastBreak = msg.lastIndexOf( '\n' );
+        //   let left = msg.slice( lastBreak + 1 );
+        //   msg = msg.slice( 0, lastBreak );
+        //   if( channel === 'err' )
+        //   _errAdditive += left;
+        //   else
+        //   _outAdditive += left;
+        // }
       }
       /* qqq : for junior : bad : it cant be working */
       if( channel === 'err' )
@@ -1897,8 +1915,7 @@ function startMultiple_body( o )
 
     o.ready
     .then( run2 )
-    .finally( end2 )
-    ;
+    .finally( end2 );
 
     return end1();
   }
@@ -1935,7 +1952,7 @@ function startMultiple_body( o )
       delete o2.concurrent;
       delete o2.state;
 
-      if( !!o.procedure )
+      if( o.procedure )
       o2.procedure = _.Procedure({ _stack : o.stack });
 
       if( o.deasync )
@@ -2637,13 +2654,15 @@ function signal_body( o )
   let cons = [];
   let signal = o.signal;
 
-  ready.then( () =>
+  if( o.withChildren )
   {
-    if( o.withChildren )
-    return _.process.children({ pid : o.pid, format : 'list' });
-    return { pid : o.pid, pnd : o.pnd };
-  })
-
+    ready.then( () => _.process.children({ pid : o.pid, format : 'list' }) );
+    ready.catch( ( err ) => { _.error.attend( err ); return [ { pid : o.pid, pnd : o.pnd } ] } );
+  }
+  else
+  {
+    ready.then( () => { return { pid : o.pid, pnd : o.pnd } } );
+  }
   ready.then( processKill );
   ready.then( handleResult );
   ready.catch( handleError1 );
@@ -2800,7 +2819,7 @@ function signal_body( o )
     // if( p )
     {
       let processInfo = processInfoGet( p );
-      _.error.concealedSet( err, { processInfo : processInfo } )
+      _.error.concealedSet( err, { processInfo } );
       _.err( err, processInfo );
       // console.log( 'handleError2 :', processInfo );
     }
@@ -2987,17 +3006,30 @@ function waitForDeath_body( o )
         if( isWindows )
         {
           let spawnTime2 = _.process.spawnTimeOf({ pid : o.pid })
-          if( spawnTime != spawnTime2 )
+          if( spawnTime === spawnTime2 )
+          {
+            let execPath = _.process.execPathOf({ pid : o.pid, sync : 1, throwing : 0 });
+            let info = `waitForDeath: Spawn time of process:${o.pid} did not change after time out.`
+            + `\nspawnTime:${spawnTime} spawnTime2:${spawnTime2}\nExec path:${execPath}`;
+            console.error( info );
+          }
+          else
           {
             _.errAttend( err );
             return null;
           }
-          else
-          {
-            let execPath = _.process.execPathOf({ pid : o.pid, sync : 1, throwing : 0 });
-            let info = `waitForDeath: Spawn time of process:${o.pid} did not change after time out.\nspawnTime:${spawnTime} spawnTime2:${spawnTime2}\nExec path:${execPath}`
-            console.error( info );
-          }
+          // if( spawnTime != spawnTime2 )
+          // {
+          //   _.errAttend( err );
+          //   return null;
+          // }
+          // else
+          // {
+          //   let execPath = _.process.execPathOf({ pid : o.pid, sync : 1, throwing : 0 });
+          //   let info = `waitForDeath: Spawn time of process:${o.pid} did not change after time out.`
+          //   + `\nspawnTime:${spawnTime} spawnTime2:${spawnTime2}\nExec path:${execPath}`;
+          //   console.error( info );
+          // }
         }
       }
 
@@ -3042,6 +3074,7 @@ function children( o )
 
   if( !_.process.isAlive( o.pid ) )
   {
+    /* Dmytro : maybe it's overhead, the caller should know what children it needs or simply return empty container */
     let err = _.err( `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
     return new _.Consequence().error( err );
   }
