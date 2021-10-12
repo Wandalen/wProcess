@@ -975,6 +975,7 @@ function startMinimal_body( o )
         pnd : o.pnd,
         withChildren : 1,
         ignoringErrorPerm : 1,
+        sync : 1,
       });
     });
 
@@ -2688,7 +2689,11 @@ function signal_body( o )
     _.assert( _.intIs( p.pid ) );
 
     if( !_.process.isAlive( p.pid ) )
-    return true;
+    {
+      if( o.ignoringErrorEsrch )
+      return true;
+      throw _.err( `Target process: ${_.strQuote( p.pid )} does not exist.` );
+    }
 
     let pnd = p.pnd;
     if( !pnd && o.pnd && o.pnd.pid === p.pid )
@@ -2889,7 +2894,7 @@ signal_body.defaults =
   ignoringErrorPerm : 0,
   ignoringErrorEsrch : 1,
   sync : 0,
-}
+};
 
 let _signal = _.routine.uniteCloning_replaceByUnite( signal_head, signal_body );
 
