@@ -35490,11 +35490,11 @@ function terminate( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp ).filePath/*programPath*/;
+  let testAppPath = a.program( testApp ).filePath;
 
-  a.ready.then( () => terminateCommon( 'spawn' ) )
-  a.ready.then( () => terminateCommon( 'fork' ) )
-  a.ready.then( () => terminateShell() )
+  a.ready.then( () => terminateCommon( 'spawn' ) );
+  a.ready.then( () => terminateCommon( 'fork' ) );
+  a.ready.then( () => terminateShell() );
 
   /* */
 
@@ -35504,9 +35504,9 @@ function terminate( test )
 
   function terminateCommon( mode )
   {
-    let ready = new _.Consequence().take( null )
+    let ready = new _.take( null );
 
-    .then( () =>
+    ready.then( () =>
     {
       /*
       xxx :
@@ -35564,22 +35564,23 @@ function terminate( test )
       2020-11-30T15:34:31.2227031Z
       2020-11-30T15:34:31.2227684Z --------------- uncaught asynchronous error ---------------<
       */
-      test.case = `mode:${mode}, terminate process using descriptor( pnd )`
+
+      test.case = `mode:${mode}, terminate process using descriptor( pnd )`;
       var o =
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
-      let ready = _.process.startMinimal( o )
+      let ready = _.process.startMinimal( o );
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pnd : o.pnd }); /* zzz : here */
-      })
+      });
 
       ready.then( ( op ) =>
       {
@@ -35601,37 +35602,37 @@ function terminate( test )
         }
 
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
-    .then( () =>
+    ready.then( () =>
     {
-      test.case = `mode:${mode}, terminate process using pid`
+      test.case = `mode:${mode}, terminate process using pid`;
       var o =
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
-      let ready = _.process.startMinimal( o )
+      let ready = _.process.startMinimal( o );
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate( o.pnd.pid );
-      })
+      });
 
       ready.then( ( op ) =>
       {
         if( process.platform === 'win32' )
         {
-          test.identical( op.exitCode, 1 );/* 1 because process was killed using pid */
+          test.identical( op.exitCode, 1 ); /* 1 because process was killed using pid */
           test.identical( op.exitSignal, null );
           test.identical( op.ended, true );
           test.true( !_.strHas( op.output, 'SIGTERM' ) );
@@ -35646,16 +35647,16 @@ function terminate( test )
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
-    .then( () =>
+    ready.then( () =>
     {
-      test.case = `mode:${mode}, terminate process using pid, zero time out`
+      test.case = `mode:${mode}, terminate process using pid, zero time out`;
 
       var o =
       {
@@ -35663,15 +35664,15 @@ function terminate( test )
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
-      let ready = _.process.startMinimal( o )
+      let ready = _.process.startMinimal( o );
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pid : o.pnd.pid, timeOut : 0 });
-      })
+      });
 
       ready.then( ( op ) =>
       {
@@ -35693,32 +35694,31 @@ function terminate( test )
         }
 
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
-    .then( () =>
+    ready.then( () =>
     {
-
-      test.case = `mode:${mode}, terminate process using pid, low time out`
+      test.case = `mode:${mode}, terminate process using pid, low time out`;
       var o =
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
-      let ready = _.process.startMinimal( o )
+      let ready = _.process.startMinimal( o );
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pid : o.pnd.pid, timeOut : context.t1*2 });
-      })
+      });
 
       ready.then( ( op ) =>
       {
@@ -35740,31 +35740,31 @@ function terminate( test )
         }
 
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
-    .then( () =>
+    ready.then( () =>
     {
-      test.case = `mode:${mode}, terminate process using pnd, zero time out`
+      test.case = `mode:${mode}, terminate process using pnd, zero time out`;
       var o =
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
       let ready = _.process.startMinimal( o )
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pnd : o.pnd, timeOut : 0 });
-      })
+      });
 
       ready.then( ( op ) =>
       {
@@ -35786,14 +35786,14 @@ function terminate( test )
         }
 
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
-    .then( () =>
+    ready.then( () =>
     {
       test.case = `mode:${mode}, terminate process using pnd, low time out`;
 
@@ -35803,15 +35803,15 @@ function terminate( test )
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
       let ready = _.process.startMinimal( o )
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pnd : o.pnd, timeOut : context.t1*4 });
-      })
+      });
 
       ready.then( ( op ) =>
       {
@@ -35833,10 +35833,10 @@ function terminate( test )
         }
 
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
@@ -37900,88 +37900,98 @@ function terminateDeadProcess( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 ).filePath/*programPath*/;
+  let testAppPath = a.program( program1 ).filePath;
+
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
+  /* */
+
   function run( mode )
   {
-    let ready = _.Consequence().take( null );
+    let ready = _.take( null );
+
+    /* - */
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}`;
+      test.case = `mode - ${mode}, ignoringErrorEsrch - 1`;
+
       let o =
       {
-        execPath : mode === 'fork' ? 'program1' : 'node program1',
+        execPath : mode === 'fork' ? testAppPath : `node ${ testAppPath }`,
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 0
-      }
-
+      };
       _.process.startMinimal( o );
 
       o.conTerminate.then( () =>
       {
         test.identical( o.exitCode, 0 )
         test.identical( o.exitSignal, null );
-        return _.process.terminate({ pid : o.pnd.pid, withChildren : 0 });
-      })
-
-      o.conTerminate.then( ( got ) =>
-      {
-        test.identical( got, true );
-        let con = _.process.terminate({ pid : o.pnd.pid, withChildren : 1 });
-        return test.mustNotThrowError( con );
+        return test.mustNotThrowError( () =>
+        {
+          _.process.terminate
+          ({
+            pid : o.pnd.pid,
+            withChildren : 0,
+            ignoringErrorEsrch : 1
+          });
+        });
       })
 
       return o.conTerminate;
-    })
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode - ${mode}, ignoringErrorEsrch - 0`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? testAppPath : `node ${ testAppPath }`,
+        currentPath : a.routinePath,
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      };
+      _.process.startMinimal( o );
+
+      o.conTerminate.then( () =>
+      {
+        test.identical( o.exitCode, 0 )
+        test.identical( o.exitSignal, null );
+        return test.shouldThrowErrorAsync( () =>
+        {
+          return _.process.terminate
+          ({
+            pid : o.pnd.pid,
+            withChildren : 0,
+            ignoringErrorEsrch : 0
+          });
+        });
+      })
+
+      return o.conTerminate;
+    });
+
+    /* - */
 
     return ready;
   }
 
-  /* ORIGINAL */
-  // let o =
-  // {
-  //   execPath : 'node program1.js',
-  //   currentPath : a.routinePath,
-  //   mode : 'spawn',
-  //   outputPiping : 1,
-  //   outputCollecting : 1,
-  //   throwingExitCode : 0
-  // }
-
-  // _.process.start( o );
-
-  // o.conTerminate.then( () =>
-  // {
-  //   test.identical( o.exitCode, 0 )
-  //   test.identical( o.exitSignal, null );
-  //   return _.process.terminate({ pid : o.pnd.pid, withChildren : 0 });
-  // })
-
-  // o.conTerminate.then( ( got ) =>
-  // {
-  //   test.identical( got, true );
-  //   let con = _.process.terminate({ pid : o.pnd.pid, withChildren : 1 });
-  //   return test.shouldThrowErrorAsync( con );
-  // })
-
-  // return o.conTerminate;
-
-  /* - */
+  /* */
 
   function program1()
   {
     console.log( 'program1::begin' );
-    setTimeout( () =>
-    {
-      console.log( 'program1::begin' );
-    }, context.t1 );
   }
 }
 
