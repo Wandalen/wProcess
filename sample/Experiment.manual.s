@@ -1,4 +1,5 @@
-var _ = require( '..')
+
+var _ = require( 'wprocess' );
 
 run();
 
@@ -8,7 +9,7 @@ function run()
   {
     executionTime : [ 50, 100 ],
     spawnPeriod : [ 25, 50 ],
-  }
+  };
 
   let additionalReady = runAdditionalTrees( 10 )
   let mainReady = _.process._startTree( mainTree );
