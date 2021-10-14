@@ -1829,8 +1829,8 @@ function startSingleSyncDeasync( test )
         execPath : env.mode === 'fork' ? filePath/*programPath*/ + ' loop : 1' : 'node ' + filePath/*programPath*/ + ' loop : 1',
         mode : env.mode,
         stdio : 'pipe',
-        timeOut : 2*context.t1,
-      }
+        timeOut : 2 * context.t1,
+      };
 
       var options = _.props.supplement( {}, o2, o3 );
 
@@ -1947,10 +1947,10 @@ function startSingleSyncDeasync( test )
     var args = _.process.input();
 
     if( args.map.exitWithCode )
-    process.exit( args.map.exitWithCode )
+    process.exit( args.map.exitWithCode );
 
     if( args.map.loop )
-    _.time.out( context.t1 * 5 ) /* 5000 */
+    _.time.out( 5000 );
 
     console.log( __filename );
   }
@@ -7761,7 +7761,596 @@ function startMinimalPassingThroughExecPathWithSpace( test )
   }
 }
 
+// --
 //
+// --
+
+function startMinimalErrorAfterTerminationWithSend( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp ).filePath/*programPath*/;
+  let track;
+
+  let modes = [ 'fork', 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    track = [];
+
+    var o =
+    {
+      execPath : mode !== 'fork' ? 'node' : null,
+      args : [ testAppPath ],
+      mode,
+      ipc : 1,
+    }
+
+    _.process.on( 'uncaughtError', uncaughtError_functor( mode ) );
+
+    let result = _.process.startMinimal( o );
+
+    o.conStart.then( ( arg ) =>
+    {
+      track.push( 'conStart' );
+      return null
+    });
+
+    o.conTerminate.finally( ( err, op ) =>
+    {
+      track.push( 'conTerminate' );
+      test.identical( err, undefined );
+      test.identical( op, o );
+      test.identical( o.exitCode, 0 );
+
+      test.description = 'Attempt to send data when ipc channel is closed';
+      try
+      {
+        /*
+          xxx : Windows 10x
+          2020-12-16T20:59:20.4729817Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend ..
+          2020-12-16T20:59:20.5249473Z  1 : function testApp()
+          2020-12-16T20:59:20.5250477Z  2 :   {
+          2020-12-16T20:59:20.5251340Z  3 :     setTimeout( () => {}, context.t1 ); // 1000
+          2020-12-16T20:59:20.5252093Z  4 :   }
+          2020-12-16T20:59:20.5252602Z  5 :
+          2020-12-16T20:59:20.5253114Z  6 : var context = {
+          2020-12-16T20:59:20.5253839Z  7 :   "t0" : 100,
+          2020-12-16T20:59:20.5254336Z  8 :   "t1" : 1000,
+          2020-12-16T20:59:20.5254823Z  9 :   "t2" : 5000,
+          2020-12-16T20:59:20.5255460Z 10 :   "t3" : 15000
+          2020-12-16T20:59:20.5256415Z 11 : };
+          2020-12-16T20:59:20.5257791Z 12 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+          2020-12-16T20:59:20.5258667Z 13 :
+          2020-12-16T20:59:20.5259219Z 14 : testApp();
+          2020-12-16T20:59:20.5259778Z 15 :
+          2020-12-16T20:59:20.5341807Z  > D:\Temp\ProcessBasic-2020-12-16-19-44-40-416-71b4.tmp\startMinimalErrorAfterTerminationWithSend\testApp.js
+          2020-12-16T20:59:21.7116943Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 1 ) ... ok
+          2020-12-16T20:59:21.7366568Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 2 ) ... ok
+          2020-12-16T20:59:21.7456178Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 3 ) ... ok
+          2020-12-16T20:59:21.7485053Z  = Message of Error#378
+          2020-12-16T20:59:21.7485850Z     Channel closed
+          2020-12-16T20:59:21.7486492Z     Error starting the process
+          2020-12-16T20:59:21.7488450Z         Exec path : D:\Temp\ProcessBasic-2020-12-16-19-44-40-416-71b4.tmp\startMinimalErrorAfterTerminationWithSend\testApp.js
+          2020-12-16T20:59:21.7490482Z         Current path : /D/a/wProcess/wProcess
+          2020-12-16T20:59:21.7491040Z
+          2020-12-16T20:59:21.7491601Z  = Beautified calls stack
+          2020-12-16T20:59:21.7493259Z     at ChildProcess.target.send (internal/child_process.js:636:16)
+          2020-12-16T20:59:21.7525108Z     at wConsequence.o.conTerminate.finally (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process.test\Execution.test.s:30039:15) *
+          2020-12-16T20:59:21.7526594Z handleError1
+          2020-12-16T20:59:21.7527427Z handleError2
+          2020-12-16T20:59:21.7528877Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:3727:8)
+          2020-12-16T20:59:21.7531681Z     at end3 (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:772:20)
+          2020-12-16T20:59:21.7533442Z     at end2 (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:723:12)
+          2020-12-16T20:59:21.7534828Z     at ChildProcess.handleClose (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:834:7)
+          2020-12-16T20:59:21.7536411Z     at ChildProcess.emit (events.js:203:15)
+          2020-12-16T20:59:21.7537771Z     at maybeClose (internal/child_process.js:982:16)
+          2020-12-16T20:59:21.7539141Z     at Process.ChildProcess._handle.onexit (internal/child_process.js:259:5)
+          2020-12-16T20:59:21.7541684Z     at Function.module.exports.loopWhile (D:\a\wProcess\wProcess\node_modules\wdeasync\index.js:71:23)
+          2020-12-16T20:59:21.7548162Z     at wConsequence._deasync (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:704:11)
+          2020-12-16T20:59:21.7550102Z     at wConsequence.deasync (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:747:15)
+          2020-12-16T20:59:21.7552095Z     at end (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:3128:13)
+          2020-12-16T20:59:21.7553551Z     at Object.execPathOf (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:3122:10)
+          2020-12-16T20:59:21.7554675Z     at processInfoGet (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2739:34)
+          2020-12-16T20:59:21.7556212Z     at handleError2 (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2717:25)
+          2020-12-16T20:59:21.7557328Z     at signalSend (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2609:13)
+          2020-12-16T20:59:21.7559283Z     at wConsequence.processKill (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2638:7)
+          2020-12-16T20:59:21.7562202Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:3727:8)
+          2020-12-16T20:59:21.7565750Z     at Object.WindowsProcessTree.getProcessList [as callback] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2964:67)
+          2020-12-16T20:59:21.7568369Z     at queue.forEach.r (D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:74:19)
+          2020-12-16T20:59:21.7569651Z     at Array.forEach (<anonymous>)
+          2020-12-16T20:59:21.7570972Z     at native.getProcessList (D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:73:19)
+          2020-12-16T20:59:21.7571914Z
+          2020-12-16T20:59:21.7572893Z     at Function.signal_body [as body] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2567:9)
+          2020-12-16T20:59:21.7574054Z     at Object.kill_body (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2789:28)
+          2020-12-16T20:59:21.7575315Z     at Object.kill (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l3\Routine.s:1068:23)
+          2020-12-16T20:59:21.7576683Z     at ChildProcess.o.pnd.on (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process.test\Execution.test.s:29654:28) *
+          2020-12-16T20:59:21.7577762Z     at ChildProcess.emit (events.js:198:13)
+          2020-12-16T20:59:21.7578536Z     at emit (internal/child_process.js:832:12)
+          2020-12-16T20:59:21.7579558Z     at process._tickCallback (internal/process/next_tick.js:63:19)
+          2020-12-16T20:59:21.7580085Z
+          2020-12-16T20:59:21.7580453Z  = Throws stack
+          2020-12-16T20:59:21.7581406Z     thrown at ChildProcess.handleError @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:854:13
+          2020-12-16T20:59:21.7582237Z
+          2020-12-16T20:59:21.7582488Z
+          2020-12-16T20:59:21.7583296Z Error: async hook stack has become corrupted (actual: 101471, expected: 101400)
+          2020-12-16T20:59:22.2931653Z  1: 00007FF67B76888A v8::internal::GCIdleTimeHandler::GCIdleTimeHandler+4506
+          2020-12-16T20:59:22.2934048Z  2: 00007FF67B6AC1E8 v8::internal::ParseInfo::end_position+134984
+          2020-12-16T20:59:22.2935078Z  3: 00007FF67B776B53 node::CallbackScope::~CallbackScope+723
+          2020-12-16T20:59:22.2936642Z  4: 00007FF67B741C0C node::RemoveEnvironmentCleanupHook+556
+          2020-12-16T20:59:22.2938777Z  5: 00007FF67B741F66 node::MakeCallback+150
+          2020-12-16T20:59:22.2939412Z  6: 00007FF9412237F9
+          2020-12-16T20:59:22.2939964Z  7: 00007FF941222094
+          2020-12-16T20:59:22.2940451Z  8: 00007FF941221102
+          2020-12-16T20:59:22.2941253Z  9: 00007FF67B7B21B0 uv_timer_set_repeat+1824
+          2020-12-16T20:59:22.2942624Z 10: 00007FF67B7B2127 uv_timer_set_repeat+1687
+          2020-12-16T20:59:22.2943365Z 11: 00007FF67B7AD284 uv_dlerror+2452
+          2020-12-16T20:59:22.2943983Z 12: 00007FF67B7AE2A8 uv_run+232
+          2020-12-16T20:59:22.2944719Z 13: 00007FF67B74A92E node::NewContext+1390
+          2020-12-16T20:59:22.2946125Z 14: 00007FF67B74AF3B node::NewIsolate+603
+          2020-12-16T20:59:22.2947662Z 15: 00007FF67B74B397 node::Start+823
+          2020-12-16T20:59:22.2948824Z 16: 00007FF67B5F91EC node::MultiIsolatePlatform::MultiIsolatePlatform+604
+          2020-12-16T20:59:22.2950138Z 17: 00007FF67C2470AC v8::internal::compiler::OperationTyper::ToBoolean+129516
+          2020-12-16T20:59:22.2951227Z 18: 00007FF947867974 BaseThreadInitThunk+20
+          2020-12-16T20:59:22.2952147Z 19: 00007FF9494CA0B1 RtlUserThreadStart+33
+          2020-12-16T20:59:22.3536566Z npm ERR! Test failed.  See above for more details.
+          2020-12-16T20:59:22.5524525Z ##[error]Process completed with exit code 1.
+        */
+
+        o.pnd.send( 1 ); /* zzz : here */
+      }
+      catch( err )
+      {
+        console.log( err );
+      }
+
+/* happens on servers
+--------------- uncaught error --------------->
+
+ = Message of Error#387
+    Channel closed
+    code : 'ERR_IPC_CHANNEL_CLOSED'
+    Error starting the process
+    Exec path : /Users/runner/Temp/ProcessBasic-2020-10-29-8-0-2-841-ad4.tmp/startErrorAfterTerminationWithSend/testApp.js
+    Current path : /Users/runner/work/wProcess/wProcess
+
+ = Beautified calls stack
+    at ChildProcess.target.send (internal/child_process.js:705:16)
+    at wConsequence.<anonymous> (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:24677:17) *
+    at wConsequence.take (/Users/runner/work/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:2669:8)
+    at end3 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:783:20)
+    at end2 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:734:12)
+    at ChildProcess.handleClose (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:845:7)
+    at ChildProcess.emit (events.js:327:22)
+    at maybeClose (internal/child_process.js:1048:16)
+    at Process.ChildProcess._handle.onexit (internal/child_process.js:288:5)
+
+    at Object.<anonymous> (/Users/runner/work/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/entry/Exec:11:11)
+
+ = Throws stack
+    thrown at ChildProcess.handleError @ /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:865:13
+    thrown at errRefine @ /Users/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:120:16
+
+ = Process
+    Current path : /Users/runner/work/wProcess/wProcess
+    Exec path : /Users/runner/hostedtoolcache/node/14.14.0/x64/bin/node /Users/runner/work/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/entry/Exec .run proto/** rapidity:-3
+
+--------------- uncaught error ---------------<
+*/
+
+      return null;
+    })
+
+    return _.time.out( context.t2 * 2, () => /* 10000 */
+    {
+      test.identical( track, [ 'conStart', 'conTerminate', 'uncaughtError' ] );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.error, null );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.pnd.exitCode, 0 );
+      test.identical( o.pnd.signalCode, null );
+    });
+
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    setTimeout( () => {}, context.t1 ); /* 1000 */
+  }
+
+  function uncaughtError_functor( mode )
+  {
+    return function uncaughtError( e )
+    {
+      var exp =
+  `
+  Channel closed
+  `
+      if( process.platform === 'darwin' )
+      exp += `code : 'ERR_IPC_CHANNEL_CLOSED'`
+      test.identical( _.strCount( e.err.originalMessage, 'Error starting the process' ), 1 );
+      _.errAttend( e.err );
+      track.push( 'uncaughtError' );
+      _.process.off( 'uncaughtError', uncaughtError );
+    }
+  }
+
+}
+
+startMinimalErrorAfterTerminationWithSend.description =
+`
+  - handleClose receive error after termination of the process
+  - error caused by call o.pnd.send()
+  - throws asynchronouse uncahught error
+`
+
+//
+
+function startMinimalTerminateHangedWithExitHandler( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp ).filePath/*programPath*/;
+
+  /* signal handler of njs on Windows is defective */
+  if( process.platform === 'win32' )
+  return test.true( true );
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  function run( mode )
+  {
+    test.case = `mode : ${mode}`;
+    let ready = _.Consequence().take( null );
+
+    /* mode::shell doesn't support ipc */
+    if( mode === 'shell' )
+    return test.true( true );
+
+    ready
+    .then( () =>
+    {
+      let time;
+      let o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputPiping : 1,
+        ipc : 1,
+        outputCollecting : 1,
+      }
+
+      let con = _.process.startMinimal( o );
+
+      o.pnd.on( 'message', () =>
+      {
+        time = _.time.now();
+        _.process.terminate({ pnd : o.pnd, timeOut : context.t1*5 });
+      })
+
+      con.then( () =>
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGKILL' );
+        test.true( !_.strHas( o.output, 'SIGTERM' ) );
+        test.ge( _.time.now() - time, context.t1*5 );
+        console.log( `time : ${_.time.spent( time )}` );
+        return null;
+      })
+
+      return con;
+    })
+
+    return ready;
+  }
+
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   let time;
+  //   let o =
+  //   {
+  //     execPath : 'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     throwingExitCode : 0,
+  //     outputPiping : 1,
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //   }
+
+  //   let con = _.process.start( o );
+
+  //   o.pnd.on( 'message', () =>
+  //   {
+  //     time = _.time.now();
+  //     _.process.terminate({ pnd : o.pnd, timeOut : context.t1*5 });
+  //   })
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, null );
+  //     test.identical( o.exitSignal, 'SIGKILL' );
+  //     test.true( !_.strHas( o.output, 'SIGTERM' ) );
+  //     test.ge( _.time.now() - time, context.t1*5 );
+  //     console.log( `time : ${_.time.spent( time )}` );
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   let time;
+  //   let o =
+  //   {
+  //     execPath : testAppPath,
+  //     mode : 'fork',
+  //     throwingExitCode : 0,
+  //     outputPiping : 1,
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //   }
+
+  //   let con = _.process.start( o );
+
+  //   o.pnd.on( 'message', () =>
+  //   {
+  //     time = _.time.now();
+  //     _.process.terminate({ pnd : o.pnd, timeOut : context.t1*5 });
+  //   })
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, null );
+  //     test.identical( o.exitSignal, 'SIGKILL' );
+  //     test.is( !_.strHas( o.output, 'SIGTERM' ) );
+  //     test.ge( _.time.now() - time, context.t1*5 );
+  //     console.log( `time : ${_.time.spent( time )}` );
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  /* - */
+
+  function testApp()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+    process.send( process.pid )
+    let x = 0;
+    while( 1 )
+    {
+      x += Math.cos( Math.random() );
+      // console.log( _.time.now() );
+    }
+  }
+}
+
+startMinimalTerminateHangedWithExitHandler.timeOut = 15e4; /* Locally : 14.622s */
+
+startMinimalTerminateHangedWithExitHandler.description =
+`
+  Test app - code that blocks event loop and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+    - Termination of child process using SIGKILL signal after small delay
+
+  Expected behaviour:
+    - For SIGINT: Child was terminated with exitCode : 0, exitSignal : null
+    - For SIGKILL: Child was terminated with exitCode : null, exitSignal : SIGKILL
+    - No time out message in output
+`
+
+//
+
+function startMinimalTerminateAfterLoopRelease( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp ).filePath/*programPath*/;
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  // if( process.platform === 'win32' )
+  // {
+  /* zzz: windows-kill doesn't work correctrly on node 14
+  investigate if its possible to use process.kill instead of windows-kill
+  */
+  //   test.identical( 1, 1 )
+  //   return;
+  // }
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputPiping : 0,
+        ipc : 1,
+        outputCollecting : 1,
+      }
+
+      if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication */
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
+
+      let con = _.process.startMinimal( o );
+
+      o.pnd.on( 'message', () =>
+      {
+        _.process.terminate({ pnd : o.pnd, timeOut : context.t2 * 2 }); /* 10000 */
+      })
+
+      con.then( () =>
+      {
+        /* njs on Windows does not let to set custom signal handler properly */
+        if( process.platform === 'win32' )
+        {
+          test.identical( o.exitCode, 1 );
+          test.identical( o.exitSignal, null );
+        }
+        else
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.exitSignal, 'SIGKILL' );
+        }
+        test.true( !_.strHas( o.output, 'SIGTERM' ) );
+        test.true( !_.strHas( o.output, 'Exit after release' ) );
+
+        return null;
+      })
+
+      return con;
+    })
+
+    return ready;
+  }
+
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   let o =
+  //   {
+  //     execPath : 'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     throwingExitCode : 0,
+  //     outputPiping : 0,
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //   }
+
+  //   let con = _.process.start( o );
+
+  //   o.pnd.on( 'message', () =>
+  //   {
+  //     _.process.terminate({ pnd : o.pnd, timeOut : context.t2 * 2 }); /* 10000 */
+  //   })
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, null );
+  //     /* njs on Windows does not let to set custom signal handler properly */
+  //     if( process.platform === 'win32' )
+  //     test.identical( o.exitSignal, 'SIGTERM' );
+  //     else
+  //     test.identical( o.exitSignal, 'SIGKILL' );
+  //     test.true( !_.strHas( o.output, 'SIGTERM' ) );
+  //     test.true( !_.strHas( o.output, 'Exit after release' ) );
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /*  */
+
+  // .then( () =>
+  // {
+  //   let o =
+  //   {
+  //     execPath : testAppPath,
+  //     mode : 'fork',
+  //     throwingExitCode : 0,
+  //     outputPiping : 0,
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //   }
+
+  //   let con = _.process.start( o );
+
+  //   o.pnd.on( 'message', () =>
+  //   {
+  //     _.process.terminate({ pnd : o.pnd, timeOut : context.t2 * 2 }); /* 10000 */
+  //   })
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, null );
+  //     /* njs on Windows does not let to set custom signal handler properly */
+  //     if( process.platform === 'win32' )
+  //     test.identical( o.exitSignal, 'SIGTERM' );
+  //     else
+  //     test.identical( o.exitSignal, 'SIGKILL' );
+  //     test.true( !_.strHas( o.output, 'SIGTERM' ) );
+  //     test.true( !_.strHas( o.output, 'Exit after release' ) );
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /*  */
+
+  // return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    const _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+    let loop = true;
+    setTimeout( () =>
+    {
+      loop = false;
+    }, context.t2 ) /* 5000 */
+    process.send( process.pid );
+    while( loop )
+    {
+      loop = loop;
+    }
+    console.log( 'Exit after release' );
+  }
+}
+
+startMinimalTerminateAfterLoopRelease.timeOut = 25e4; /* Locally : 24.941s */
+startMinimalTerminateAfterLoopRelease.description =
+`
+  Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+
+  Expected behaviour:
+    - Child was terminated after event loop release with exitCode : 0, exitSignal : null
+    - Child process message should be printed
+`;
 
 // --
 // procedures / chronology / structural
@@ -31560,12 +32149,12 @@ function killOptionWithChildren( test )
       }
 
       _.process.startMinimal( o );
-      o.pnd.kill('SIGKILL');
+      o.pnd.kill( 'SIGKILL' );
 
       return o.ready.then( () =>
       {
         let ready = _.process.kill({ pid : o.pnd.pid, withChildren : 1 });
-        return test.shouldThrowErrorAsync( ready );
+        return test.mustNotThrowError( ready );
       })
 
     })
@@ -31854,14 +32443,14 @@ killOptionWithChildren.timeOut = 13e4; /* Locally : 12.669s */
 
 //
 
-function startMinimalErrorAfterTerminationWithSend( test )
+/* zzz for Vova : extend, cover kill of group of processes */
+
+function killComplex( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp ).filePath/*programPath*/;
-  let track;
-
-  let modes = [ 'fork', 'spawn' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
@@ -31869,540 +32458,124 @@ function startMinimalErrorAfterTerminationWithSend( test )
 
   function run( mode )
   {
-    track = [];
-
-    var o =
-    {
-      execPath : mode !== 'fork' ? 'node' : null,
-      args : [ testAppPath ],
-      mode,
-      ipc : 1,
-    }
-
-    _.process.on( 'uncaughtError', uncaughtError_functor( mode ) );
-
-    let result = _.process.startMinimal( o );
-
-    o.conStart.then( ( arg ) =>
-    {
-      track.push( 'conStart' );
-      return null
-    });
-
-    o.conTerminate.finally( ( err, op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.identical( err, undefined );
-      test.identical( op, o );
-      test.identical( o.exitCode, 0 );
-
-      test.description = 'Attempt to send data when ipc channel is closed';
-      try
-      {
-        /*
-          xxx : Windows 10x
-          2020-12-16T20:59:20.4729817Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend ..
-          2020-12-16T20:59:20.5249473Z  1 : function testApp()
-          2020-12-16T20:59:20.5250477Z  2 :   {
-          2020-12-16T20:59:20.5251340Z  3 :     setTimeout( () => {}, context.t1 ); // 1000
-          2020-12-16T20:59:20.5252093Z  4 :   }
-          2020-12-16T20:59:20.5252602Z  5 :
-          2020-12-16T20:59:20.5253114Z  6 : var context = {
-          2020-12-16T20:59:20.5253839Z  7 :   "t0" : 100,
-          2020-12-16T20:59:20.5254336Z  8 :   "t1" : 1000,
-          2020-12-16T20:59:20.5254823Z  9 :   "t2" : 5000,
-          2020-12-16T20:59:20.5255460Z 10 :   "t3" : 15000
-          2020-12-16T20:59:20.5256415Z 11 : };
-          2020-12-16T20:59:20.5257791Z 12 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
-          2020-12-16T20:59:20.5258667Z 13 :
-          2020-12-16T20:59:20.5259219Z 14 : testApp();
-          2020-12-16T20:59:20.5259778Z 15 :
-          2020-12-16T20:59:20.5341807Z  > D:\Temp\ProcessBasic-2020-12-16-19-44-40-416-71b4.tmp\startMinimalErrorAfterTerminationWithSend\testApp.js
-          2020-12-16T20:59:21.7116943Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 1 ) ... ok
-          2020-12-16T20:59:21.7366568Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 2 ) ... ok
-          2020-12-16T20:59:21.7456178Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 3 ) ... ok
-          2020-12-16T20:59:21.7485053Z  = Message of Error#378
-          2020-12-16T20:59:21.7485850Z     Channel closed
-          2020-12-16T20:59:21.7486492Z     Error starting the process
-          2020-12-16T20:59:21.7488450Z         Exec path : D:\Temp\ProcessBasic-2020-12-16-19-44-40-416-71b4.tmp\startMinimalErrorAfterTerminationWithSend\testApp.js
-          2020-12-16T20:59:21.7490482Z         Current path : /D/a/wProcess/wProcess
-          2020-12-16T20:59:21.7491040Z
-          2020-12-16T20:59:21.7491601Z  = Beautified calls stack
-          2020-12-16T20:59:21.7493259Z     at ChildProcess.target.send (internal/child_process.js:636:16)
-          2020-12-16T20:59:21.7525108Z     at wConsequence.o.conTerminate.finally (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process.test\Execution.test.s:30039:15) *
-          2020-12-16T20:59:21.7526594Z handleError1
-          2020-12-16T20:59:21.7527427Z handleError2
-          2020-12-16T20:59:21.7528877Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:3727:8)
-          2020-12-16T20:59:21.7531681Z     at end3 (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:772:20)
-          2020-12-16T20:59:21.7533442Z     at end2 (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:723:12)
-          2020-12-16T20:59:21.7534828Z     at ChildProcess.handleClose (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:834:7)
-          2020-12-16T20:59:21.7536411Z     at ChildProcess.emit (events.js:203:15)
-          2020-12-16T20:59:21.7537771Z     at maybeClose (internal/child_process.js:982:16)
-          2020-12-16T20:59:21.7539141Z     at Process.ChildProcess._handle.onexit (internal/child_process.js:259:5)
-          2020-12-16T20:59:21.7541684Z     at Function.module.exports.loopWhile (D:\a\wProcess\wProcess\node_modules\wdeasync\index.js:71:23)
-          2020-12-16T20:59:21.7548162Z     at wConsequence._deasync (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:704:11)
-          2020-12-16T20:59:21.7550102Z     at wConsequence.deasync (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:747:15)
-          2020-12-16T20:59:21.7552095Z     at end (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:3128:13)
-          2020-12-16T20:59:21.7553551Z     at Object.execPathOf (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:3122:10)
-          2020-12-16T20:59:21.7554675Z     at processInfoGet (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2739:34)
-          2020-12-16T20:59:21.7556212Z     at handleError2 (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2717:25)
-          2020-12-16T20:59:21.7557328Z     at signalSend (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2609:13)
-          2020-12-16T20:59:21.7559283Z     at wConsequence.processKill (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2638:7)
-          2020-12-16T20:59:21.7562202Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:3727:8)
-          2020-12-16T20:59:21.7565750Z     at Object.WindowsProcessTree.getProcessList [as callback] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2964:67)
-          2020-12-16T20:59:21.7568369Z     at queue.forEach.r (D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:74:19)
-          2020-12-16T20:59:21.7569651Z     at Array.forEach (<anonymous>)
-          2020-12-16T20:59:21.7570972Z     at native.getProcessList (D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:73:19)
-          2020-12-16T20:59:21.7571914Z
-          2020-12-16T20:59:21.7572893Z     at Function.signal_body [as body] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2567:9)
-          2020-12-16T20:59:21.7574054Z     at Object.kill_body (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2789:28)
-          2020-12-16T20:59:21.7575315Z     at Object.kill (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l3\Routine.s:1068:23)
-          2020-12-16T20:59:21.7576683Z     at ChildProcess.o.pnd.on (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process.test\Execution.test.s:29654:28) *
-          2020-12-16T20:59:21.7577762Z     at ChildProcess.emit (events.js:198:13)
-          2020-12-16T20:59:21.7578536Z     at emit (internal/child_process.js:832:12)
-          2020-12-16T20:59:21.7579558Z     at process._tickCallback (internal/process/next_tick.js:63:19)
-          2020-12-16T20:59:21.7580085Z
-          2020-12-16T20:59:21.7580453Z  = Throws stack
-          2020-12-16T20:59:21.7581406Z     thrown at ChildProcess.handleError @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:854:13
-          2020-12-16T20:59:21.7582237Z
-          2020-12-16T20:59:21.7582488Z
-          2020-12-16T20:59:21.7583296Z Error: async hook stack has become corrupted (actual: 101471, expected: 101400)
-          2020-12-16T20:59:22.2931653Z  1: 00007FF67B76888A v8::internal::GCIdleTimeHandler::GCIdleTimeHandler+4506
-          2020-12-16T20:59:22.2934048Z  2: 00007FF67B6AC1E8 v8::internal::ParseInfo::end_position+134984
-          2020-12-16T20:59:22.2935078Z  3: 00007FF67B776B53 node::CallbackScope::~CallbackScope+723
-          2020-12-16T20:59:22.2936642Z  4: 00007FF67B741C0C node::RemoveEnvironmentCleanupHook+556
-          2020-12-16T20:59:22.2938777Z  5: 00007FF67B741F66 node::MakeCallback+150
-          2020-12-16T20:59:22.2939412Z  6: 00007FF9412237F9
-          2020-12-16T20:59:22.2939964Z  7: 00007FF941222094
-          2020-12-16T20:59:22.2940451Z  8: 00007FF941221102
-          2020-12-16T20:59:22.2941253Z  9: 00007FF67B7B21B0 uv_timer_set_repeat+1824
-          2020-12-16T20:59:22.2942624Z 10: 00007FF67B7B2127 uv_timer_set_repeat+1687
-          2020-12-16T20:59:22.2943365Z 11: 00007FF67B7AD284 uv_dlerror+2452
-          2020-12-16T20:59:22.2943983Z 12: 00007FF67B7AE2A8 uv_run+232
-          2020-12-16T20:59:22.2944719Z 13: 00007FF67B74A92E node::NewContext+1390
-          2020-12-16T20:59:22.2946125Z 14: 00007FF67B74AF3B node::NewIsolate+603
-          2020-12-16T20:59:22.2947662Z 15: 00007FF67B74B397 node::Start+823
-          2020-12-16T20:59:22.2948824Z 16: 00007FF67B5F91EC node::MultiIsolatePlatform::MultiIsolatePlatform+604
-          2020-12-16T20:59:22.2950138Z 17: 00007FF67C2470AC v8::internal::compiler::OperationTyper::ToBoolean+129516
-          2020-12-16T20:59:22.2951227Z 18: 00007FF947867974 BaseThreadInitThunk+20
-          2020-12-16T20:59:22.2952147Z 19: 00007FF9494CA0B1 RtlUserThreadStart+33
-          2020-12-16T20:59:22.3536566Z npm ERR! Test failed.  See above for more details.
-          2020-12-16T20:59:22.5524525Z ##[error]Process completed with exit code 1.
-        */
-
-        o.pnd.send( 1 ); /* zzz : here */
-      }
-      catch( err )
-      {
-        console.log( err );
-      }
-
-/* happens on servers
---------------- uncaught error --------------->
-
- = Message of Error#387
-    Channel closed
-    code : 'ERR_IPC_CHANNEL_CLOSED'
-    Error starting the process
-    Exec path : /Users/runner/Temp/ProcessBasic-2020-10-29-8-0-2-841-ad4.tmp/startErrorAfterTerminationWithSend/testApp.js
-    Current path : /Users/runner/work/wProcess/wProcess
-
- = Beautified calls stack
-    at ChildProcess.target.send (internal/child_process.js:705:16)
-    at wConsequence.<anonymous> (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:24677:17) *
-    at wConsequence.take (/Users/runner/work/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:2669:8)
-    at end3 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:783:20)
-    at end2 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:734:12)
-    at ChildProcess.handleClose (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:845:7)
-    at ChildProcess.emit (events.js:327:22)
-    at maybeClose (internal/child_process.js:1048:16)
-    at Process.ChildProcess._handle.onexit (internal/child_process.js:288:5)
-
-    at Object.<anonymous> (/Users/runner/work/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/entry/Exec:11:11)
-
- = Throws stack
-    thrown at ChildProcess.handleError @ /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:865:13
-    thrown at errRefine @ /Users/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:120:16
-
- = Process
-    Current path : /Users/runner/work/wProcess/wProcess
-    Exec path : /Users/runner/hostedtoolcache/node/14.14.0/x64/bin/node /Users/runner/work/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/entry/Exec .run proto/** rapidity:-3
-
---------------- uncaught error ---------------<
-*/
-
-      return null;
-    })
-
-    return _.time.out( context.t2 * 2, () => /* 10000 */
-    {
-      test.identical( track, [ 'conStart', 'conTerminate', 'uncaughtError' ] );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-      test.identical( o.error, null );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.pnd.exitCode, 0 );
-      test.identical( o.pnd.signalCode, null );
-    });
-
-  }
-
-  /* - */
-
-  function testApp()
-  {
-    setTimeout( () => {}, context.t1 ); /* 1000 */
-  }
-
-  function uncaughtError_functor( mode )
-  {
-    return function uncaughtError( e )
-    {
-      var exp =
-  `
-  Channel closed
-  `
-      if( process.platform === 'darwin' )
-      exp += `code : 'ERR_IPC_CHANNEL_CLOSED'`
-      test.identical( _.strCount( e.err.originalMessage, 'Error starting the process' ), 1 );
-      _.errAttend( e.err );
-      track.push( 'uncaughtError' );
-      _.process.off( 'uncaughtError', uncaughtError );
-    }
-  }
-
-}
-
-startMinimalErrorAfterTerminationWithSend.description =
-`
-  - handleClose receive error after termination of the process
-  - error caused by call o.pnd.send()
-  - throws asynchronouse uncahught error
-`
-
-//
-
-function startMinimalTerminateHangedWithExitHandler( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp ).filePath/*programPath*/;
-
-  /* signal handler of njs on Windows is defective */
-  if( process.platform === 'win32' )
-  return test.true( true );
-
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-  return a.ready;
-
-  function run( mode )
-  {
-    test.case = `mode : ${mode}`;
     let ready = _.Consequence().take( null );
-
-    /* mode::shell doesn't support ipc */
-    if( mode === 'shell' )
-    return test.true( true );
+    let testAppPath2 = a.program({ entry : testApp2, locals : { mode } }).filePath/*programPath*/;
 
     ready
+
     .then( () =>
     {
-      let time;
-      let o =
+      test.case = `mode : ${mode}, Kill child of child process`;
+      var o =
       {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        throwingExitCode : 0,
-        outputPiping : 1,
+        execPath : 'node ' + testAppPath2,
+        mode : 'spawn',
         ipc : 1,
         outputCollecting : 1,
+        throwingExitCode : 0
       }
 
-      let con = _.process.startMinimal( o );
+      let ready = _.process.startMinimal( o );
 
-      o.pnd.on( 'message', () =>
+      let pid = null;
+      let childOfChild = null;
+      o.pnd.on( 'message', ( e ) =>
       {
-        time = _.time.now();
-        _.process.terminate({ pnd : o.pnd, timeOut : context.t1*5 });
-      })
-
-      con.then( () =>
-      {
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGKILL' );
-        test.true( !_.strHas( o.output, 'SIGTERM' ) );
-        test.ge( _.time.now() - time, context.t1*5 );
-        console.log( `time : ${_.time.spent( time )}` );
-        return null;
-      })
-
-      return con;
-    })
-
-    return ready;
-  }
-
-  /* ORIGINAL */
-  // a.ready
-
-  // .then( () =>
-  // {
-  //   let time;
-  //   let o =
-  //   {
-  //     execPath : 'node ' + testAppPath,
-  //     mode : 'spawn',
-  //     throwingExitCode : 0,
-  //     outputPiping : 1,
-  //     ipc : 1,
-  //     outputCollecting : 1,
-  //   }
-
-  //   let con = _.process.start( o );
-
-  //   o.pnd.on( 'message', () =>
-  //   {
-  //     time = _.time.now();
-  //     _.process.terminate({ pnd : o.pnd, timeOut : context.t1*5 });
-  //   })
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, null );
-  //     test.identical( o.exitSignal, 'SIGKILL' );
-  //     test.true( !_.strHas( o.output, 'SIGTERM' ) );
-  //     test.ge( _.time.now() - time, context.t1*5 );
-  //     console.log( `time : ${_.time.spent( time )}` );
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   let time;
-  //   let o =
-  //   {
-  //     execPath : testAppPath,
-  //     mode : 'fork',
-  //     throwingExitCode : 0,
-  //     outputPiping : 1,
-  //     ipc : 1,
-  //     outputCollecting : 1,
-  //   }
-
-  //   let con = _.process.start( o );
-
-  //   o.pnd.on( 'message', () =>
-  //   {
-  //     time = _.time.now();
-  //     _.process.terminate({ pnd : o.pnd, timeOut : context.t1*5 });
-  //   })
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, null );
-  //     test.identical( o.exitSignal, 'SIGKILL' );
-  //     test.is( !_.strHas( o.output, 'SIGTERM' ) );
-  //     test.ge( _.time.now() - time, context.t1*5 );
-  //     console.log( `time : ${_.time.spent( time )}` );
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  /* - */
-
-  function testApp()
-  {
-    const _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.process._exitHandlerRepair();
-    process.send( process.pid )
-    let x = 0;
-    while( 1 )
-    {
-      x += Math.cos( Math.random() );
-      // console.log( _.time.now() );
-    }
-  }
-}
-
-startMinimalTerminateHangedWithExitHandler.timeOut = 15e4; /* Locally : 14.622s */
-
-startMinimalTerminateHangedWithExitHandler.description =
-`
-  Test app - code that blocks event loop and appExitHandlerRepair called at start
-
-  Will test:
-    - Termination of child process using SIGINT signal after small delay
-    - Termination of child process using SIGKILL signal after small delay
-
-  Expected behaviour:
-    - For SIGINT: Child was terminated with exitCode : 0, exitSignal : null
-    - For SIGKILL: Child was terminated with exitCode : null, exitSignal : SIGKILL
-    - No time out message in output
-`
-
-//
-
-function startMinimalTerminateAfterLoopRelease( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp ).filePath/*programPath*/;
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-  return a.ready;
-
-  // if( process.platform === 'win32' )
-  // {
-  /* zzz: windows-kill doesn't work correctrly on node 14
-  investigate if its possible to use process.kill instead of windows-kill
-  */
-  //   test.identical( 1, 1 )
-  //   return;
-  // }
-
-  /* */
-
-  function run( mode )
-  {
-    let ready = _.Consequence().take( null );
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}`;
-
-      let o =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        throwingExitCode : 0,
-        outputPiping : 0,
-        ipc : 1,
-        outputCollecting : 1,
-      }
-
-      if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication */
-      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
-
-      let con = _.process.startMinimal( o );
-
-      o.pnd.on( 'message', () =>
-      {
-        _.process.terminate({ pnd : o.pnd, timeOut : context.t2 * 2 }); /* 10000 */
-      })
-
-      con.then( () =>
-      {
-        /* njs on Windows does not let to set custom signal handler properly */
-        if( process.platform === 'win32' )
+        if( pid )
         {
-          test.identical( o.exitCode, 1 );
-          test.identical( o.exitSignal, null );
+          childOfChild = e;
         }
         else
         {
-          test.identical( o.exitCode, null );
-          test.identical( o.exitSignal, 'SIGKILL' );
+          pid = _.numberFrom( e );
+          _.process.kill( pid );
         }
-        test.true( !_.strHas( o.output, 'SIGTERM' ) );
-        test.true( !_.strHas( o.output, 'Exit after release' ) );
+      })
 
+      ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.identical( childOfChild.pid, pid );
+        if( process.platform === 'win32' )
+        {
+          test.identical( childOfChild.exitCode, 1 );
+          test.identical( childOfChild.exitSignal, null );
+        }
+        else
+        {
+          test.identical( childOfChild.exitCode, null );
+          test.identical( childOfChild.exitSignal, 'SIGKILL' );
+        }
+
+        a.fileProvider.fileDelete( testAppPath2 );
         return null;
       })
 
-      return con;
+      return ready;
     })
+
+    /* */
 
     return ready;
   }
 
   /* ORIGINAL */
   // a.ready
-
   // .then( () =>
   // {
-  //   let o =
+  //   test.case = 'Kill child of child process'
+  //   var o =
   //   {
-  //     execPath : 'node ' + testAppPath,
+  //     execPath : 'node ' + testAppPath2,
   //     mode : 'spawn',
-  //     throwingExitCode : 0,
-  //     outputPiping : 0,
   //     ipc : 1,
   //     outputCollecting : 1,
+  //     throwingExitCode : 0
   //   }
 
-  //   let con = _.process.start( o );
+  //   let ready = _.process.start( o );
 
-  //   o.pnd.on( 'message', () =>
+  //   let pid = null;
+  //   let childOfChild = null;
+  //   o.pnd.on( 'message', ( e ) =>
   //   {
-  //     _.process.terminate({ pnd : o.pnd, timeOut : context.t2 * 2 }); /* 10000 */
+  //     if( !pid )
+  //     {
+  //       pid = _.numberFrom( e )
+  //       _.process.kill( pid );
+  //     }
+  //     else
+  //     {
+  //       childOfChild = e;
+  //     }
   //   })
 
-  //   con.then( () =>
+  //   ready.then( ( op ) =>
   //   {
-  //     test.identical( o.exitCode, null );
-  //     /* njs on Windows does not let to set custom signal handler properly */
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.identical( op.exitSignal, null );
+  //     test.identical( childOfChild.pid, pid );
   //     if( process.platform === 'win32' )
-  //     test.identical( o.exitSignal, 'SIGTERM' );
+  //     {
+  //       test.identical( childOfChild.exitCode, 1 );
+  //       test.identical( childOfChild.exitSignal, null );
+  //     }
   //     else
-  //     test.identical( o.exitSignal, 'SIGKILL' );
-  //     test.true( !_.strHas( o.output, 'SIGTERM' ) );
-  //     test.true( !_.strHas( o.output, 'Exit after release' ) );
+  //     {
+  //       test.identical( childOfChild.exitCode, null );
+  //       test.identical( childOfChild.exitSignal, 'SIGKILL' );
+  //     }
 
   //     return null;
   //   })
 
-  //   return con;
+  //   return ready;
   // })
 
-  // /*  */
-
-  // .then( () =>
-  // {
-  //   let o =
-  //   {
-  //     execPath : testAppPath,
-  //     mode : 'fork',
-  //     throwingExitCode : 0,
-  //     outputPiping : 0,
-  //     ipc : 1,
-  //     outputCollecting : 1,
-  //   }
-
-  //   let con = _.process.start( o );
-
-  //   o.pnd.on( 'message', () =>
-  //   {
-  //     _.process.terminate({ pnd : o.pnd, timeOut : context.t2 * 2 }); /* 10000 */
-  //   })
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, null );
-  //     /* njs on Windows does not let to set custom signal handler properly */
-  //     if( process.platform === 'win32' )
-  //     test.identical( o.exitSignal, 'SIGTERM' );
-  //     else
-  //     test.identical( o.exitSignal, 'SIGKILL' );
-  //     test.true( !_.strHas( o.output, 'SIGTERM' ) );
-  //     test.true( !_.strHas( o.output, 'Exit after release' ) );
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /*  */
+  // /* */
 
   // return a.ready;
 
@@ -32410,36 +32583,30 @@ function startMinimalTerminateAfterLoopRelease( test )
 
   function testApp()
   {
-    const _ = require( toolsPath );
-
-    _.include( 'wProcess' );
-    _.process._exitHandlerRepair();
-    let loop = true;
     setTimeout( () =>
     {
-      loop = false;
-    }, context.t2 ) /* 5000 */
-    process.send( process.pid );
-    while( loop )
-    {
-      loop = loop;
-    }
-    console.log( 'Exit after release' );
+      console.log( 'Application timeout!' )
+    }, context.t2 / 2 ) /* 2500 */
   }
+
+  function testApp2()
+  {
+    const _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFilesBasic' );
+    var testAppPath = _.fileProvider.path.nativize( _.path.join( __dirname, 'testApp' ) );
+    var o = { execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath, mode, throwingExitCode : 0 }
+    var ready = _.process.startMinimal( o )
+    process.send( o.pnd.pid );
+    ready.then( ( op ) =>
+    {
+      process.send({ exitCode : o.exitCode, pid : o.pnd.pid, exitSignal : o.exitSignal })
+      return null;
+    })
+    return ready;
+  }
+
 }
-
-startMinimalTerminateAfterLoopRelease.timeOut = 25e4; /* Locally : 24.941s */
-startMinimalTerminateAfterLoopRelease.description =
-`
-  Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
-
-  Will test:
-    - Termination of child process using SIGINT signal after small delay
-
-  Expected behaviour:
-    - Child was terminated after event loop release with exitCode : 0, exitSignal : null
-    - Child process message should be printed
-`
 
 //
 
@@ -35323,11 +35490,11 @@ function terminate( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp ).filePath/*programPath*/;
+  let testAppPath = a.program( testApp ).filePath;
 
-  a.ready.then( () => terminateCommon( 'spawn' ) )
-  a.ready.then( () => terminateCommon( 'fork' ) )
-  a.ready.then( () => terminateShell() )
+  a.ready.then( () => terminateCommon( 'spawn' ) );
+  a.ready.then( () => terminateCommon( 'fork' ) );
+  a.ready.then( () => terminateShell() );
 
   /* */
 
@@ -35337,9 +35504,9 @@ function terminate( test )
 
   function terminateCommon( mode )
   {
-    let ready = new _.Consequence().take( null )
+    let ready = new _.take( null );
 
-    .then( () =>
+    ready.then( () =>
     {
       /*
       xxx :
@@ -35397,22 +35564,23 @@ function terminate( test )
       2020-11-30T15:34:31.2227031Z
       2020-11-30T15:34:31.2227684Z --------------- uncaught asynchronous error ---------------<
       */
-      test.case = `mode:${mode}, terminate process using descriptor( pnd )`
+
+      test.case = `mode:${mode}, terminate process using descriptor( pnd )`;
       var o =
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
-      let ready = _.process.startMinimal( o )
+      let ready = _.process.startMinimal( o );
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pnd : o.pnd }); /* zzz : here */
-      })
+      });
 
       ready.then( ( op ) =>
       {
@@ -35434,37 +35602,37 @@ function terminate( test )
         }
 
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
-    .then( () =>
+    ready.then( () =>
     {
-      test.case = `mode:${mode}, terminate process using pid`
+      test.case = `mode:${mode}, terminate process using pid`;
       var o =
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
-      let ready = _.process.startMinimal( o )
+      let ready = _.process.startMinimal( o );
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate( o.pnd.pid );
-      })
+      });
 
       ready.then( ( op ) =>
       {
         if( process.platform === 'win32' )
         {
-          test.identical( op.exitCode, 1 );/* 1 because process was killed using pid */
+          test.identical( op.exitCode, 1 ); /* 1 because process was killed using pid */
           test.identical( op.exitSignal, null );
           test.identical( op.ended, true );
           test.true( !_.strHas( op.output, 'SIGTERM' ) );
@@ -35479,16 +35647,16 @@ function terminate( test )
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
-    .then( () =>
+    ready.then( () =>
     {
-      test.case = `mode:${mode}, terminate process using pid, zero time out`
+      test.case = `mode:${mode}, terminate process using pid, zero time out`;
 
       var o =
       {
@@ -35496,15 +35664,15 @@ function terminate( test )
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
-      let ready = _.process.startMinimal( o )
+      let ready = _.process.startMinimal( o );
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pid : o.pnd.pid, timeOut : 0 });
-      })
+      });
 
       ready.then( ( op ) =>
       {
@@ -35526,32 +35694,31 @@ function terminate( test )
         }
 
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
-    .then( () =>
+    ready.then( () =>
     {
-
-      test.case = `mode:${mode}, terminate process using pid, low time out`
+      test.case = `mode:${mode}, terminate process using pid, low time out`;
       var o =
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
-      let ready = _.process.startMinimal( o )
+      let ready = _.process.startMinimal( o );
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pid : o.pnd.pid, timeOut : context.t1*2 });
-      })
+      });
 
       ready.then( ( op ) =>
       {
@@ -35573,31 +35740,31 @@ function terminate( test )
         }
 
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
-    .then( () =>
+    ready.then( () =>
     {
-      test.case = `mode:${mode}, terminate process using pnd, zero time out`
+      test.case = `mode:${mode}, terminate process using pnd, zero time out`;
       var o =
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
       let ready = _.process.startMinimal( o )
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pnd : o.pnd, timeOut : 0 });
-      })
+      });
 
       ready.then( ( op ) =>
       {
@@ -35619,14 +35786,14 @@ function terminate( test )
         }
 
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
-    .then( () =>
+    ready.then( () =>
     {
       test.case = `mode:${mode}, terminate process using pnd, low time out`;
 
@@ -35636,15 +35803,15 @@ function terminate( test )
         mode,
         ipc : 1,
         outputCollecting : 1,
-        throwingExitCode : 0
-      }
+        throwingExitCode : 0,
+      };
 
       let ready = _.process.startMinimal( o )
 
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pnd : o.pnd, timeOut : context.t1*4 });
-      })
+      });
 
       ready.then( ( op ) =>
       {
@@ -35666,10 +35833,10 @@ function terminate( test )
         }
 
         return null;
-      })
+      });
 
       return ready;
-    })
+    });
 
     /* */
 
@@ -37733,88 +37900,98 @@ function terminateDeadProcess( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 ).filePath/*programPath*/;
+  let testAppPath = a.program( program1 ).filePath;
+
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
+  /* */
+
   function run( mode )
   {
-    let ready = _.Consequence().take( null );
+    let ready = _.take( null );
+
+    /* - */
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}`;
+      test.case = `mode - ${mode}, ignoringErrorEsrch - 1`;
+
       let o =
       {
-        execPath : mode === 'fork' ? 'program1' : 'node program1',
+        execPath : mode === 'fork' ? testAppPath : `node ${ testAppPath }`,
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 0
-      }
-
+      };
       _.process.startMinimal( o );
 
       o.conTerminate.then( () =>
       {
         test.identical( o.exitCode, 0 )
         test.identical( o.exitSignal, null );
-        return _.process.terminate({ pid : o.pnd.pid, withChildren : 0 });
-      })
-
-      o.conTerminate.then( ( got ) =>
-      {
-        test.identical( got, true );
-        let con = _.process.terminate({ pid : o.pnd.pid, withChildren : 1 });
-        return test.shouldThrowErrorAsync( con );
+        return test.mustNotThrowError( () =>
+        {
+          _.process.terminate
+          ({
+            pid : o.pnd.pid,
+            withChildren : 0,
+            ignoringErrorEsrch : 1
+          });
+        });
       })
 
       return o.conTerminate;
-    })
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode - ${mode}, ignoringErrorEsrch - 0`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? testAppPath : `node ${ testAppPath }`,
+        currentPath : a.routinePath,
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      };
+      _.process.startMinimal( o );
+
+      o.conTerminate.then( () =>
+      {
+        test.identical( o.exitCode, 0 )
+        test.identical( o.exitSignal, null );
+        return test.shouldThrowErrorAsync( () =>
+        {
+          return _.process.terminate
+          ({
+            pid : o.pnd.pid,
+            withChildren : 0,
+            ignoringErrorEsrch : 0
+          });
+        });
+      })
+
+      return o.conTerminate;
+    });
+
+    /* - */
 
     return ready;
   }
 
-  /* ORIGINAL */
-  // let o =
-  // {
-  //   execPath : 'node program1.js',
-  //   currentPath : a.routinePath,
-  //   mode : 'spawn',
-  //   outputPiping : 1,
-  //   outputCollecting : 1,
-  //   throwingExitCode : 0
-  // }
-
-  // _.process.start( o );
-
-  // o.conTerminate.then( () =>
-  // {
-  //   test.identical( o.exitCode, 0 )
-  //   test.identical( o.exitSignal, null );
-  //   return _.process.terminate({ pid : o.pnd.pid, withChildren : 0 });
-  // })
-
-  // o.conTerminate.then( ( got ) =>
-  // {
-  //   test.identical( got, true );
-  //   let con = _.process.terminate({ pid : o.pnd.pid, withChildren : 1 });
-  //   return test.shouldThrowErrorAsync( con );
-  // })
-
-  // return o.conTerminate;
-
-  /* - */
+  /* */
 
   function program1()
   {
     console.log( 'program1::begin' );
-    setTimeout( () =>
-    {
-      console.log( 'program1::begin' );
-    }, context.t1 );
   }
 }
 
@@ -38678,395 +38855,6 @@ terminateDifferentStdio.timeOut = 3e5;
 
 //
 
-/* zzz for Vova : extend, cover kill of group of processes */
-
-function killComplex( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp ).filePath/*programPath*/;
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-  return a.ready;
-
-  /* */
-
-  function run( mode )
-  {
-    let ready = _.Consequence().take( null );
-    let testAppPath2 = a.program({ entry : testApp2, locals : { mode } }).filePath/*programPath*/;
-
-    ready
-
-    .then( () =>
-    {
-      test.case = `mode : ${mode}, Kill child of child process`;
-      var o =
-      {
-        execPath : 'node ' + testAppPath2,
-        mode : 'spawn',
-        ipc : 1,
-        outputCollecting : 1,
-        throwingExitCode : 0
-      }
-
-      let ready = _.process.startMinimal( o );
-
-      let pid = null;
-      let childOfChild = null;
-      o.pnd.on( 'message', ( e ) =>
-      {
-        if( pid )
-        {
-          childOfChild = e;
-        }
-        else
-        {
-          pid = _.numberFrom( e );
-          _.process.kill( pid );
-        }
-      })
-
-      ready.then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.identical( childOfChild.pid, pid );
-        if( process.platform === 'win32' )
-        {
-          test.identical( childOfChild.exitCode, 1 );
-          test.identical( childOfChild.exitSignal, null );
-        }
-        else
-        {
-          test.identical( childOfChild.exitCode, null );
-          test.identical( childOfChild.exitSignal, 'SIGKILL' );
-        }
-
-        a.fileProvider.fileDelete( testAppPath2 );
-        return null;
-      })
-
-      return ready;
-    })
-
-    /* */
-
-    return ready;
-  }
-
-  /* ORIGINAL */
-  // a.ready
-  // .then( () =>
-  // {
-  //   test.case = 'Kill child of child process'
-  //   var o =
-  //   {
-  //     execPath : 'node ' + testAppPath2,
-  //     mode : 'spawn',
-  //     ipc : 1,
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0
-  //   }
-
-  //   let ready = _.process.start( o );
-
-  //   let pid = null;
-  //   let childOfChild = null;
-  //   o.pnd.on( 'message', ( e ) =>
-  //   {
-  //     if( !pid )
-  //     {
-  //       pid = _.numberFrom( e )
-  //       _.process.kill( pid );
-  //     }
-  //     else
-  //     {
-  //       childOfChild = e;
-  //     }
-  //   })
-
-  //   ready.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, 0 );
-  //     test.identical( op.ended, true );
-  //     test.identical( op.exitSignal, null );
-  //     test.identical( childOfChild.pid, pid );
-  //     if( process.platform === 'win32' )
-  //     {
-  //       test.identical( childOfChild.exitCode, 1 );
-  //       test.identical( childOfChild.exitSignal, null );
-  //     }
-  //     else
-  //     {
-  //       test.identical( childOfChild.exitCode, null );
-  //       test.identical( childOfChild.exitSignal, 'SIGKILL' );
-  //     }
-
-  //     return null;
-  //   })
-
-  //   return ready;
-  // })
-
-  // /* */
-
-  // return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    setTimeout( () =>
-    {
-      console.log( 'Application timeout!' )
-    }, context.t2 / 2 ) /* 2500 */
-  }
-
-  function testApp2()
-  {
-    const _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFilesBasic' );
-    var testAppPath = _.fileProvider.path.nativize( _.path.join( __dirname, 'testApp' ) );
-    var o = { execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath, mode, throwingExitCode : 0 }
-    var ready = _.process.startMinimal( o )
-    process.send( o.pnd.pid );
-    ready.then( ( op ) =>
-    {
-      process.send({ exitCode : o.exitCode, pid : o.pnd.pid, exitSignal : o.exitSignal })
-      return null;
-    })
-    return ready;
-  }
-
-}
-
-//
-
-function execPathOf( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp ).filePath/*programPath*/;
-
-  /* zzz : implement for linux and osx */
-  if( process.platform !== 'win32' )
-  return test.identical( 1, 1 );
-
-  a.ready
-
-  /* */
-
-  .then( () =>
-  {
-    let o = { execPath : testAppPath };
-    _.process.startNjs( o )
-
-    o.conStart.then( () => _.process.execPathOf( o.pnd ) )
-    o.conStart.then( ( arg ) =>
-    {
-      test.true( _.strHas( arg, o.execPath ) );
-      return null;
-    })
-
-    return _.Consequence.And( o.conStart, o.conTerminate );
-  })
-
-  /* */
-
-  return a.ready;
-
-  /* */
-
-  function testApp()
-  {
-    setTimeout( () => {}, context.t1 * 5 ) /* 5000 */
-  }
-}
-
-//
-
-function execPathOfOptionSync( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp ).filePath/*programPath*/;
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync : 1, pnd, no error';
-
-    let o = { execPath : testAppPath };
-
-    _.process.startNjs( o )
-
-    o.conStart.then( ( op ) =>
-    {
-      let execPath = _.process.execPathOf({ pnd : o.pnd, sync : 1 });
-      test.true( _.strHas( execPath, op.execPath ) );
-
-      return null;
-    })
-
-    return _.Consequence.And( o.conStart, o.conTerminate );
-  })
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync : 0, pnd, no error';
-
-    let o = { execPath : testAppPath };
-
-    _.process.startNjs( o )
-
-    o.conStart.then( ( op ) =>
-    {
-      _.process.execPathOf({ pnd : o.pnd, sync : 0 })
-      .then( ( arg ) =>
-      {
-        test.true( _.strHas( arg, op.execPath ) );
-        return null;
-      })
-
-      return null;
-    })
-
-    return _.Consequence.And( o.conStart, o.conTerminate );
-  })
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync : 1, pid, no error';
-
-    let o = { execPath : testAppPath };
-
-    _.process.startNjs( o )
-
-    o.conStart.then( ( op ) =>
-    {
-      let execPath = _.process.execPathOf({ pid : o.pnd.pid, sync : 1 });
-      test.true( _.strHas( execPath, op.execPath ) );
-
-      return null;
-    })
-
-    return _.Consequence.And( o.conStart, o.conTerminate );
-  })
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync : 0, pid, no error';
-
-    let o = { execPath : testAppPath };
-
-    _.process.startNjs( o )
-
-    o.conStart.then( ( op ) =>
-    {
-      _.process.execPathOf({ pid : o.pnd.pid, sync : 0 })
-      .then( ( arg ) =>
-      {
-        test.true( _.strHas( arg, op.execPath ) );
-        return null;
-      })
-
-      return null;
-    })
-
-    return _.Consequence.And( o.conStart, o.conTerminate );
-  })
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync : 1, wrong pid';
-
-    let returned = test.shouldThrowErrorSync( () => _.process.execPathOf({ pid : 111111, sync : 1 }) );
-
-    test.true( _.errIs( returned ) );
-    test.equivalent( returned.message, 'Target process: "111111" does not exist.' )
-
-    return null;
-  })
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync : 0, wrong pid';
-
-    test.shouldThrowErrorAsync( () => _.process.execPathOf({ pid : 111111, sync : 0 }) )
-    .then( ( err ) =>
-    {
-      test.true( _.errIs( err ) );
-      test.equivalent( err.message, 'Target process: "111111" does not exist.' );
-
-      return null;
-    });
-
-    return null;
-  })
-
-  return a.ready;
-
-  /* */
-
-  function testApp()
-  {
-    setTimeout( () => {}, context.t1 * 5 ) /* 5000 */
-  }
-}
-
-//
-
-function execPathOfOptionThrowing( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync : 1, throwing : 0, wrong pid';
-
-    let returned = _.process.execPathOf({ pid : 111111, sync : 1, throwing : 0 });
-
-    test.identical( returned, null );
-
-    return null;
-  })
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync : 0, throwing : 0, wrong pid';
-
-    return _.process.execPathOf({ pid : 111111, sync : 0, throwing : 0 })
-    .then( ( op ) =>
-    {
-      test.identical( op, null );
-      return null;
-    });
-
-  })
-
-  return a.ready;
-
-}
-
-//
-
 function waitForDeath( test )
 {
   let context = this;
@@ -39653,6 +39441,228 @@ function childrenOptionFormatList( test )
 
 //
 
+function execPathOf( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp ).filePath/*programPath*/;
+
+  /* zzz : implement for linux and osx */
+  if( process.platform !== 'win32' )
+  return test.identical( 1, 1 );
+
+  a.ready
+
+  /* */
+
+  .then( () =>
+  {
+    let o = { execPath : testAppPath };
+    _.process.startNjs( o )
+
+    o.conStart.then( () => _.process.execPathOf( o.pnd ) )
+    o.conStart.then( ( arg ) =>
+    {
+      test.true( _.strHas( arg, o.execPath ) );
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    setTimeout( () => {}, context.t1 * 5 ) /* 5000 */
+  }
+}
+
+//
+
+function execPathOfOptionSync( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp ).filePath/*programPath*/;
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, pnd, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      let execPath = _.process.execPathOf({ pnd : o.pnd, sync : 1 });
+      test.true( _.strHas( execPath, op.execPath ) );
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, pnd, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      _.process.execPathOf({ pnd : o.pnd, sync : 0 })
+      .then( ( arg ) =>
+      {
+        test.true( _.strHas( arg, op.execPath ) );
+        return null;
+      })
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, pid, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      let execPath = _.process.execPathOf({ pid : o.pnd.pid, sync : 1 });
+      test.true( _.strHas( execPath, op.execPath ) );
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, pid, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      _.process.execPathOf({ pid : o.pnd.pid, sync : 0 })
+      .then( ( arg ) =>
+      {
+        test.true( _.strHas( arg, op.execPath ) );
+        return null;
+      })
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, wrong pid';
+
+    let returned = test.shouldThrowErrorSync( () => _.process.execPathOf({ pid : 111111, sync : 1 }) );
+
+    test.true( _.errIs( returned ) );
+    test.equivalent( returned.message, 'Target process: "111111" does not exist.' )
+
+    return null;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, wrong pid';
+
+    test.shouldThrowErrorAsync( () => _.process.execPathOf({ pid : 111111, sync : 0 }) )
+    .then( ( err ) =>
+    {
+      test.true( _.errIs( err ) );
+      test.equivalent( err.message, 'Target process: "111111" does not exist.' );
+
+      return null;
+    });
+
+    return null;
+  })
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    setTimeout( () => {}, context.t1 * 5 ) /* 5000 */
+  }
+}
+
+//
+
+function execPathOfOptionThrowing( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, throwing : 0, wrong pid';
+
+    let returned = _.process.execPathOf({ pid : 111111, sync : 1, throwing : 0 });
+
+    test.identical( returned, null );
+
+    return null;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, throwing : 0, wrong pid';
+
+    return _.process.execPathOf({ pid : 111111, sync : 0, throwing : 0 })
+    .then( ( op ) =>
+    {
+      test.identical( op, null );
+      return null;
+    });
+
+  })
+
+  return a.ready;
+
+}
+
+//
+
 function spawnTimeOf( test )
 {
   let context = this;
@@ -40116,6 +40126,12 @@ const Proto =
     startNjsPassingThroughDifferentTypesOfPaths,
     startMinimalPassingThroughExecPathWithSpace,
 
+    //
+
+    startMinimalErrorAfterTerminationWithSend,
+    startMinimalTerminateHangedWithExitHandler,
+    startMinimalTerminateAfterLoopRelease,
+
     // procedures / chronology / structural
 
     startProcedureTrivial, /* with routine::starter */
@@ -40257,10 +40273,7 @@ const Proto =
     kill,
     killSync,
     killOptionWithChildren,
-
-    startMinimalErrorAfterTerminationWithSend,
-    startMinimalTerminateHangedWithExitHandler,
-    startMinimalTerminateAfterLoopRelease,
+    killComplex,
 
     endSignalsBasic,
     endSignalsOnExit,
@@ -40286,16 +40299,16 @@ const Proto =
 
     terminateDifferentStdio,
 
-    killComplex,
-    execPathOf,
-    execPathOfOptionSync,
-    execPathOfOptionThrowing,
     waitForDeath,
 
     // children
 
     children,
     childrenOptionFormatList,
+
+    execPathOf,
+    execPathOfOptionSync,
+    execPathOfOptionThrowing,
 
     spawnTimeOf,
 
