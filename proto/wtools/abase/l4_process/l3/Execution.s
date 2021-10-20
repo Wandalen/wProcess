@@ -975,7 +975,6 @@ function startMinimal_body( o )
         pnd : o.pnd,
         withChildren : 1,
         ignoringErrorPerm : 1,
-        sync : 1,
       });
     });
 
