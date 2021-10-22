@@ -134,7 +134,14 @@ function tempClose_body( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.strIs( o.filePath ) || o.filePath === null, 'Expects string or null {-o.filePath-}, but got', _.entity.strType( o.filePath ) );
 
-  if( !o.filePath )
+  if( o.filePath )
+  {
+    let i = _.longLeftIndex( _tempFiles, o.filePath );
+    _.assert( i !== -1, `Requested {-o.filePath-} ${o.filePath} is not a path of temp application.` )
+    _.fileProvider.fileDelete( o.filePath );
+    _tempFiles.splice( i, 1 );
+  }
+  else
   {
     if( !_tempFiles.length )
     return;
@@ -142,13 +149,21 @@ function tempClose_body( o )
     _.fileProvider.filesDelete( _tempFiles );
     _tempFiles.splice( 0 );
   }
-  else
-  {
-    let i = _.longLeftIndex( _tempFiles, o.filePath );
-    _.assert( i !== -1, `Requested {-o.filePath-} ${o.filePath} is not a path of temp application.` )
-    _.fileProvider.fileDelete( o.filePath );
-    _tempFiles.splice( i, 1 );
-  }
+  // if( !o.filePath )
+  // {
+  //   if( !_tempFiles.length )
+  //   return;
+  //
+  //   _.fileProvider.filesDelete( _tempFiles );
+  //   _tempFiles.splice( 0 );
+  // }
+  // else
+  // {
+  //   let i = _.longLeftIndex( _tempFiles, o.filePath );
+  //   _.assert( i !== -1, `Requested {-o.filePath-} ${o.filePath} is not a path of temp application.` )
+  //   _.fileProvider.fileDelete( o.filePath );
+  //   _tempFiles.splice( i, 1 );
+  // }
 }
 
 var defaults = tempClose_body.defaults = Object.create( null );
@@ -380,7 +395,8 @@ function exitCode( status )
 function exit( exitCode )
 {
 
-  exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
+  exitCode = exitCode === undefined ? _.process.exitCode() : exitCode;
+  // exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
   _.assert( exitCode === undefined || _.numberIs( exitCode ) );
@@ -630,12 +646,7 @@ function _argEscape2( arg )
   _.assert( arguments.length === 1 );
   _.assert( _.strIs( arg ) );
 
-  if( process.platform !== 'win32' )
-  {
-		// Backslash-escape any hairy characters:
-    arg = arg.replace( /([^a-zA-Z0-9_])/g, '\\$1' );
-  }
-  else
+  if( process.platform === 'win32' )
   {
     //Sequence of backslashes followed by a double quote:
     //double up all the backslashes and escape the double quote
@@ -644,7 +655,7 @@ function _argEscape2( arg )
     // Sequence of backslashes followed by the end of the string
     // (which will become a double quote later):
     // double up all the backslashes
-    arg = arg.replace( /(\\*)$/,'$1$1' );
+    arg = arg.replace( /(\\*)$/, '$1$1' );
 
     // All other backslashes occur literally
 
@@ -654,6 +665,36 @@ function _argEscape2( arg )
     // Escape shell metacharacters:
     arg = arg.replace( /([()\][%!^"`<>&|;, *?])/g, '^$1' );
   }
+  else
+  {
+    // Backslash-escape any hairy characters:
+    arg = arg.replace( /([^a-zA-Z0-9_])/g, '\\$1' );
+  }
+
+  // if( process.platform !== 'win32' )
+  // {
+  //   // Backslash-escape any hairy characters:
+  //   arg = arg.replace( /([^a-zA-Z0-9_])/g, '\\$1' );
+  // }
+  // else
+  // {
+  //   //Sequence of backslashes followed by a double quote:
+  //   //double up all the backslashes and escape the double quote
+  //   arg = arg.replace( /(\\*)"/g, '$1$1\\"' );
+  //
+  //   // Sequence of backslashes followed by the end of the string
+  //   // (which will become a double quote later):
+  //   // double up all the backslashes
+  //   arg = arg.replace( /(\\*)$/,'$1$1' );
+  //
+  //   // All other backslashes occur literally
+  //
+  //   // Quote the whole thing:
+  //   arg = `"${arg}"`;
+  //
+  //   // Escape shell metacharacters:
+  //   arg = arg.replace( /([()\][%!^"`<>&|;, *?])/g, '^$1' );
+  // }
 
   return arg;
 }
@@ -668,13 +709,13 @@ function _argProgEscape( prog )
   // Windows cmd.exe: needs special treatment
   if( process.platform === 'win32' )
   {
-		// Escape shell metacharacters:
+    // Escape shell metacharacters:
     prog = prog.replace( /([()\][%!^"`<>&|;, *?])/g, '^$1' );
   }
   else
   {
     // Unix shells: same procedure as for arguments
-		prog = _.process._argEscape2( prog );
+    prog = _.process._argEscape2( prog );
   }
 
   return prog;

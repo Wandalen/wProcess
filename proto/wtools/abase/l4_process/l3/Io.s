@@ -180,7 +180,7 @@ function _inputInSamFormatBrowser( o )
 
   let result = Object.create( null );
 
-  result.map =  Object.create( null );
+  result.map = Object.create( null );
   result.subject = '';
   result.original = '';
 
@@ -433,7 +433,11 @@ function effectiveMainFile() /* qqq2 : move to process, review */
     //xxx : review
     console.error( `process.argv : ${process.argv.join( ', ' )}` );
     console.error( `currentAtBegin : ${this._initialCurrentPathGet()}` );
-    console.error( `effectiveMainFile.raw : ${this.join( this._initialCurrentPathGet(), process.argv[ 1 ] || process.argv[ 0 ] )}` );
+    console.error
+    (
+      `effectiveMainFile.raw : `
+      + `${this.join( this._initialCurrentPathGet(), process.argv[ 1 ] || process.argv[ 0 ] )}`
+    );
     console.error( `effectiveMainFile : ${_effectiveMainFilePath}` );
     _effectiveMainFilePath = this.realMainFile();
   }
