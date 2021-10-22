@@ -18275,11 +18275,15 @@ ${options.sessions[ 1 ].procedure.id}.end
     }
   }
 
+  /* */
+
   function clear()
   {
     track = [];
     track2 = [];
   }
+
+  /* */
 
   function processTrack( op )
   {
@@ -18288,6 +18292,8 @@ ${options.sessions[ 1 ].procedure.id}.end
     consequenceTrack( op, 'conDisconnect' );
     consequenceTrack( op, 'ready' );
   }
+
+  /* */
 
   function consequenceTrack( op, cname )
   {
@@ -18298,6 +18304,8 @@ ${options.sessions[ 1 ].procedure.id}.end
     });
   }
 
+  /* */
+
   function eventTrack( op, name, err )
   {
     _.assert( !!op.procedure );
@@ -18305,10 +18313,11 @@ ${options.sessions[ 1 ].procedure.id}.end
     if( err )
     postfix = _.symbolIs( err ) ? '.dont' : '.err';
     track.push( `${op.procedure.id}.${name}${postfix}` );
-    /* track.push( `${op.procedure.id}.${name}${err ? '.err' : ''} - ${_.time.now() - t0}` ); */
     if( err )
     _.errAttend( err );
   }
+
+  /* */
 
   function program1()
   {
@@ -18316,13 +18325,13 @@ ${options.sessions[ 1 ].procedure.id}.end
     _.include( 'wProcess' );
     let args = _.process.input();
 
-    let sessionDelay = context.t1 * 0.5*args.map.sessionId;
+    let sessionDelay = context.t1 * 0.5 * args.map.sessionId;
 
     if( args.map.concurrent )
     setTimeout( () => { console.log( `${args.map.id}.begin` ) }, sessionDelay );
     else
     console.log( `${args.map.id}.begin` );
-    setTimeout( () => { console.log( `${args.map.id}.end` ) }, context.t1 + sessionDelay );
+    setTimeout( () => { console.log( `${args.map.id}.end` ) }, 2 * context.t1 + sessionDelay );
 
     if( args.map.throwing )
     throw 'Error1';
