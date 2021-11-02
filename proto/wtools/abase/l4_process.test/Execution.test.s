@@ -17898,15 +17898,15 @@ ${options.sessions[ 1 ].procedure.id}.end
 
       options.ready.tap( function( err, op )
       {
-        var exp =
-`
-${options.sessions[ 0 ].procedure.id}.begin
-${options.sessions[ 1 ].procedure.id}.begin
-${options.sessions[ 0 ].procedure.id}.end
-${options.sessions[ 1 ].procedure.id}.end
-`
+        var exp = `${options.sessions[ 0 ].procedure.id}.begin`;
+        test.identical( _.strCount( options.output, exp ), 1 );
+        var exp = `${options.sessions[ 1 ].procedure.id}.begin`;
+        test.identical( _.strCount( options.output, exp ), 1 );
+        var exp = `${options.sessions[ 0 ].procedure.id}.end`;
+        test.identical( _.strCount( options.output, exp ), 1 );
+        var exp = `${options.sessions[ 1 ].procedure.id}.end`
+        test.identical( _.strCount( options.output, exp ), 1 );
 
-        test.equivalent( options.output, exp );
         var exp =
         [
           `${options.procedure.id}.conStart`,
@@ -17920,7 +17920,7 @@ ${options.sessions[ 1 ].procedure.id}.end
           `${options.sessions[ 1 ].procedure.id}.ready`,
           `${options.procedure.id}.conTerminate`,
           `${options.procedure.id}.ready`,
-        ]
+        ];
         if( options.deasync || options.sync )
         exp =
         [
@@ -37206,7 +37206,7 @@ function terminateWithDetachedChild( test )
         return _.process.terminate
         ({
           pid : o.pnd.pid,
-          timeOut : context.t1 * 5,
+          timeOut : context.t1 * 2,
           withChildren : 1
         })
       })
