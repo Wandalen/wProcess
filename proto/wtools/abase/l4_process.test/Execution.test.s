@@ -37206,7 +37206,7 @@ function terminateWithDetachedChild( test )
         return _.process.terminate
         ({
           pid : o.pnd.pid,
-          timeOut : context.t1 * 5,
+          timeOut : context.t1 * 2,
           withChildren : 1
         })
       })
