@@ -37180,7 +37180,7 @@ function terminateWithDetachedChild( test )
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 0
-      }
+      };
 
       _.process.startMinimal( o );
 
@@ -37207,9 +37207,9 @@ function terminateWithDetachedChild( test )
         ({
           pid : o.pnd.pid,
           timeOut : context.t1 * 2,
-          withChildren : 1
-        })
-      })
+          withChildren : 1,
+        });
+      });
 
       o.conTerminate.then( () =>
       {
@@ -37263,13 +37263,12 @@ function terminateWithDetachedChild( test )
         test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
         return null;
-      })
+      });
 
       return _.Consequence.AndKeep( terminate, o.conTerminate );
-    })
+    });
 
     return ready;
-
   }
 
   /* - */
@@ -37293,7 +37292,7 @@ function terminateWithDetachedChild( test )
       return true;
       timerIsRunning.isRunning = false;
       terminate.take( true );
-    })
+    });
   }
 
   /* - */
@@ -37314,10 +37313,10 @@ function terminateWithDetachedChild( test )
       outputPiping : 1,
       outputCollecting : 0,
       throwingExitCode : 0,
-    }
+    };
     _.process.startMinimal( o );
 
-    let timer = _.time.outError( context.t1*25 );
+    let timer = _.time.outError( context.t1 * 40 );
 
     console.log( 'program1::begin' );
 
@@ -37334,8 +37333,8 @@ function terminateWithDetachedChild( test )
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
-      encoding : 'json'
-    })
+      encoding : 'json',
+    });
 
     setTimeout( () =>
     {
@@ -37343,9 +37342,9 @@ function terminateWithDetachedChild( test )
       _.fileProvider.fileWrite
       ({
         filePath : _.path.join( __dirname, 'program2end' ),
-        data : 'end'
+        data : 'end',
       })
-    }, context.t1*10 )
+    }, context.t1 * 10 );
 
     console.log( 'program2::begin' );
 
@@ -37356,8 +37355,7 @@ terminateWithDetachedChild.timeOut = 9e4; /* Locally : 8.060s */
 terminateWithDetachedChild.description =
 `program1 starts program2 in detached mode
 tester terminates program1 with option withChildren : 1
-program1 and program2 should be terminated
-`
+program1 and program2 should be terminated`;
 
 //
 
