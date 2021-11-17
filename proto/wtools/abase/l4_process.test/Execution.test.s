@@ -37316,7 +37316,7 @@ function terminateWithDetachedChild( test )
     };
     _.process.startMinimal( o );
 
-    let timer = _.time.outError( context.t1 * 40 );
+    let timer = _.time.outError( context.t1 * 80 );
 
     console.log( 'program1::begin' );
 
@@ -37344,7 +37344,7 @@ function terminateWithDetachedChild( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end',
       })
-    }, context.t1 * 10 );
+    }, context.t1 * 20 );
 
     console.log( 'program2::begin' );
 
