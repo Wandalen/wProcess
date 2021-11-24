@@ -25,7 +25,7 @@ about:
     - chrome >= 60.0.0
     - firefox >= 60.0.0
   npm.scripts:
-    test: wtest .run proto/**
+    test: wtest .run 'proto/**' rapidity:-1 fails:5
     docgen: wdocgen .build proto
 build:
   proto.export:

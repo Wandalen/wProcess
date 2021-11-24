@@ -24,7 +24,7 @@
     "proto/node_modules/wprocess"
   ],
   "scripts": {
-    "test": "wtest .run 'proto/**' rapidity:-1 verbosity:5 fails:5 s:0",
+    "test": "wtest .run 'proto/**' rapidity:-1 fails:5",
     "docgen": "wdocgen proto"
   },
   "repository": {
