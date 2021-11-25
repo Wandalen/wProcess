@@ -3,8 +3,8 @@ root:
   - wProcess.out
 consistency:
   ../will.yml: &ref_0
-    hash: 9680dd41e4e4b7544809588135c199ee
-    size: 7335
+    hash: 0084b4cc9177ed13bfca23495153be43
+    size: 7357
 module:
   wProcess.out:
     about:
@@ -35,7 +35,7 @@ module:
         - chrome >= 60.0.0
         - firefox >= 60.0.0
       npm.scripts: &ref_4
-        test: wtest .run proto/**
+        test: 'wtest .run ''proto/**'' rapidity:-1 fails:5'
         docgen: wdocgen .build proto
     path:
       module.willfiles:
@@ -1543,5 +1543,5 @@ module:
           - 'build::npm'
     consistency:
       ../will.yml:
-        hash: 9680dd41e4e4b7544809588135c199ee
-        size: 7335
+        hash: 0084b4cc9177ed13bfca23495153be43
+        size: 7357
