@@ -37196,7 +37196,11 @@ function terminateWithDetachedChild( test )
       }
       else
       {
-        o.pnd.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
+        o.pnd.stdout.on( 'data', ( data ) =>
+        {
+          if( _.str.has( data.toString(), 'program2::begin' ) )
+          terminate.take( null );
+        });
       }
 
       terminate.then( () =>
@@ -37271,17 +37275,7 @@ function terminateWithDetachedChild( test )
     return ready;
   }
 
-  /* - */
-
-  function handleOutput( o, terminate, output )
-  {
-    if( !_.strHas( output.toString(), 'program2::begin' ) )
-    return;
-    o.pnd.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
-  /* - */
+  /* */
 
   function waitForProgram2Ready( terminate, timerIsRunning )
   {
@@ -37295,7 +37289,7 @@ function terminateWithDetachedChild( test )
     });
   }
 
-  /* - */
+  /* */
 
   function program1()
   {
@@ -37319,10 +37313,9 @@ function terminateWithDetachedChild( test )
     let timer = _.time.outError( context.t1 * 80 );
 
     console.log( 'program1::begin' );
-
   }
 
-  /* - */
+  /* */
 
   function program2()
   {
@@ -37347,7 +37340,6 @@ function terminateWithDetachedChild( test )
     }, context.t1 * 20 );
 
     console.log( 'program2::begin' );
-
   }
 }
 

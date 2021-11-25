@@ -1024,12 +1024,12 @@ function _argEscape2( test )
   test.identical( got, expected );
 
   var src = '"a"';
-  var expected = isWin ?  '^"\\^"a\\^"^"' : '\\"a\\"'
+  var expected = isWin ? '^"\\^"a\\^"^"' : '\\"a\\"'
   var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = '\\"a\\"';
-  var expected = isWin ?  '^"\\\\\\^"a\\\\\\^"^"' : '\\\\\\"a\\\\\\"'
+  var expected = isWin ? '^"\\\\\\^"a\\\\\\^"^"' : '\\\\\\"a\\\\\\"'
   var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
@@ -1053,7 +1053,7 @@ function _argEscape2( test )
   test.identical( got, expected );
 
   var src = '**';
-  var expected = isWin ?  '^"^*^*^"' : '\\*\\*'
+  var expected = isWin ? '^"^*^*^"' : '\\*\\*'
   var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
@@ -1063,7 +1063,7 @@ function _argEscape2( test )
   test.identical( got, expected );
 
   var src = '&&';
-  var expected = isWin ?  '^"^&^&^"' : '\\&\\&'
+  var expected = isWin ? '^"^&^&^"' : '\\&\\&'
   var got = _.process._argEscape2( src )
   test.identical( got, expected );
 }
@@ -1105,12 +1105,12 @@ function _argProgEscape( test )
   test.identical( got, expected );
 
   var src = '"a"';
-  var expected = isWin ?  '^"a^"' : '\\"a\\"'
+  var expected = isWin ? '^"a^"' : '\\"a\\"'
   var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = '\\"a\\"';
-  var expected = isWin ?  '\\^"a\\^"' : '\\\\\\"a\\\\\\"'
+  var expected = isWin ? '\\^"a\\^"' : '\\\\\\"a\\\\\\"'
   var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
@@ -1134,7 +1134,7 @@ function _argProgEscape( test )
   test.identical( got, expected );
 
   var src = '**';
-  var expected = isWin ?  '^*^*' : '\\*\\*'
+  var expected = isWin ? '^*^*' : '\\*\\*'
   var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
@@ -1144,7 +1144,7 @@ function _argProgEscape( test )
   test.identical( got, expected );
 
   var src = '&&';
-  var expected = isWin ?  '^&^&' : '\\&\\&'
+  var expected = isWin ? '^&^&' : '\\&\\&'
   var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 }
@@ -1158,49 +1158,49 @@ function _argCmdEscape( test )
   var prog = 'node'
   var args = [ '-v' ]
   var expected = isWin ? 'node ^"-v^"' : 'node \\-v'
-  var got = _.process._argCmdEscape( prog,args )
+  var got = _.process._argCmdEscape( prog, args )
   test.identical( got, expected );
 
   var prog = '/path/to/node'
   var args = [ '-v' ]
   var expected = isWin ? '/path/to/node ^"-v^"' : '\\/path\\/to\\/node \\-v'
-  var got = _.process._argCmdEscape( prog,args )
+  var got = _.process._argCmdEscape( prog, args )
   test.identical( got, expected );
 
   var prog = '/path/with space/node'
   var args = [ '-v' ]
   var expected = isWin ? '/path/with^ space/node ^"-v^"' : '\\/path\\/with\\ space\\/node \\-v'
-  var got = _.process._argCmdEscape( prog,args )
+  var got = _.process._argCmdEscape( prog, args )
   test.identical( got, expected );
 
   var prog = '"node"'
   var args = [ '-v' ]
   var expected = isWin ? '^"node^" ^"-v^"' : '\\"node\\" \\-v'
-  var got = _.process._argCmdEscape( prog,args )
+  var got = _.process._argCmdEscape( prog, args )
   test.identical( got, expected );
 
   var prog = 'node -v'
   var args = []
   var expected = isWin ? 'node^ -v' : 'node\\ \\-v'
-  var got = _.process._argCmdEscape( prog,args )
+  var got = _.process._argCmdEscape( prog, args )
   test.identical( got, expected );
 
   var prog = '/path/to/node -v'
   var args = []
   var expected = isWin ? '/path/to/node^ -v' : '\\/path\\/to\\/node\\ \\-v'
-  var got = _.process._argCmdEscape( prog,args )
+  var got = _.process._argCmdEscape( prog, args )
   test.identical( got, expected );
 
   var prog = '/path/with space/node -v'
   var args = []
   var expected = isWin ? '/path/with^ space/node^ -v' : '\\/path\\/with\\ space\\/node\\ \\-v'
-  var got = _.process._argCmdEscape( prog,args )
+  var got = _.process._argCmdEscape( prog, args )
   test.identical( got, expected );
 
   var prog = 'ls'
   var args = [ '*' ]
   var expected = isWin ? 'ls ^"^*^"' : 'ls \\*'
-  var got = _.process._argCmdEscape( prog,args )
+  var got = _.process._argCmdEscape( prog, args )
   test.identical( got, expected );
 
 }
