@@ -15069,7 +15069,7 @@ function startMinimalEventClose( test )
         result[ 3 ] = true;
       })
 
-      return _.time.out( context.t1 * 3, () =>
+      return _.time.out( context.t1 * 5, () =>
       {
         test.true( !_.process.isAlive( o.pnd.pid ) );
 
@@ -15107,7 +15107,7 @@ startMinimalEventClose.timeOut = 5e5;
 startMinimalEventClose.description =
 `
 Check if close event is called.
-`
+`;
 
 //
 
