@@ -37339,7 +37339,7 @@ function terminateWithDetachedChild( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end',
       })
-    }, context.t1 * 20 );
+    }, context.t1 * 40 );
 
     console.log( 'program2::begin' );
   }
