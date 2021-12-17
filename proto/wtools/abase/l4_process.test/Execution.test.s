@@ -1661,6 +1661,8 @@ function startMinimalSync( test )
   }
 }
 
+startMinimalSync.timeOut = 120000;
+
 //
 
 function startSingleSyncDeasync( test )
