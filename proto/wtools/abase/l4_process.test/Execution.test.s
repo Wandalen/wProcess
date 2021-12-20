@@ -37046,7 +37046,7 @@ function terminateWithDetachedChild( test )
       /*
       xxx :
       Ubuntu 12x, mode::fork
-      2020-11-30T18:29:51.9440081Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild ..
+      2020-11-30T18:29:51.9440081Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild ..
       2020-11-30T18:29:52.0223160Z  1 : function program1()
       2020-11-30T18:29:52.0224260Z  2 :   {
       2020-11-30T18:29:52.0225033Z  3 :     const _ = require( toolsPath );
@@ -37119,13 +37119,13 @@ function terminateWithDetachedChild( test )
       2020-11-30T18:29:52.0317790Z 34 :
       2020-11-30T18:29:52.0318192Z 35 : program2();
       2020-11-30T18:29:52.0318549Z 36 :
-      2020-11-30T18:29:52.0344359Z > program1.js
-      2020-11-30T18:29:53.2273945Z program1::begin
-      2020-11-30T18:29:54.3630214Z program2::begin
-      2020-11-30T18:29:54.4356321Z SIGTERM
-      2020-11-30T18:29:54.4400160Z --------------- uncaught error --------------->
-      2020-11-30T18:29:54.4401318Z 
-      2020-11-30T18:29:54.4424846Z = Message of Error#2
+      2020-11-30T18:29:52.0344359Z > program1.js
+      2020-11-30T18:29:53.2273945Z program1::begin
+      2020-11-30T18:29:54.3630214Z program2::begin
+      2020-11-30T18:29:54.4356321Z SIGTERM
+      2020-11-30T18:29:54.4400160Z --------------- uncaught error --------------->
+      2020-11-30T18:29:54.4401318Z
+      2020-11-30T18:29:54.4424846Z = Message of Error#2
       2020-11-30T18:29:54.4426746Z     IPC channel is already disconnected
       2020-11-30T18:29:54.4428094Z       code : 'ERR_IPC_DISCONNECTED'
       2020-11-30T18:29:54.4429307Z     Error starting the process
@@ -37144,20 +37144,20 @@ function terminateWithDetachedChild( test )
       2020-11-30T18:29:54.4441210Z     Current path : /tmp/ProcessBasic-2020-11-30-17-14-19-131-6266.tmp/terminateWithDetachedChild
       2020-11-30T18:29:54.4443722Z     Exec path : /opt/hostedtoolcache/node/13.14.0/x64/bin/node /tmp/ProcessBasic-2020-11-30-17-14-19-131-6266.tmp/terminateWithDetachedChild/program1.js
       2020-11-30T18:29:54.4445140Z
-      2020-11-30T18:29:54.4445785Z 
-      2020-11-30T18:29:54.4453098Z [--------------- uncaught error ---------------<
-      2020-11-30T18:29:54.4453820Z 
-      2020-11-30T18:29:54.4638392Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 1 ) ... ok
-      2020-11-30T18:29:54.4756609Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 2 ) ... ok
-      2020-11-30T18:29:54.4886268Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 3 ) ... ok
-      2020-11-30T18:29:54.5011445Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 4 ) ... ok
-      2020-11-30T18:29:54.5133939Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 5 ) ... ok
+      2020-11-30T18:29:54.4445785Z
+      2020-11-30T18:29:54.4453098Z [--------------- uncaught error ---------------<
+      2020-11-30T18:29:54.4453820Z
+      2020-11-30T18:29:54.4638392Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 1 ) ... ok
+      2020-11-30T18:29:54.4756609Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 2 ) ... ok
+      2020-11-30T18:29:54.4886268Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 3 ) ... ok
+      2020-11-30T18:29:54.5011445Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 4 ) ... ok
+      2020-11-30T18:29:54.5133939Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 5 ) ... ok
       2020-11-30T18:29:54.5282311Z         - got :
       2020-11-30T18:29:54.5283500Z           3
       2020-11-30T18:29:54.5284258Z         - expected :
       2020-11-30T18:29:54.5284644Z           0
       2020-11-30T18:29:54.5285191Z         - difference :
-      2020-11-30T18:29:54.5285760Z           *
+      2020-11-30T18:29:54.5285760Z           *
       2020-11-30T18:29:54.5303880Z
       2020-11-30T18:29:54.5304852Z         /home/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:34421:14
       2020-11-30T18:29:54.5306502Z           34417 :         test.ge( _.strCount( o.output, 'program2::begin' ), 0 );
@@ -37166,9 +37166,9 @@ function terminateWithDetachedChild( test )
       2020-11-30T18:29:54.5309570Z           34420 :         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
       2020-11-30T18:29:54.5310609Z         * 34421 :         test.identical( _.strCount( o.output, 'error' ), 0 );
       2020-11-30T18:29:54.5311359Z
-      2020-11-30T18:29:54.5359253Z Test check(TestSuite::Tools.l4.process.Execution /TestRoutine::terminateWithDetachedChild /mode : fork # 6 ) ... failed
-      2020-11-30T18:29:54.5513474Z         Test routine TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild was canceled!
-      2020-11-30T18:29:54.5528198Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 7 ) ... failed, throwing error
+      2020-11-30T18:29:54.5359253Z Test check(TestSuite::Tools.l4.process.Execution /TestRoutine::terminateWithDetachedChild /mode : fork # 6 ) ... failed
+      2020-11-30T18:29:54.5513474Z         Test routine TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild was canceled!
+      2020-11-30T18:29:54.5528198Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 7 ) ... failed, throwing error
       */
 
       let testAppPath = a.program({ entry : program1, locals : { mode } }).filePath/*programPath*/;
@@ -37212,7 +37212,7 @@ function terminateWithDetachedChild( test )
         return _.process.terminate
         ({
           pid : o.pnd.pid,
-          timeOut : context.t1 * 2,
+          // timeOut : context.t1 * 2,
           withChildren : 1,
         });
       });
@@ -37297,7 +37297,7 @@ function terminateWithDetachedChild( test )
   {
     const _ = require( toolsPath );
     _.include( 'wProcess' );
-    _.include( 'wFilesBasic' );
+
     var o =
     {
       execPath : mode === 'fork' ? 'program2' : 'node program2',
