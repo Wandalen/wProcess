@@ -2735,10 +2735,24 @@ function signal_body( o )
     for( let i = 0 ; i < processes.length ; i++ )
     {
       let process = processes[ i ];
-/*
+
+      /* Dmytro : the solution was before, I uncommented it.
+        The reasons:
+        - conhost.exe is the layer of back-compatibility to WindowsXP
+        - actually, conhost.exe  is not a child process like the POSIX child process, it looks like a shared host
+        More about conhost.exe: https://www.howtogeek.com/howto/4996/what-is-conhost.exe-and-why-is-it-running/
+
+        The parent process closes its conhost.exe process.
+        If we try to close the process manually, then OS permitted the signal and the program will wait for the result forever.
+
+        I've watched the Windows Task Manager during testing :
+        - number of processes 'conhost.exe' was a constant value;
+        - the memory usage does not grow..
+      */
+
       if( isWindows && i && process.name === 'conhost.exe' )
       continue;
-*/
+
       if( _.process._windowsSystemLike( process ) )
       console.error( `Attemp to send signal to Windows system process.\n${processInfoGet( process )}` )
 
@@ -3364,7 +3378,8 @@ function _windowsSystemLike( pnd )
   ]
 
   _.assert( arguments.length === 1 );
-  _.assert( _.strDefined( pnd.name ) );
+  _.assert( _.number.is( pnd.pid ) );
+  // _.assert( _.strDefined( pnd.name ) );
 
   return list.indexOf( pnd.name ) !== -1;
 }
