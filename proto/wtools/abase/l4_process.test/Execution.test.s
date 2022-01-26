@@ -7368,6 +7368,8 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   }
 }
 
+startNjsPassingThroughDifferentTypesOfPaths.timeOut = 120000;
+
 //
 
 function startMinimalPassingThroughExecPathWithSpace( test )
