@@ -28855,6 +28855,10 @@ function startSingleOptionCurrentPath( test )
       .then( function( op )
       {
         let got = a.fileProvider.fileRead( testFilePath );
+        /* Windows resolve a path but not change cwd */
+        if( process.platform === 'win32' )
+        test.identical( got, a.path.nativize( currentPath ) );
+        else
         test.identical( got, __dirname )
         return null;
       })
